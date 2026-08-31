@@ -1,31 +1,31 @@
 import React, { useState } from 'react';
 
-const EVENTS = [
+const ECA_EVENTS = [
   {
-    id: 'tech-symposium',
-    title: 'Tech Symposium 2026',
+    id: 'technotsav',
+    title: 'Technotsav 2026 (ECA Tech Fest)',
     category: 'Technical',
     categoryBg: 'bg-primary text-on-primary',
     dateBadgeDay: '15',
     dateBadgeMonth: 'Oct',
-    dateText: 'Oct 15 - 17, 2026 • Main Auditorium',
+    dateText: 'Oct 15 - 17, 2026 • ECA Campus & Central Labs',
     description:
-      'Annual technical festival featuring hackathons, guest lectures from industry leaders, and project showcases.',
+      'Engineering College Ajmer’s flagship technical festival featuring Hackathons, Robowar, Roborace, Coding Sprint, and SIH-2026 showcases.',
     status: 'Registration Open',
     actionText: 'Register Now',
     imgUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuAmUkjAYcJOEjVGc8sovruZ1wYMmQAmPckWJV9H84SLiyOrEJCqOWPIcTJbHw36Opb_aUtPC7e9J3thDiwSbcpfKTlG9b5jWlkaDyul4rV1Hmsfa_QPWrVMueEHAC1XjsO29TWGgfQ4UOu96Wy-onvdm2VSvaT9S8BOXsdmGm_Tx9pV1eU5wVzzm9JzPB-TF9m0_UYyD5-WIyjnmP8NAknLVtmxNOqDYkUlWX5LJYxi_uP-zG4IhzOt_g',
   },
   {
-    id: 'rhythm-arts',
-    title: 'Rhythm & Arts Fest 2026',
+    id: 'tarangini',
+    title: 'Tarangini 2026 (ECA Cultural Fest)',
     category: 'Cultural',
     categoryBg: 'bg-tertiary text-on-tertiary',
     dateBadgeDay: '05',
     dateBadgeMonth: 'Nov',
-    dateText: 'Nov 05, 2026 • Open Air Theatre',
+    dateText: 'Nov 05, 2026 • ECA Open Air Theatre (OAT)',
     description:
-      'A celebration of diversity and talent. Join us for an evening of music, dance, and theatrical performances.',
+      'GECA’s annual cultural extravaganza hosted by Creative Art Society. Battle of Bands, Folk Dance, Drama, Quiz, and Fashion Show.',
     status: 'Opening soon',
     actionText: 'Notify Me',
     imgUrl:
@@ -38,21 +38,21 @@ export default function EventsSection({ onActionNotification }) {
   const [notified, setNotified] = useState({});
 
   const handleAction = (event) => {
-    if (event.id === 'tech-symposium') {
+    if (event.id === 'technotsav') {
       const isReg = registered[event.id];
       setRegistered({ ...registered, [event.id]: !isReg });
       if (!isReg) {
-        onActionNotification(`Registered for Tech Symposium 2026! Check student email for pass.`);
+        onActionNotification(`Registered for Technotsav 2026 at ECA! Event pass sent to student email.`);
       } else {
-        onActionNotification(`Registration cancelled for Tech Symposium 2026.`);
+        onActionNotification(`Registration cancelled for Technotsav 2026.`);
       }
     } else {
       const isNot = notified[event.id];
       setNotified({ ...notified, [event.id]: !isNot });
       if (!isNot) {
-        onActionNotification(`Reminder set for Rhythm & Arts Fest 2026 (Nov 05, 2026).`);
+        onActionNotification(`Reminder set for Tarangini 2026 (Nov 05, 2026 at ECA OAT).`);
       } else {
-        onActionNotification(`Reminder turned off for Rhythm & Arts Fest 2026.`);
+        onActionNotification(`Reminder turned off for Tarangini 2026.`);
       }
     }
   };
@@ -61,10 +61,10 @@ export default function EventsSection({ onActionNotification }) {
     <section className="py-section-gap bg-surface relative overflow-hidden" id="events">
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-8 md:mb-12 text-center tracking-tight">
-          Featured <span className="font-serif-italic text-gradient">Events</span>
+          Featured <span className="font-serif-italic text-gradient">ECA Events</span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {EVENTS.map((event) => {
+          {ECA_EVENTS.map((event) => {
             const isRegistered = registered[event.id];
             const isNotified = notified[event.id];
 
@@ -118,7 +118,7 @@ export default function EventsSection({ onActionNotification }) {
                     <button
                       onClick={() => handleAction(event)}
                       className={`px-5 md:px-7 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-[0.1em] transition-colors border ${
-                        event.id === 'tech-symposium'
+                        event.id === 'technotsav'
                           ? isRegistered
                             ? 'bg-primary/20 text-primary border-primary/40'
                             : 'bg-surface-bright hover:bg-surface-variant text-white border-outline/20'
@@ -127,7 +127,7 @@ export default function EventsSection({ onActionNotification }) {
                           : 'bg-surface-bright/50 text-on-surface-variant border-outline/10 hover:text-white'
                       }`}
                     >
-                      {event.id === 'tech-symposium'
+                      {event.id === 'technotsav'
                         ? isRegistered
                           ? 'Registered ✓'
                           : event.actionText

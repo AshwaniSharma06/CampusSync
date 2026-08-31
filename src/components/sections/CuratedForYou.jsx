@@ -6,10 +6,10 @@ export default function CuratedForYou({ onActionNotification }) {
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <div className="mb-8 md:mb-12">
           <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-4 tracking-tight">
-            Curated <span className="font-serif-italic text-tertiary">for you</span>
+            Curated <span className="font-serif-italic text-tertiary">for ECA Students</span>
           </h2>
           <p className="font-sans text-base md:text-lg text-on-surface-variant">
-            Personalized updates, deadlines, and recommendations based on your profile.
+            Personalized BTU examination updates, department notices, and hackathon recommendations.
           </p>
         </div>
 
@@ -22,17 +22,17 @@ export default function CuratedForYou({ onActionNotification }) {
                 <span className="material-symbols-outlined text-sm">schedule</span> Approaching Deadlines
               </h3>
               <div
-                onClick={() => onActionNotification('Opening Database Systems Project submission portal...')}
+                onClick={() => onActionNotification('Opening B.Tech VII Sem Project submission portal...')}
                 className="bg-surface/50 rounded-xl p-4 border border-error/20 border-l-4 border-l-error cursor-pointer hover:bg-surface/70 transition-colors font-sans"
               >
-                <h4 className="text-white font-semibold">Database Systems Project Phase 2</h4>
+                <h4 className="text-white font-semibold">B.Tech Project-1 Submission (VII Sem CSE/IT/Cyber)</h4>
                 <p className="text-sm text-error mt-1 font-bold">Due in 2 days (Friday, 11:59 PM)</p>
               </div>
               <div
-                onClick={() => onActionNotification('Viewing Library Renewals panel...')}
+                onClick={() => onActionNotification('Opening BTU Exam Registration schedule...')}
                 className="bg-surface/50 rounded-xl p-4 border border-outline/10 cursor-pointer hover:bg-surface/70 transition-colors font-sans"
               >
-                <h4 className="text-white font-semibold">Library Book Return</h4>
+                <h4 className="text-white font-semibold">BTU B.Tech III, V, VII Sem Registration</h4>
                 <p className="text-sm text-on-surface-variant mt-1">Due in 5 days</p>
               </div>
             </div>
@@ -40,18 +40,18 @@ export default function CuratedForYou({ onActionNotification }) {
             {/* Column 2: Department Announcements */}
             <div className="col-span-1 flex flex-col gap-4">
               <h3 className="font-sans text-xs font-bold text-secondary uppercase tracking-[0.12em] mb-2 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">domain</span> Dept of Computer Science
+                <span className="material-symbols-outlined text-sm">domain</span> Dept of CSE & IT (ECA)
               </h3>
               <div
-                onClick={() => onActionNotification('Opening Spring 2026 Elective Syllabus document...')}
+                onClick={() => onActionNotification('Opening ECA LEEP 2026-27 Direct Admission Portal...')}
                 className="bg-surface/50 rounded-xl p-4 border border-outline/10 hover:border-secondary/30 transition-colors cursor-pointer font-sans"
               >
                 <span className="text-xs bg-secondary/10 text-secondary px-2.5 py-0.5 rounded mb-2 inline-block font-bold">
-                  Announcement
+                  Official Notice
                 </span>
-                <h4 className="text-white font-semibold">Elective Selection for Spring 2026</h4>
+                <h4 className="text-white font-semibold">LEEP 2026-27 & B.Tech 1st Year Internal Sliding</h4>
                 <p className="text-sm text-on-surface-variant mt-1 line-clamp-2 leading-relaxed">
-                  The portal for selecting your departmental electives will open on Monday. Please review the syllabus document beforehand.
+                  Online form links for Diploma Lateral Entry (LEEP 2nd Year) and 1st Year direct admissions session 2026-27 are live.
                 </p>
               </div>
             </div>
@@ -62,15 +62,15 @@ export default function CuratedForYou({ onActionNotification }) {
                 <span className="material-symbols-outlined text-sm">auto_awesome</span> Recommended for you
               </h3>
               <div
-                onClick={() => onActionNotification('Viewing Web3 Workshop details & schedule...')}
+                onClick={() => onActionNotification('Viewing Smart India Hackathon SIH-2026 details...')}
                 className="bg-surface/50 rounded-xl p-4 border border-outline/10 hover:border-tertiary/30 transition-colors cursor-pointer flex gap-4 items-start font-sans"
               >
                 <div className="w-10 h-10 rounded-lg bg-tertiary/20 flex items-center justify-center text-tertiary shrink-0">
                   <span className="material-symbols-outlined text-sm">school</span>
                 </div>
                 <div>
-                  <h4 className="text-white text-sm font-semibold">Workshop: Intro to Web3</h4>
-                  <p className="text-xs text-on-surface-variant mt-1">Based on your interest in Blockchain</p>
+                  <h4 className="text-white text-sm font-semibold">Smart India Hackathon (SIH) 2026</h4>
+                  <p className="text-xs text-on-surface-variant mt-1">ECA Innovation Cell selection round</p>
                   <button className="mt-2 text-xs text-tertiary uppercase font-bold tracking-wider hover:underline">
                     View Details
                   </button>

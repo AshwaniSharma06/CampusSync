@@ -7,7 +7,7 @@ export default function Hero({ onEnter, onExplore }) {
       {/* Enhanced Campus Background Image */}
       <div className="absolute inset-0 z-0">
         <img
-          alt="Enhanced Campus background"
+          alt="Engineering College Ajmer Campus Background"
           className="w-full h-full object-cover object-center opacity-75 transform scale-105 transition-transform duration-10000"
           src={heroBg}
           style={{ animation: 'subtleZoom 20s infinite alternate' }}
@@ -20,7 +20,7 @@ export default function Hero({ onEnter, onExplore }) {
           <div className="inline-flex items-center gap-2 bg-surface-variant/60 backdrop-blur-md border border-outline/20 px-4 py-2 rounded-full w-fit shadow-sm">
             <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#71d8c8] animate-pulse"></span>
             <span className="font-sans font-bold text-primary uppercase tracking-[0.15em] text-[10px] md:text-xs">
-              The New Academic Standard
+              Engineering College Ajmer • BTU & RTU Affiliated
             </span>
           </div>
           <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-normal leading-[1.05] tracking-tight drop-shadow-md">
@@ -29,20 +29,20 @@ export default function Hero({ onEnter, onExplore }) {
             <span className="font-serif-italic text-gradient">One Platform.</span>
           </h1>
           <p className="font-sans text-base sm:text-lg md:text-xl font-normal text-on-surface-variant/90 leading-relaxed max-w-xl">
-            CampusSync brings announcements, schedules, events, resources and intelligent academic assistance into one beautifully connected student experience.
+            Welcome to the official student portal for Engineering College Ajmer (ECA). Unified announcements, BTU schedules, Technotsav events, and AI assistance.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mt-2 md:mt-4">
             <button
               onClick={onEnter}
               className="bg-primary text-on-primary px-7 md:px-9 py-3.5 md:py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.12em] hover:bg-primary-fixed transition-all glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)] w-full sm:w-auto text-center"
             >
-              Enter CampusSync
+              Enter ECA CampusSync
             </button>
             <button
               onClick={onExplore}
               className="border border-outline/40 text-on-surface px-7 md:px-9 py-3.5 md:py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.12em] hover:bg-surface-variant/80 transition-all backdrop-blur-sm w-full sm:w-auto text-center"
             >
-              Explore Experience
+              Explore ECA Clubs
             </button>
           </div>
         </div>
@@ -56,7 +56,7 @@ export default function Hero({ onEnter, onExplore }) {
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-sm">person</span>
                 </div>
-                <span className="font-sans text-sm text-white font-semibold tracking-wide">Today's Overview</span>
+                <span className="font-sans text-sm text-white font-semibold tracking-wide">ECA Today's Overview</span>
               </div>
               <span className="material-symbols-outlined text-on-surface-variant cursor-pointer">more_horiz</span>
             </div>
@@ -66,8 +66,8 @@ export default function Hero({ onEnter, onExplore }) {
                   <span className="material-symbols-outlined">menu_book</span>
                 </div>
                 <div>
-                  <h4 className="font-sans text-white font-semibold">Advanced Physics Lab</h4>
-                  <p className="text-sm text-on-surface-variant mt-1">10:00 AM - Science Bldg, Room 402</p>
+                  <h4 className="font-sans text-white font-semibold">Advanced AI & ML Lab (CSE VII Sem)</h4>
+                  <p className="text-sm text-on-surface-variant mt-1">10:00 AM - Barliya Block, Room 402</p>
                 </div>
               </div>
               <div className="bg-surface/50 rounded-xl p-4 border border-outline/10 flex gap-4 items-start">
@@ -75,14 +75,14 @@ export default function Hero({ onEnter, onExplore }) {
                   <span className="material-symbols-outlined">groups</span>
                 </div>
                 <div>
-                  <h4 className="font-sans text-white font-semibold">Study Group: Calculus</h4>
-                  <p className="text-sm text-on-surface-variant mt-1">2:00 PM - Main Library, Pod B</p>
+                  <h4 className="font-sans text-white font-semibold">Creative Art Society Workshop</h4>
+                  <p className="text-sm text-on-surface-variant mt-1">2:00 PM - ECA Central Auditorium</p>
                 </div>
               </div>
               {/* Progress */}
               <div className="mt-2">
                 <div className="flex justify-between text-sm mb-2 font-sans">
-                  <span className="text-on-surface-variant">Daily Progress</span>
+                  <span className="text-on-surface-variant">BTU Semester Progress</span>
                   <span className="text-primary font-bold">65%</span>
                 </div>
                 <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
@@ -99,8 +99,8 @@ export default function Hero({ onEnter, onExplore }) {
                 <span className="material-symbols-outlined">warning</span>
               </div>
               <div>
-                <h4 className="font-sans text-[11px] font-bold text-error uppercase tracking-wider">Urgent Notice</h4>
-                <p className="text-sm text-white font-medium mt-1">Mid-term Examination Schedule Updated. Check portal.</p>
+                <h4 className="font-sans text-[11px] font-bold text-error uppercase tracking-wider">ECA Notice</h4>
+                <p className="text-sm text-white font-medium mt-1">B.Tech III, V, VII Sem BTU Exam Registration Schedule Released.</p>
               </div>
             </div>
           </div>
@@ -119,7 +119,7 @@ export default function Hero({ onEnter, onExplore }) {
               </div>
               <div>
                 <h4 className="font-sans text-[11px] font-bold text-primary uppercase tracking-wider mb-1">Upcoming Event</h4>
-                <p className="text-sm text-white font-semibold line-clamp-2">Annual Tech Symposium 2026</p>
+                <p className="text-sm text-white font-semibold line-clamp-2">Technotsav 2026 - ECA Tech Fest</p>
               </div>
             </div>
           </div>

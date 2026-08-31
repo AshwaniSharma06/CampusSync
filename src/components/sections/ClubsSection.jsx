@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-const CLUBS = [
+const ECA_CLUBS = [
   {
-    id: 'coding',
-    name: 'Coding Club',
+    id: 'pcc-coding',
+    name: 'Technotsav & PCC Club',
     icon: 'code_blocks',
     accentColor: 'text-primary',
     bgBadge: 'bg-primary/20 border-primary/30',
@@ -11,35 +11,35 @@ const CLUBS = [
     bgImg:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuBBAMxWMbzO72c92JTA0Z4EQGYTOrcjdibq1M3z2kkSO98DeUoyQBFompqvo4_V-vWjBk6f09Hlo9g1bWYJAHWQXh8bZScqS6YnF8wtfBqufAu7Wp8voitWpgrjRxklE_ZWxWRuPuWdCLwA9q5B2LjRRCYT-p6jjLsbjFi2Z7NgEAq9-zUhVT4qp_uUlMnmAwa4K00I-6ptkLwmMJVxwR2AYgG3a_KEkHypRymHjOzjjPVUbbuxf4B0bA',
     description:
-      'Building the future, one line of code at a time. Join us for hackathons and workshops.',
-    membersCount: '+120',
+      'Official technical club of ECA. Organizes Robowar, Roborace, Hackathons, and annual Technotsav competitions.',
+    membersCount: '+240 ECA Students',
   },
   {
-    id: 'robotics',
-    name: 'Robotics Society',
-    icon: 'precision_manufacturing',
+    id: 'creative-art',
+    name: 'Creative Art Society (CAS)',
+    icon: 'palette',
     accentColor: 'text-tertiary',
     bgBadge: 'bg-tertiary/20 border-tertiary/30',
     btnColor: 'text-tertiary hover:text-tertiary-fixed',
     bgImg:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBciqEZTmtAHmcSWfaL3iLbtMGxlj9jwezOOkBI5eJIF4t0Pn4Xfey2dfa7ylYbWDsnRSSsiB2kPGp860jDq5NKB3Xfwvr9a5HYY-nRawWkc-nYomwJTfI543vgMm-fomnhO_died5buq13Pxs42fNt1AbEsXXw81z7Jsml87eZTXxR6KQ67mUGsqgbHq4wJvdvUdobcNJJjBF2V2nZ9r8k_FcAC1bJVfyUXtj-38POiUHbo72rNGuklw',
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAY9KRjPh_ddODP3b0LQhe1eNqTfZX0VedMpYIlW_nIkaB1jzD57004QgZrPPpZHlaLB7f_4IThSKJR0volI3DvXB69pj0snzinEFkIdfCv3nk412f__XrF7kYcjMecNqGkP5wy6gOapOBVUiZpv4-8OzfQJ3AMSTrIPM6oZZryntPOZ2uYhxsg5S1b9kRiAdNP_6_-SKzbZAJ_2jMTBrtTE5XVsxdk7hlS04aLdE2_CdKGS9KF7_3vVA',
     description:
-      'Designing autonomous systems and participating in national robotics competitions.',
-    membersCount: '+85',
+      'Coordinates ECA’s annual cultural festival Tarangini. Music, dance, theatrical acts, photography, and fine arts.',
+    membersCount: '+310 ECA Students',
     stagger: true,
   },
   {
-    id: 'arts',
-    name: 'Arts & Cultural',
-    icon: 'palette',
+    id: 'ai-ml-cse',
+    name: 'AI/ML Research Club (CSE)',
+    icon: 'smart_toy',
     accentColor: 'text-secondary',
     bgBadge: 'bg-secondary/20 border-secondary/30',
     btnColor: 'text-secondary hover:text-secondary-fixed',
     bgImg:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAY9KRjPh_ddODP3b0LQhe1eNqTfZX0VedMpYIlW_nIkaB1jzD57004QgZrPPpZHlaLB7f_4IThSKJR0volI3DvXB69pj0snzinEFkIdfCv3nk412f__XrF7kYcjMecNqGkP5wy6gOapOBVUiZpv4-8OzfQJ3AMSTrIPM6oZZryntPOZ2uYhxsg5S1b9kRiAdNP_6_-SKzbZAJ_2jMTBrtTE5XVsxdk7hlS04aLdE2_CdKGS9KF7_3vVA',
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBciqEZTmtAHmcSWfaL3iLbtMGxlj9jwezOOkBI5eJIF4t0Pn4Xfey2dfa7ylYbWDsnRSSsiB2kPGp860jDq5NKB3Xfwvr9a5HYY-nRawWkc-nYomwJTfI543vgMm-fomnhO_died5buq13Pxs42fNt1AbEsXXw81z7Jsml87eZTXxR6KQ67mUGsqgbHq4wJvdvUdobcNJJjBF2V2nZ9r8k_FcAC1bJVfyUXtj-38POiUHbo72rNGuklw',
     description:
-      'Celebrating creativity through music, dance, theatre, and visual arts.',
-    membersCount: '+150',
+      'Specialized Machine Learning, Data Science & Cyber Security group under Department of CSE at Engineering College Ajmer.',
+    membersCount: '+180 ECA Students',
   },
 ];
 
@@ -50,7 +50,7 @@ export default function ClubsSection({ onActionNotification }) {
     const isJoined = joinedClubs[club.id];
     setJoinedClubs((prev) => ({ ...prev, [club.id]: !isJoined }));
     if (!isJoined) {
-      onActionNotification(`Successfully joined ${club.name}! Welcome aboard.`);
+      onActionNotification(`Successfully joined ${club.name}! Welcome to ECA Student Activity Center.`);
     } else {
       onActionNotification(`Left ${club.name}.`);
     }
@@ -61,26 +61,29 @@ export default function ClubsSection({ onActionNotification }) {
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
           <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-3 py-1 rounded-full text-xs font-bold text-primary mb-3 uppercase tracking-wider">
+              ECA Student Activity Center (SAC)
+            </div>
             <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-4 tracking-tight leading-tight">
-              Find your people.
+              ECA Societies & Clubs.
               <br />
-              <span className="font-serif-italic text-primary">Build something together.</span>
+              <span className="font-serif-italic text-primary">Build something remarkable.</span>
             </h2>
             <p className="font-sans text-base md:text-lg text-on-surface-variant">
-              Discover over 50+ student-led organizations covering arts, technology, sports, and entrepreneurship.
+              Discover official student-led clubs across Engineering College Ajmer (Technotsav, Creative Art Society, AI/ML Club, NSS, and Sports).
             </p>
           </div>
           <button
-            onClick={() => onActionNotification('Opening full Campus Clubs Directory...')}
+            onClick={() => onActionNotification('Opening ECA Student Activity Center Directory...')}
             className="hidden md:block border border-outline/40 text-on-surface px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] hover:bg-surface-variant transition-colors whitespace-nowrap"
           >
-            View All Clubs
+            View All ECA Clubs
           </button>
         </div>
 
         {/* Clubs Grid / Carousel */}
         <div className="flex overflow-x-auto hide-scrollbar gap-6 pb-8 -mx-margin-mobile px-margin-mobile snap-x snap-mandatory md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3">
-          {CLUBS.map((club) => {
+          {ECA_CLUBS.map((club) => {
             const isJoined = joinedClubs[club.id];
             return (
               <div
@@ -132,10 +135,10 @@ export default function ClubsSection({ onActionNotification }) {
         </div>
 
         <button
-          onClick={() => onActionNotification('Opening full Campus Clubs Directory...')}
+          onClick={() => onActionNotification('Opening ECA Student Activity Center Directory...')}
           className="md:hidden w-full border border-outline/40 text-on-surface px-6 py-3 mt-4 rounded-xl font-sans text-xs font-bold uppercase tracking-[0.1em] hover:bg-surface-variant transition-colors"
         >
-          View All Clubs
+          View All ECA Clubs
         </button>
       </div>
     </section>

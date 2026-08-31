@@ -11,74 +11,81 @@ export default function Footer({ onActionNotification }) {
       <div className="grid grid-cols-1 md:grid-cols-4 px-margin-mobile md:px-margin-desktop gap-8 md:gap-gutter max-w-container-max mx-auto">
         <div className="col-span-1 md:col-span-1 flex flex-col gap-4">
           <div className="font-serif text-3xl md:text-4xl text-primary font-brand">CampusSync</div>
-          <p className="font-sans text-on-surface-variant mt-2 md:mt-4 text-sm leading-relaxed">
-            © 2026 CampusSync Institutional. All rights reserved.
+          <p className="font-sans text-on-surface-variant mt-2 text-sm leading-relaxed">
+            Engineering College Ajmer (ECA)
+            <br />
+            Badliya Chouraha, N.H.8, Ajmer, Rajasthan 305025
+            <br />
+            <span className="text-xs text-primary/80 mt-1 inline-block">Affiliated with BTU &amp; RTU • Approved by AICTE</span>
+          </p>
+          <p className="font-sans text-xs text-on-surface-variant/70 mt-1">
+            © 2026 Engineering College Ajmer. All rights reserved.
           </p>
         </div>
         <div className="col-span-1 md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8 font-sans">
           <div className="flex flex-col gap-3">
-            <h5 className="text-white font-bold text-xs uppercase tracking-[0.12em] mb-2">Legal</h5>
+            <h5 className="text-white font-bold text-xs uppercase tracking-[0.12em] mb-2">ECA Portal</h5>
             <a
-              onClick={(e) => handleLinkClick(e, 'Privacy Policy')}
+              onClick={(e) => handleLinkClick(e, 'BTU Syllabus & Orders')}
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#"
             >
-              Privacy Policy
+              BTU Orders &amp; Syllabus
             </a>
             <a
-              onClick={(e) => handleLinkClick(e, 'Terms of Service')}
+              onClick={(e) => handleLinkClick(e, 'LEEP / REAP Admissions')}
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#"
             >
-              Terms of Service
+              LEEP / REAP Admissions
             </a>
           </div>
           <div className="flex flex-col gap-3">
             <h5 className="text-white font-bold text-xs uppercase tracking-[0.12em] mb-2">Campus</h5>
             <a
-              onClick={(e) => handleLinkClick(e, 'Campus Map')}
+              onClick={(e) => handleLinkClick(e, 'ECA Barliya Campus Map')}
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#"
             >
-              Campus Map
+              Barliya Campus Map
             </a>
             <a
-              onClick={(e) => handleLinkClick(e, 'Directory')}
+              onClick={(e) => handleLinkClick(e, 'Faculty Directory')}
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#"
             >
-              Directory
+              Faculty Directory
             </a>
             <a
-              onClick={(e) => handleLinkClick(e, 'Library Resources')}
+              onClick={(e) => handleLinkClick(e, 'ECA Library')}
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#"
             >
-              Library Resources
+              Central Library
             </a>
           </div>
           <div className="flex flex-col gap-3">
-            <h5 className="text-white font-bold text-xs uppercase tracking-[0.12em] mb-2">Community</h5>
+            <h5 className="text-white font-bold text-xs uppercase tracking-[0.12em] mb-2">Student Societies</h5>
             <a
-              onClick={(e) => handleLinkClick(e, 'Clubs & Orgs')}
+              onClick={(e) => handleLinkClick(e, 'Technotsav Tech Club')}
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#clubs"
             >
-              Clubs &amp; Orgs
+              Technotsav Tech Club
             </a>
             <a
-              onClick={(e) => handleLinkClick(e, 'Events Calendar')}
+              onClick={(e) => handleLinkClick(e, 'Creative Art Society')}
+              className="text-on-surface-variant hover:text-primary transition-colors text-sm"
+              href="#clubs"
+            >
+              Creative Art Society
+            </a>
+            <a
+              onClick={(e) => handleLinkClick(e, 'Tarangini Cultural Fest')}
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#events"
             >
-              Events Calendar
-            </a>
-            <a
-              onClick={(e) => handleLinkClick(e, 'Student Council')}
-              className="text-on-surface-variant hover:text-primary transition-colors text-sm"
-              href="#"
-            >
-              Student Council
+              Tarangini Fest
             </a>
           </div>
         </div>
