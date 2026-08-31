@@ -9,9 +9,11 @@ import CampusAiSection from './components/sections/CampusAiSection';
 import CtaSection from './components/sections/CtaSection';
 import Footer from './components/layout/Footer';
 import Toast from './components/ui/Toast';
+import AiWidget from './components/ui/AiWidget';
 
 export default function App() {
   const [toastMessage, setToastMessage] = useState('');
+  const [aiWidgetOpen, setAiWidgetOpen] = useState(false);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -21,9 +23,13 @@ export default function App() {
     showToast('Student Portal authentication is coming soon! Landing page preview active.');
   };
 
+  const handleOpenAiAgent = () => {
+    setAiWidgetOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
-      <Navbar onOpenPortal={handleOpenPortal} />
+      <Navbar onOpenPortal={handleOpenPortal} onOpenAiAgent={handleOpenAiAgent} />
       <main>
         <Hero
           onEnter={() => {
@@ -44,6 +50,7 @@ export default function App() {
       </main>
       <Footer onActionNotification={showToast} />
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />
+      <AiWidget isOpenExternal={aiWidgetOpen} setIsOpenExternal={setAiWidgetOpen} />
     </div>
   );
 }
