@@ -1,17 +1,18 @@
 import React from 'react';
+import heroBg from '../../assets/hero-bg.jpg';
 
 export default function Hero({ onEnter, onExplore }) {
   return (
     <header className="relative min-h-[95vh] flex items-center justify-center pt-20 overflow-hidden film-grain" id="home">
-      {/* Background Image */}
+      {/* Enhanced Campus Background Image */}
       <div className="absolute inset-0 z-0">
         <img
-          alt="Campus background"
-          className="w-full h-full object-cover object-center opacity-70 transform scale-105 transition-transform duration-10000"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtGnaPng_QLBwZTULZMw46KDSbf5wUlTHNaZT8OmQSZLGm3qWfgpey-Cy7yR6DbfSt2H45tYou6EXGpEj4Xwzq3O0_7DFBQ79K5JxggG--n_o33zgM_YJtCXTm9xN8ExoX9qOn494AX49HrlzGZ2rOb4R8owCwY3s3V5XyLTvwB7kZ8lJ0bc_TdyfeAQhXdzfQ5JM2yhhJO1K6h9dLbWGAEjqKLDbQ8akxU_jNAYSUwDwhVg9B_6uPqtxQv9pC3bOK6vs"
+          alt="Enhanced Campus background"
+          className="w-full h-full object-cover object-center opacity-75 transform scale-105 transition-transform duration-10000"
+          src={heroBg}
           style={{ animation: 'subtleZoom 20s infinite alternate' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-surface/40 via-surface/40 to-background"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-surface/50 via-surface/40 to-background"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid md:grid-cols-2 gap-gutter items-center pt-12 md:pt-0">
@@ -20,7 +21,7 @@ export default function Hero({ onEnter, onExplore }) {
             <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#71d8c8] animate-pulse"></span>
             <span className="font-label-sm text-primary uppercase text-[10px] md:text-xs">The New Standard</span>
           </div>
-          <h1 className="font-display-lg text-4xl md:text-6xl text-white leading-tight">
+          <h1 className="font-display-lg text-4xl md:text-6xl text-white leading-tight drop-shadow-md">
             Your Entire <span className="text-gradient">Campus.</span>
             <br />
             Connected.
