@@ -308,7 +308,7 @@ export default function CommunityFeed({ onActionNotification }) {
                   onClick={() => onActionNotification('Viewing New Cafe Menu trend')}
                   className="group cursor-pointer p-2 hover:bg-surface-bright/30 rounded-lg transition-colors"
                 >
-                  <p className="text-xs text-on-surface-variant font-medium">3. Campus Life</p>
+                  <p className="text-xs text-on-surface-variant font-medium">3. Student Activities</p>
                   <p className="font-semibold text-white group-hover:text-primary transition-colors mt-0.5">
                     New Cafe Menu
                   </p>
