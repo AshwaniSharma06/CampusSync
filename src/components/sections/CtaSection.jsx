@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function CtaSection({ onOpenPortal }) {
+export default function CtaSection({ onOpenSignIn }) {
   return (
     <section className="relative py-section-gap flex items-center justify-center text-center overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -18,10 +18,10 @@ export default function CtaSection({ onOpenPortal }) {
           <span className="font-serif-italic text-gradient">Stay connected to all of it.</span>
         </h2>
         <button
-          onClick={onOpenPortal}
+          onClick={onOpenSignIn}
           className="bg-primary text-on-primary px-9 py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.14em] hover:bg-primary-fixed transition-all glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)]"
         >
-          Open Student Portal
+          Sign In to Student Portal
         </button>
       </div>
     </section>

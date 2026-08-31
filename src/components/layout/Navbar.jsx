@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Navbar({ onOpenPortal, onOpenAiAgent }) {
+export default function Navbar({ onOpenSignIn, onOpenAiAgent, currentUser, onOpenPortalView }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -82,25 +82,48 @@ export default function Navbar({ onOpenPortal, onOpenAiAgent }) {
             <span className="material-symbols-outlined text-sm">smart_toy</span>
             AI Copilot
           </button>
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onOpenPortal();
-            }}
-            className="md:hidden bg-primary text-on-primary px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] hover:bg-primary-fixed transition-colors mt-4 w-full"
-          >
-            Student Portal
-          </button>
+
+          {currentUser ? (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenPortalView();
+              }}
+              className="md:hidden bg-primary text-on-primary px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] hover:bg-primary-fixed transition-colors mt-4 w-full"
+            >
+              My Student Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenSignIn();
+              }}
+              className="md:hidden bg-primary text-on-primary px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] hover:bg-primary-fixed transition-colors mt-4 w-full"
+            >
+              Sign In
+            </button>
+          )}
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-4 z-20">
-          <button
-            onClick={onOpenPortal}
-            className="hidden md:flex bg-primary text-on-primary px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.12em] hover:bg-primary-fixed transition-colors glow-hover scale-95 active:scale-90 transition-transform"
-          >
-            Student Portal
-          </button>
+          {currentUser ? (
+            <button
+              onClick={onOpenPortalView}
+              className="hidden md:flex bg-primary text-on-primary px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.12em] hover:bg-primary-fixed transition-colors glow-hover scale-95 active:scale-90 transition-transform"
+            >
+              Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={onOpenSignIn}
+              className="hidden md:flex bg-primary text-on-primary px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.12em] hover:bg-primary-fixed transition-colors glow-hover scale-95 active:scale-90 transition-transform"
+            >
+              Sign In
+            </button>
+          )}
+
           <button
             className="md:hidden text-primary p-2 focus:outline-none"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
