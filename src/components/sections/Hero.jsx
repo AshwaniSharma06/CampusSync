@@ -24,9 +24,9 @@ export default function Hero({ onEnter, onExplore }) {
             </span>
           </div>
           <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-normal leading-[1.05] tracking-tight drop-shadow-md">
-            Your Entire <span className="font-serif-italic text-gradient">Campus.</span>
+            One Campus.
             <br />
-            Connected.
+            <span className="font-serif-italic text-gradient">One Platform.</span>
           </h1>
           <p className="font-sans text-base sm:text-lg md:text-xl font-normal text-on-surface-variant/90 leading-relaxed max-w-xl">
             CampusSync brings announcements, schedules, events, resources and intelligent academic assistance into one beautifully connected student experience.
