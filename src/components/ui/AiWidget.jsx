@@ -4,7 +4,7 @@ const SAMPLE_PROMPTS = [
   'Where is my next class?',
   'When is the main library open today?',
   'What mid-terms do I have in Fall 2026?',
-  'How do I register for Tech Symposium?',
+  'How do I register for Technotsav 2026?',
 ];
 
 export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
@@ -15,7 +15,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: 'Hi Alex! 👋 I am your CampusSync AI agent. I can help with your schedule, exam dates, library books, and campus navigation. Ask me anything!',
+      text: 'Hi Alex! 👋 I am your Campus AI Agent. I can help with your schedule, BTU exam dates, library books, and ECA campus navigation. Ask me anything!',
     },
   ]);
   const [inputVal, setInputVal] = useState('');
@@ -31,23 +31,23 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
     setIsThinking(true);
 
     setTimeout(() => {
-      let botResponse = `CampusSync AI: I've checked your 2026 academic calendar and profile. `;
+      let botResponse = `Campus AI Agent: I've checked Engineering College Ajmer's 2026 calendar and profile. `;
 
       const lower = query.toLowerCase();
       if (lower.includes('next class') || lower.includes('where')) {
         botResponse =
-          "Your next class is Advanced Physics Lab in Science Bldg, Room 402 at 10:00 AM. It's about a 7-minute walk from the Main Library.";
+          "Your next class is Advanced AI & ML Lab in Barliya Block, Room 402 at 10:00 AM. It's about a 5-minute walk from Central Computer Center.";
       } else if (lower.includes('library') || lower.includes('open')) {
         botResponse =
-          'The Main Library is open today until 11:00 PM. Pod B is reserved for your Calculus study session at 2:00 PM.';
+          'The Central Library is open today until 11:00 PM. Study Pod B is reserved for your Calculus study session at 2:00 PM.';
       } else if (lower.includes('exam') || lower.includes('mid-term') || lower.includes('midterm')) {
         botResponse =
-          'Your mid-term exam schedule for Fall 2026 includes Database Systems on Oct 18 and Machine Learning on Oct 22.';
-      } else if (lower.includes('tech symposium') || lower.includes('register')) {
+          'Your BTU mid-term exam schedule for Fall 2026 includes Database Systems on Oct 18 and Machine Learning on Oct 22.';
+      } else if (lower.includes('technotsav') || lower.includes('register') || lower.includes('fest')) {
         botResponse =
-          'Tech Symposium 2026 is scheduled for Oct 15–17 in the Main Auditorium. Registration is currently open!';
+          'Technotsav 2026 is scheduled for Oct 15–17 at ECA Campus. Registration is currently open for Robowar and Hackathon!';
       } else {
-        botResponse = `CampusSync AI: "${query}" has been logged into your student dashboard. I've updated your schedule preferences.`;
+        botResponse = `Campus AI Agent: "${query}" has been logged into your student dashboard. I've updated your schedule preferences.`;
       }
 
       setMessages((prev) => [...prev, { role: 'assistant', text: botResponse }]);
@@ -71,10 +71,10 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
               </div>
               <div>
                 <h4 className="font-sans font-bold text-white text-sm flex items-center gap-1.5">
-                  CampusSync AI Copilot
+                  Campus AI Agent
                 </h4>
                 <span className="text-[11px] text-primary font-medium flex items-center gap-1">
-                  Online • Context-Aware 2026
+                  Online • ECA Knowledge Base 2026
                 </span>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
             {isThinking && (
               <div className="bg-surface-bright/40 text-primary rounded-2xl rounded-tl-xs p-3 max-w-[50%] self-start border border-outline/10 text-xs flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
-                <span>Copilot is searching...</span>
+                <span>Campus AI Agent is thinking...</span>
               </div>
             )}
           </div>
@@ -138,7 +138,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
               type="text"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
-              placeholder="Ask AI Copilot..."
+              placeholder="Ask Campus AI Agent..."
               className="w-full bg-surface-container-low rounded-full py-2.5 px-4 pr-11 text-xs text-white placeholder:text-on-surface-variant/70 border border-outline/20 focus:outline-none focus:border-primary/50 transition-colors font-sans"
             />
             <button
@@ -155,7 +155,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="group relative flex items-center justify-center w-14 h-14 rounded-full bg-primary text-on-primary shadow-[0_0_25px_rgba(113,216,200,0.5)] hover:bg-primary-fixed hover:scale-105 active:scale-95 transition-all duration-300 z-50"
-        title="Open CampusSync AI Agent"
+        title="Open Campus AI Agent"
       >
         <span className="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform">
           {isOpen ? 'close' : 'smart_toy'}

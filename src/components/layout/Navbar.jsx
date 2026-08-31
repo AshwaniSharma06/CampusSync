@@ -80,7 +80,7 @@ export default function Navbar({ onOpenSignIn, onOpenAiAgent, currentUser, onOpe
             className="text-primary hover:text-primary-fixed border border-primary/30 bg-primary/10 px-4 py-1.5 rounded-full flex items-center gap-1.5 font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all hover:bg-primary/20"
           >
             <span className="material-symbols-outlined text-sm">smart_toy</span>
-            AI Copilot
+            Campus AI Agent
           </button>
 
           {currentUser ? (
