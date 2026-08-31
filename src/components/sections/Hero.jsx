@@ -17,30 +17,32 @@ export default function Hero({ onEnter, onExplore }) {
 
       <div className="relative z-10 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid md:grid-cols-2 gap-gutter items-center pt-12 md:pt-0">
         <div className="flex flex-col gap-6 md:gap-8 max-w-2xl">
-          <div className="inline-flex items-center gap-2 bg-surface-variant/50 backdrop-blur border border-outline/20 px-4 py-2 rounded-full w-fit">
+          <div className="inline-flex items-center gap-2 bg-surface-variant/60 backdrop-blur-md border border-outline/20 px-4 py-2 rounded-full w-fit shadow-sm">
             <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#71d8c8] animate-pulse"></span>
-            <span className="font-label-sm text-primary uppercase text-[10px] md:text-xs">The New Standard</span>
+            <span className="font-sans font-bold text-primary uppercase tracking-[0.15em] text-[10px] md:text-xs">
+              The New Academic Standard
+            </span>
           </div>
-          <h1 className="font-display-lg text-4xl md:text-6xl text-white leading-tight drop-shadow-md">
-            Your Entire <span className="text-gradient">Campus.</span>
+          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-normal leading-[1.05] tracking-tight drop-shadow-md">
+            Your Entire <span className="font-serif-italic text-gradient">Campus.</span>
             <br />
             Connected.
           </h1>
-          <p className="font-body-lg text-base md:text-lg text-on-surface-variant max-w-xl">
+          <p className="font-sans text-base sm:text-lg md:text-xl font-normal text-on-surface-variant/90 leading-relaxed max-w-xl">
             CampusSync brings announcements, schedules, events, resources and intelligent academic assistance into one beautifully connected student experience.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mt-2 md:mt-4">
             <button
               onClick={onEnter}
-              className="bg-primary text-on-primary px-6 md:px-8 py-3 md:py-4 rounded-xl font-label-sm uppercase tracking-wider hover:bg-primary-fixed transition-colors glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)] w-full sm:w-auto text-center"
+              className="bg-primary text-on-primary px-7 md:px-9 py-3.5 md:py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.12em] hover:bg-primary-fixed transition-all glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)] w-full sm:w-auto text-center"
             >
               Enter CampusSync
             </button>
             <button
               onClick={onExplore}
-              className="border border-outline text-on-surface px-6 md:px-8 py-3 md:py-4 rounded-xl font-label-sm uppercase tracking-wider hover:bg-surface-variant transition-colors backdrop-blur-sm w-full sm:w-auto text-center"
+              className="border border-outline/40 text-on-surface px-7 md:px-9 py-3.5 md:py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.12em] hover:bg-surface-variant/80 transition-all backdrop-blur-sm w-full sm:w-auto text-center"
             >
-              Explore the Experience
+              Explore Experience
             </button>
           </div>
         </div>
@@ -54,7 +56,7 @@ export default function Hero({ onEnter, onExplore }) {
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-sm">person</span>
                 </div>
-                <span className="font-body-md text-white font-semibold">Today's Overview</span>
+                <span className="font-sans text-sm text-white font-semibold tracking-wide">Today's Overview</span>
               </div>
               <span className="material-symbols-outlined text-on-surface-variant cursor-pointer">more_horiz</span>
             </div>
@@ -64,7 +66,7 @@ export default function Hero({ onEnter, onExplore }) {
                   <span className="material-symbols-outlined">menu_book</span>
                 </div>
                 <div>
-                  <h4 className="font-body-md text-white">Advanced Physics Lab</h4>
+                  <h4 className="font-sans text-white font-semibold">Advanced Physics Lab</h4>
                   <p className="text-sm text-on-surface-variant mt-1">10:00 AM - Science Bldg, Room 402</p>
                 </div>
               </div>
@@ -73,15 +75,15 @@ export default function Hero({ onEnter, onExplore }) {
                   <span className="material-symbols-outlined">groups</span>
                 </div>
                 <div>
-                  <h4 className="font-body-md text-white">Study Group: Calculus</h4>
+                  <h4 className="font-sans text-white font-semibold">Study Group: Calculus</h4>
                   <p className="text-sm text-on-surface-variant mt-1">2:00 PM - Main Library, Pod B</p>
                 </div>
               </div>
               {/* Progress */}
               <div className="mt-2">
-                <div className="flex justify-between text-sm mb-2">
+                <div className="flex justify-between text-sm mb-2 font-sans">
                   <span className="text-on-surface-variant">Daily Progress</span>
-                  <span className="text-primary font-semibold">65%</span>
+                  <span className="text-primary font-bold">65%</span>
                 </div>
                 <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
                   <div className="h-full bg-primary w-[65%] rounded-full shadow-[0_0_10px_#71d8c8]"></div>
@@ -97,8 +99,8 @@ export default function Hero({ onEnter, onExplore }) {
                 <span className="material-symbols-outlined">warning</span>
               </div>
               <div>
-                <h4 className="font-label-sm text-error uppercase tracking-wider">Urgent Notice</h4>
-                <p className="text-sm text-white mt-1">Mid-term Examination Schedule Updated. Check portal.</p>
+                <h4 className="font-sans text-[11px] font-bold text-error uppercase tracking-wider">Urgent Notice</h4>
+                <p className="text-sm text-white font-medium mt-1">Mid-term Examination Schedule Updated. Check portal.</p>
               </div>
             </div>
           </div>
@@ -116,7 +118,7 @@ export default function Hero({ onEnter, onExplore }) {
                 ></div>
               </div>
               <div>
-                <h4 className="font-label-sm text-primary uppercase tracking-wider mb-1">Upcoming Event</h4>
+                <h4 className="font-sans text-[11px] font-bold text-primary uppercase tracking-wider mb-1">Upcoming Event</h4>
                 <p className="text-sm text-white font-semibold line-clamp-2">Annual Tech Symposium 2026</p>
               </div>
             </div>

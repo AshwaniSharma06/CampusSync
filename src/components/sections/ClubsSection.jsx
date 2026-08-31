@@ -61,18 +61,18 @@ export default function ClubsSection({ onActionNotification }) {
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
           <div className="max-w-2xl">
-            <h2 className="font-display-md text-3xl md:text-5xl text-white mb-4">
+            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-4 tracking-tight leading-tight">
               Find your people.
               <br />
-              Build something together.
+              <span className="font-serif-italic text-primary">Build something together.</span>
             </h2>
-            <p className="font-body-lg text-base md:text-lg text-on-surface-variant">
+            <p className="font-sans text-base md:text-lg text-on-surface-variant">
               Discover over 50+ student-led organizations covering arts, technology, sports, and entrepreneurship.
             </p>
           </div>
           <button
             onClick={() => onActionNotification('Opening full Campus Clubs Directory...')}
-            className="hidden md:block border border-outline text-on-surface px-6 py-2 rounded-full font-label-sm uppercase tracking-wider hover:bg-surface-variant transition-colors whitespace-nowrap"
+            className="hidden md:block border border-outline/40 text-on-surface px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] hover:bg-surface-variant transition-colors whitespace-nowrap"
           >
             View All Clubs
           </button>
@@ -102,22 +102,24 @@ export default function ClubsSection({ onActionNotification }) {
                   </div>
                 </div>
                 <div className="p-6 flex flex-col h-[calc(100%-8rem)]">
-                  <h3 className="text-2xl text-white font-headline-md mb-2">{club.name}</h3>
-                  <p className="text-sm text-on-surface-variant mb-6 line-clamp-2">{club.description}</p>
+                  <h3 className="text-2xl text-white font-serif mb-2">{club.name}</h3>
+                  <p className="font-sans text-sm text-on-surface-variant mb-6 line-clamp-2 leading-relaxed">
+                    {club.description}
+                  </p>
                   <div className="flex items-center justify-between mt-auto">
                     <div className="flex -space-x-2">
                       <div className="w-8 h-8 rounded-full bg-surface-bright border-2 border-surface-container-lowest z-30"></div>
                       <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest z-20"></div>
-                      <div className="w-8 h-8 rounded-full bg-surface border-2 border-surface-container-lowest z-10 flex items-center justify-center text-xs text-white">
+                      <div className="w-8 h-8 rounded-full bg-surface border-2 border-surface-container-lowest z-10 flex items-center justify-center text-xs text-white font-sans font-bold">
                         {club.membersCount}
                       </div>
                     </div>
                     <button
                       onClick={() => toggleJoin(club)}
-                      className={`font-label-sm uppercase transition-colors px-3 py-1 rounded-full border ${
+                      className={`font-sans text-xs font-bold uppercase tracking-[0.1em] transition-colors px-4 py-1.5 rounded-full border ${
                         isJoined
                           ? 'bg-primary/20 text-primary border-primary/40'
-                          : `${club.btnColor} border-transparent`
+                          : `${club.btnColor} border-transparent hover:bg-surface-bright/50`
                       }`}
                     >
                       {isJoined ? 'Joined ✓' : 'Join Club'}
@@ -131,7 +133,7 @@ export default function ClubsSection({ onActionNotification }) {
 
         <button
           onClick={() => onActionNotification('Opening full Campus Clubs Directory...')}
-          className="md:hidden w-full border border-outline text-on-surface px-6 py-3 mt-4 rounded-xl font-label-sm uppercase tracking-wider hover:bg-surface-variant transition-colors"
+          className="md:hidden w-full border border-outline/40 text-on-surface px-6 py-3 mt-4 rounded-xl font-sans text-xs font-bold uppercase tracking-[0.1em] hover:bg-surface-variant transition-colors"
         >
           View All Clubs
         </button>

@@ -12,12 +12,14 @@ export default function CtaSection({ onOpenPortal }) {
         <div className="absolute inset-0 bg-background/80"></div>
       </div>
       <div className="relative z-10 max-w-3xl px-margin-mobile md:px-margin-desktop">
-        <h2 className="font-display-md text-3xl md:text-5xl text-white mb-6">
-          Campus life moves quickly. Stay connected to all of it.
+        <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-6 tracking-tight leading-tight">
+          Campus life moves quickly.
+          <br />
+          <span className="font-serif-italic text-gradient">Stay connected to all of it.</span>
         </h2>
         <button
           onClick={onOpenPortal}
-          className="bg-primary text-on-primary px-8 py-4 rounded-xl font-label-sm uppercase tracking-wider hover:bg-primary-fixed transition-colors glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)]"
+          className="bg-primary text-on-primary px-9 py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.14em] hover:bg-primary-fixed transition-all glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)]"
         >
           Open Student Portal
         </button>

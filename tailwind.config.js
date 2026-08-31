@@ -71,21 +71,28 @@ export default {
         "container-max": "1440px"
       },
       fontFamily: {
-        "body-lg": ["Manrope", "sans-serif"],
-        "headline-md": ["Instrument Serif", "serif"],
-        "headline-lg": ["Instrument Serif", "serif"],
-        "display-lg": ["Instrument Serif", "serif"],
-        "label-sm": ["Manrope", "sans-serif"],
-        "headline-lg-mobile": ["Instrument Serif", "serif"],
-        "display-md": ["Instrument Serif", "serif"],
-        "body-md": ["Manrope", "sans-serif"]
+        serif: ['"Instrument Serif"', "Georgia", "serif"],
+        display: ['"Instrument Serif"', "Georgia", "serif"],
+        headline: ['"Instrument Serif"', "Georgia", "serif"],
+        sans: ['"Plus Jakarta Sans"', '"Manrope"', "sans-serif"],
+        body: ['"Plus Jakarta Sans"', '"Manrope"', "sans-serif"],
+        label: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"],
+        // Legacy class aliases from Stitch
+        "display-lg": ['"Instrument Serif"', "Georgia", "serif"],
+        "display-md": ['"Instrument Serif"', "Georgia", "serif"],
+        "headline-lg": ['"Instrument Serif"', "Georgia", "serif"],
+        "headline-md": ['"Instrument Serif"', "Georgia", "serif"],
+        "headline-lg-mobile": ['"Instrument Serif"', "Georgia", "serif"],
+        "body-lg": ['"Plus Jakarta Sans"', '"Manrope"', "sans-serif"],
+        "body-md": ['"Plus Jakarta Sans"', '"Manrope"', "sans-serif"],
+        "label-sm": ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"]
       },
       fontSize: {
         "body-lg": ["20px", { "lineHeight": "32px", "fontWeight": "400" }],
         "headline-md": ["32px", { "lineHeight": "40px", "fontWeight": "400" }],
         "headline-lg": ["48px", { "lineHeight": "56px", "fontWeight": "400" }],
         "display-lg": ["84px", { "lineHeight": "92px", "letterSpacing": "-0.02em", "fontWeight": "400" }],
-        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
         "headline-lg-mobile": ["36px", { "lineHeight": "44px", "fontWeight": "400" }],
         "display-md": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
         "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "400" }]

@@ -62,16 +62,16 @@ export default function CampusAiSection() {
           <div className="flex flex-col gap-6 relative z-10 order-2 lg:order-1">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-2 rounded-full w-fit">
               <span className="material-symbols-outlined text-primary text-sm">smart_toy</span>
-              <span className="font-label-sm text-primary uppercase text-[10px] md:text-xs">
+              <span className="font-sans font-bold text-primary uppercase tracking-[0.15em] text-[10px] md:text-xs">
                 CampusSync AI Assistant
               </span>
             </div>
-            <h2 className="font-display-md text-3xl md:text-5xl text-white">
+            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white tracking-tight leading-tight">
               Ask your campus.
               <br />
-              Get the right answer.
+              <span className="font-serif-italic text-primary">Get the right answer.</span>
             </h2>
-            <p className="font-body-lg text-base md:text-lg text-on-surface-variant max-w-xl">
+            <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed">
               Our context-aware AI knows your schedule, the syllabus, library inventory, and campus events. Just ask naturally.
             </p>
 
@@ -81,7 +81,7 @@ export default function CampusAiSection() {
                 <button
                   key={idx}
                   onClick={() => handleSend(sp.q)}
-                  className="text-xs bg-surface-bright/40 hover:bg-surface-bright/80 text-on-surface-variant hover:text-white px-3 py-1.5 rounded-full border border-outline/10 transition-colors text-left"
+                  className="font-sans text-xs bg-surface-bright/40 hover:bg-surface-bright/80 text-on-surface-variant hover:text-white px-3.5 py-1.5 rounded-full border border-outline/10 transition-colors text-left font-medium"
                 >
                   "{sp.q.length > 40 ? sp.q.slice(0, 40) + '...' : sp.q}"
                 </button>
@@ -89,7 +89,7 @@ export default function CampusAiSection() {
             </div>
 
             {/* AI Interactive Chat Card */}
-            <div className="glass-card rounded-2xl p-6 border border-outline/10 shadow-xl mt-2">
+            <div className="glass-card rounded-2xl p-6 border border-outline/10 shadow-xl mt-2 font-sans">
               <div className="flex flex-col gap-4 max-h-[260px] overflow-y-auto pr-2 hide-scrollbar">
                 {messages.map((m, index) =>
                   m.role === 'user' ? (
@@ -127,7 +127,7 @@ export default function CampusAiSection() {
                   type="text"
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
-                  className="w-full bg-surface-container rounded-full py-3 px-6 pr-12 text-sm text-white placeholder:text-on-surface-variant border border-outline/20 focus:outline-none focus:border-primary/50 transition-colors"
+                  className="w-full bg-surface-container rounded-full py-3 px-6 pr-12 text-sm text-white placeholder:text-on-surface-variant border border-outline/20 focus:outline-none focus:border-primary/50 transition-colors font-sans"
                   placeholder="Ask anything about your campus life..."
                 />
                 <button

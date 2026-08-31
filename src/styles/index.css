@@ -1,6 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Manrope:wght@400;600;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, .font-serif, .font-display, .font-headline, .font-display-lg, .font-display-md, .font-headline-md, .font-headline-lg {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+  }
+}
+
+.font-serif-italic {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+}
+
+.font-brand {
+  font-family: 'Instrument Serif', Georgia, serif;
+  letter-spacing: -0.03em;
+}
 
 .film-grain {
   position: relative;
@@ -49,14 +74,14 @@
 }
 
 .glass-card {
-  background: rgba(4, 19, 42, 0.6);
+  background: rgba(4, 19, 42, 0.65);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(135, 147, 144, 0.2);
 }
 
 .text-gradient {
-  background: linear-gradient(to right, #71d8c8, #bac3ff);
+  background: linear-gradient(to right, #71d8c8, #bac3ff, #e6c277);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

@@ -83,10 +83,10 @@ export default function CommunityFeed({ onActionNotification }) {
 
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative z-10">
         <div className="mb-12 text-center">
-          <h2 className="font-display-md text-3xl md:text-5xl text-white mb-4">
-            Campus conversations, all in one place
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-4 tracking-tight">
+            Campus conversations, <span className="font-serif-italic text-gradient">all in one place</span>
           </h2>
-          <p className="font-body-lg text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto">
+          <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto">
             Connect with your peers, join discussions, and stay updated with the pulse of the campus.
           </p>
         </div>
@@ -97,7 +97,7 @@ export default function CommunityFeed({ onActionNotification }) {
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`whitespace-nowrap px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-colors ${
+              className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-[0.08em] flex items-center gap-2 transition-colors ${
                 activeFilter.includes(filter)
                   ? 'bg-surface-bright/80 text-white border border-primary/40'
                   : 'bg-surface/50 text-on-surface-variant border border-outline/10'
@@ -121,7 +121,9 @@ export default function CommunityFeed({ onActionNotification }) {
           {/* Desktop Filter Sidebar */}
           <div className="hidden lg:flex flex-col gap-4 col-span-1">
             <div className="glass-card rounded-2xl p-6 sticky top-24">
-              <h3 className="font-label-sm text-primary uppercase tracking-wider mb-6">Explore Feeds</h3>
+              <h3 className="font-sans text-xs font-bold text-primary uppercase tracking-[0.12em] mb-6">
+                Explore Feeds
+              </h3>
               <ul className="space-y-3">
                 {[
                   { name: 'All Campus', icon: 'public' },
@@ -132,10 +134,10 @@ export default function CommunityFeed({ onActionNotification }) {
                   <li key={item.name}>
                     <button
                       onClick={() => setActiveFilter(item.name)}
-                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-left transition-all ${
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-left font-sans text-sm transition-all ${
                         activeFilter === item.name
-                          ? 'text-white bg-surface-bright/50 border border-primary/30 font-semibold'
-                          : 'text-on-surface-variant hover:text-white hover:bg-surface-bright/20'
+                          ? 'text-white bg-surface-bright/50 border border-primary/30 font-bold'
+                          : 'text-on-surface-variant hover:text-white hover:bg-surface-bright/20 font-medium'
                       }`}
                     >
                       <span className="material-symbols-outlined">{item.icon}</span>
@@ -152,7 +154,7 @@ export default function CommunityFeed({ onActionNotification }) {
             {/* Post Creator */}
             <div className="glass-card rounded-2xl p-6 border border-primary/20 bg-surface-bright/20">
               <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-full bg-surface-variant overflow-hidden shrink-0 flex items-center justify-center text-primary font-bold">
+                <div className="w-10 h-10 rounded-full bg-surface-variant overflow-hidden shrink-0 flex items-center justify-center text-primary font-bold font-sans">
                   AM
                 </div>
                 <div className="flex-1">
@@ -161,7 +163,7 @@ export default function CommunityFeed({ onActionNotification }) {
                     value={newPostText}
                     onChange={(e) => setNewPostText(e.target.value)}
                     placeholder="Share something with the campus..."
-                    className="w-full bg-surface/50 rounded-xl px-4 py-3 text-white text-sm border border-outline/10 placeholder:text-on-surface-variant focus:outline-none focus:border-primary/50 transition-colors resize-none mb-3"
+                    className="w-full bg-surface/50 rounded-xl px-4 py-3 text-white text-sm font-sans border border-outline/10 placeholder:text-on-surface-variant focus:outline-none focus:border-primary/50 transition-colors resize-none mb-3"
                   />
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2">
@@ -191,13 +193,13 @@ export default function CommunityFeed({ onActionNotification }) {
                       </button>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-on-surface-variant hidden sm:inline-flex items-center gap-1">
+                      <span className="text-xs text-on-surface-variant hidden sm:inline-flex items-center gap-1 font-sans">
                         <span className="material-symbols-outlined text-[14px]">verified</span> Verified Student
                       </span>
                       <button
                         onClick={handleCreatePost}
                         disabled={!newPostText.trim()}
-                        className={`px-5 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                        className={`px-5 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-[0.1em] transition-all ${
                           newPostText.trim()
                             ? 'bg-primary text-on-primary hover:bg-primary-fixed shadow-md cursor-pointer'
                             : 'bg-primary/20 text-primary opacity-50 cursor-not-allowed'
@@ -220,14 +222,14 @@ export default function CommunityFeed({ onActionNotification }) {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-12 h-12 rounded-full ${post.avatarBg} flex items-center justify-center font-bold`}
+                      className={`w-12 h-12 rounded-full ${post.avatarBg} flex items-center justify-center font-bold font-sans`}
                     >
                       {post.initials}
                     </div>
                     <div>
-                      <h4 className="font-body-md text-white font-semibold">{post.author}</h4>
-                      <div className="flex items-center gap-2 text-sm text-on-surface-variant mt-0.5">
-                        <span className="bg-surface-bright px-2 py-0.5 rounded text-xs">{post.tag}</span>
+                      <h4 className="font-sans text-white font-semibold">{post.author}</h4>
+                      <div className="flex items-center gap-2 text-sm text-on-surface-variant mt-0.5 font-sans">
+                        <span className="bg-surface-bright px-2 py-0.5 rounded text-xs font-medium">{post.tag}</span>
                         <span>•</span>
                         <span>{post.time}</span>
                       </div>
@@ -240,13 +242,13 @@ export default function CommunityFeed({ onActionNotification }) {
                     <span className="material-symbols-outlined">more_vert</span>
                   </button>
                 </div>
-                <p className="text-on-surface mb-4">{post.content}</p>
+                <p className="font-sans text-on-surface mb-4 leading-relaxed">{post.content}</p>
                 {post.icon && (
                   <div className="rounded-xl overflow-hidden mb-4 border border-outline/10 h-48 bg-surface-container flex items-center justify-center">
                     <span className="material-symbols-outlined text-4xl text-primary/50">{post.icon}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-6 border-t border-outline/10 pt-4">
+                <div className="flex items-center gap-6 border-t border-outline/10 pt-4 font-sans text-sm">
                   <button
                     onClick={() => handleLike(post.id)}
                     className={`flex items-center gap-2 transition-colors ${
@@ -278,14 +280,16 @@ export default function CommunityFeed({ onActionNotification }) {
           {/* Trending Topics Column */}
           <div className="hidden lg:flex flex-col gap-6 col-span-1">
             <div className="glass-card rounded-2xl p-6 sticky top-24">
-              <h3 className="font-label-sm text-primary uppercase tracking-wider mb-6">Trending Topics</h3>
-              <div className="space-y-4">
+              <h3 className="font-sans text-xs font-bold text-primary uppercase tracking-[0.12em] mb-6">
+                Trending Topics
+              </h3>
+              <div className="space-y-4 font-sans">
                 <div
                   onClick={() => onActionNotification('Viewing #TechSymposium26 trend')}
                   className="group cursor-pointer p-2 hover:bg-surface-bright/30 rounded-lg transition-colors"
                 >
-                  <p className="text-sm text-on-surface-variant">1. Event</p>
-                  <p className="font-semibold text-white group-hover:text-primary transition-colors">
+                  <p className="text-xs text-on-surface-variant font-medium">1. Event</p>
+                  <p className="font-semibold text-white group-hover:text-primary transition-colors mt-0.5">
                     #TechSymposium26
                   </p>
                   <p className="text-xs text-on-surface-variant mt-1">450 posts</p>
@@ -294,8 +298,8 @@ export default function CommunityFeed({ onActionNotification }) {
                   onClick={() => onActionNotification('Viewing Midterms Prep trend')}
                   className="group cursor-pointer p-2 hover:bg-surface-bright/30 rounded-lg transition-colors"
                 >
-                  <p className="text-sm text-on-surface-variant">2. Academics</p>
-                  <p className="font-semibold text-white group-hover:text-primary transition-colors">
+                  <p className="text-xs text-on-surface-variant font-medium">2. Academics</p>
+                  <p className="font-semibold text-white group-hover:text-primary transition-colors mt-0.5">
                     Midterms Prep
                   </p>
                   <p className="text-xs text-on-surface-variant mt-1">320 posts</p>
@@ -304,8 +308,8 @@ export default function CommunityFeed({ onActionNotification }) {
                   onClick={() => onActionNotification('Viewing New Cafe Menu trend')}
                   className="group cursor-pointer p-2 hover:bg-surface-bright/30 rounded-lg transition-colors"
                 >
-                  <p className="text-sm text-on-surface-variant">3. Campus Life</p>
-                  <p className="font-semibold text-white group-hover:text-primary transition-colors">
+                  <p className="text-xs text-on-surface-variant font-medium">3. Campus Life</p>
+                  <p className="font-semibold text-white group-hover:text-primary transition-colors mt-0.5">
                     New Cafe Menu
                   </p>
                   <p className="text-xs text-on-surface-variant mt-1">185 posts</p>

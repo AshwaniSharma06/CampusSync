@@ -60,8 +60,8 @@ export default function EventsSection({ onActionNotification }) {
   return (
     <section className="py-section-gap bg-surface relative overflow-hidden" id="events">
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-        <h2 className="font-display-md text-3xl md:text-5xl text-white mb-8 md:mb-12 text-center">
-          Featured Events
+        <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-8 md:mb-12 text-center tracking-tight">
+          Featured <span className="font-serif-italic text-gradient">Events</span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {EVENTS.map((event) => {
@@ -77,7 +77,7 @@ export default function EventsSection({ onActionNotification }) {
                   <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent/30 z-10"></div>
                   <div className="absolute bottom-4 left-6 z-20">
                     <span
-                      className={`${event.categoryBg} text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg`}
+                      className={`${event.categoryBg} text-xs font-sans font-bold px-3.5 py-1 rounded-full uppercase tracking-wider shadow-lg`}
                     >
                       {event.category}
                     </span>
@@ -86,12 +86,12 @@ export default function EventsSection({ onActionNotification }) {
                 <div className="p-6 md:p-8">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-2xl md:text-3xl text-white font-headline-md mb-2">{event.title}</h3>
-                      <p className="text-sm md:text-base text-on-surface-variant flex items-center gap-2">
+                      <h3 className="text-2xl md:text-3xl text-white font-serif mb-2">{event.title}</h3>
+                      <p className="font-sans text-sm md:text-base text-on-surface-variant flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">calendar_month</span> {event.dateText}
                       </p>
                     </div>
-                    <div className="text-center bg-surface-bright rounded-xl p-3 border border-outline/10 shrink-0">
+                    <div className="text-center bg-surface-bright rounded-xl p-3 border border-outline/10 shrink-0 font-sans">
                       <span
                         className={`block text-lg md:text-xl font-bold ${
                           event.category === 'Technical' ? 'text-primary' : 'text-tertiary'
@@ -99,13 +99,15 @@ export default function EventsSection({ onActionNotification }) {
                       >
                         {event.dateBadgeDay}
                       </span>
-                      <span className="block text-xs text-on-surface-variant uppercase">
+                      <span className="block text-xs text-on-surface-variant uppercase font-semibold">
                         {event.dateBadgeMonth}
                       </span>
                     </div>
                   </div>
-                  <p className="text-sm md:text-base text-on-surface-variant mb-6">{event.description}</p>
-                  <div className="flex items-center justify-between pt-4 border-t border-outline/10">
+                  <p className="font-sans text-sm md:text-base text-on-surface-variant mb-6 leading-relaxed">
+                    {event.description}
+                  </p>
+                  <div className="flex items-center justify-between pt-4 border-t border-outline/10 font-sans">
                     <span
                       className={`text-sm ${
                         isRegistered ? 'text-primary font-bold' : 'text-on-surface-variant'
@@ -115,7 +117,7 @@ export default function EventsSection({ onActionNotification }) {
                     </span>
                     <button
                       onClick={() => handleAction(event)}
-                      className={`px-4 md:px-6 py-2 rounded-full text-xs md:text-sm font-label-sm uppercase transition-colors border ${
+                      className={`px-5 md:px-7 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-[0.1em] transition-colors border ${
                         event.id === 'tech-symposium'
                           ? isRegistered
                             ? 'bg-primary/20 text-primary border-primary/40'
