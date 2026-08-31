@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Navbar from './components/layout/Navbar';
 import Hero from './components/sections/Hero';
-import CoreNetworkSection from './components/sections/CoreNetworkSection';
 import CommunityFeed from './components/sections/CommunityFeed';
 import ClubsSection from './components/sections/ClubsSection';
 import EventsSection from './components/sections/EventsSection';
@@ -23,20 +22,19 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-on-surface font-body-lg antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+    <div className="min-h-screen bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
       <Navbar onOpenPortal={handleOpenPortal} />
       <main>
         <Hero
           onEnter={() => {
-            const el = document.getElementById('features');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-          onExplore={() => {
             const el = document.getElementById('community');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
           }}
+          onExplore={() => {
+            const el = document.getElementById('clubs');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
         />
-        <CoreNetworkSection />
         <CommunityFeed onActionNotification={showToast} />
         <ClubsSection onActionNotification={showToast} />
         <EventsSection onActionNotification={showToast} />

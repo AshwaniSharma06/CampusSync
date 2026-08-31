@@ -46,10 +46,10 @@ export default function Navbar({ onOpenPortal }) {
           </a>
           <a
             className="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center font-sans text-xs uppercase tracking-[0.1em] font-semibold hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto"
-            href="#features"
+            href="#community"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Features
+            Community
           </a>
           <a
             className="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center font-sans text-xs uppercase tracking-[0.1em] font-semibold hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto"
@@ -60,10 +60,10 @@ export default function Navbar({ onOpenPortal }) {
           </a>
           <a
             className="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center font-sans text-xs uppercase tracking-[0.1em] font-semibold hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto"
-            href="#community"
+            href="#events"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Community
+            Events
           </a>
           <a
             className="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center font-sans text-xs uppercase tracking-[0.1em] font-semibold hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto"
@@ -77,7 +77,7 @@ export default function Navbar({ onOpenPortal }) {
             href="#curated"
             onClick={() => setMobileMenuOpen(false)}
           >
-            About
+            Curated
           </a>
           <button
             onClick={() => {
