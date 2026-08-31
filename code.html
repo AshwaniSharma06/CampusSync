@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CampusSync - The Modern Institution</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#690005",
+                      "surface-tint": "#71d8c8",
+                      "secondary-container": "#1738bd",
+                      "outline-variant": "#3d4947",
+                      "surface-container-high": "#1c2a42",
+                      "inverse-primary": "#006a60",
+                      "on-secondary": "#00208e",
+                      "on-surface-variant": "#bdc9c6",
+                      "on-primary-fixed-variant": "#005048",
+                      "primary": "#71d8c8",
+                      "on-secondary-fixed": "#00115a",
+                      "surface-container-low": "#0d1b33",
+                      "outline": "#879390",
+                      "error-container": "#93000a",
+                      "surface": "#04132a",
+                      "on-secondary-container": "#a7b4ff",
+                      "secondary-fixed": "#dee0ff",
+                      "tertiary-container": "#af8f4a",
+                      "inverse-on-surface": "#233149",
+                      "on-secondary-fixed-variant": "#1335bb",
+                      "secondary-fixed-dim": "#bac3ff",
+                      "primary-fixed-dim": "#71d8c8",
+                      "surface-container": "#112037",
+                      "on-tertiary": "#402d00",
+                      "surface-container-lowest": "#010e25",
+                      "on-background": "#d7e3ff",
+                      "tertiary-fixed": "#ffdf9f",
+                      "on-tertiary-fixed-variant": "#5b4301",
+                      "on-tertiary-fixed": "#261a00",
+                      "on-primary": "#003731",
+                      "error": "#ffb4ab",
+                      "on-primary-container": "#00322d",
+                      "on-error-container": "#ffdad6",
+                      "tertiary-fixed-dim": "#e6c277",
+                      "tertiary": "#e6c277",
+                      "on-tertiary-container": "#3a2900",
+                      "on-primary-fixed": "#00201c",
+                      "secondary": "#bac3ff",
+                      "background": "#04132a",
+                      "surface-variant": "#27354d",
+                      "primary-container": "#36a395",
+                      "on-surface": "#d7e3ff",
+                      "surface-dim": "#04132a",
+                      "surface-bright": "#2c3952",
+                      "inverse-surface": "#d7e3ff",
+                      "primary-fixed": "#8ef4e4",
+                      "surface-container-highest": "#27354d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "20px",
+                      "section-gap": "128px",
+                      "margin-desktop": "64px",
+                      "gutter": "32px",
+                      "unit": "8px",
+                      "container-max": "1440px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Manrope"],
+                      "headline-md": ["Instrument Serif"],
+                      "headline-lg": ["Instrument Serif"],
+                      "display-lg": ["Instrument Serif"],
+                      "label-sm": ["Manrope"],
+                      "headline-lg-mobile": ["Instrument Serif"],
+                      "display-md": ["Instrument Serif"],
+                      "body-md": ["Manrope"]
+              },
+              "fontSize": {
+                      "body-lg": ["20px", {"lineHeight": "32px", "fontWeight": "400"}],
+                      "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "400"}],
+                      "headline-lg": ["48px", {"lineHeight": "56px", "fontWeight": "400"}],
+                      "display-lg": ["84px", {"lineHeight": "92px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["36px", {"lineHeight": "44px", "fontWeight": "400"}],
+                      "display-md": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+        .film-grain {
+            position: relative;
+        }
+        .film-grain::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 10;
+        }
+        .illuminated-border {
+            position: relative;
+        }
+        .illuminated-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(113, 216, 200, 0.4), transparent);
+            z-index: 1;
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(113, 216, 200, 0.3);
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        .float-animation-delayed {
+            animation: float 7s ease-in-out infinite 2s;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .glass-card {
+            background: rgba(4, 19, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(135, 147, 144, 0.2);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #71d8c8, #bac3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            .mobile-menu-active {
+                display: flex !important;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(4, 19, 42, 0.95);
+                backdrop-filter: blur(20px);
+                padding: 1rem 20px;
+                border-bottom: 1px solid rgba(135, 147, 144, 0.2);
+            }
+            .hide-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .hide-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .float-animation, .float-animation-delayed {
+                animation: none !important;
+            }
+        }
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-lg antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/10 shadow-sm transition-all duration-300" id="main-nav">
+<div class="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="font-display-md text-display-md text-primary tracking-tighter text-3xl md:text-4xl leading-none z-20">
+                CampusSync
+            </div>
+<div class="hidden md:flex gap-8 items-center h-full" id="mobile-menu">
+<a class="text-primary border-b-2 border-primary pb-1 h-full flex items-center md:mt-1 py-2 md:py-0 w-full md:w-auto" href="#">Home</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto" href="#">Features</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto" href="#">Campus Life</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto" href="#">Community</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto" href="#">AI Assistant</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-bright/50 transition-all duration-300 md:px-4 rounded-xl md:my-2 py-2 md:py-0 w-full md:w-auto" href="#">About</a>
+<button class="md:hidden bg-primary text-on-primary px-6 py-2 rounded-full font-label-sm uppercase tracking-wider hover:bg-primary-fixed transition-colors mt-4 w-full">
+                    Student Portal
+                </button>
+</div>
+<div class="flex items-center gap-4 z-20">
+<button class="hidden md:flex bg-primary text-on-primary px-6 py-2 rounded-full font-label-sm uppercase tracking-wider hover:bg-primary-fixed transition-colors glow-hover scale-95 active:scale-90 transition-transform">
+                    Student Portal
+                </button>
+<button class="md:hidden text-primary p-2" id="hamburger-btn">
+<span class="material-symbols-outlined text-3xl">menu</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<header class="relative min-h-[95vh] flex items-center justify-center pt-20 overflow-hidden film-grain">
+<!-- Background Image -->
+<div class="absolute inset-0 z-0">
+<img alt="Campus" class="w-full h-full object-cover object-center opacity-70 transform scale-105 transition-transform duration-10000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtGnaPng_QLBwZTULZMw46KDSbf5wUlTHNaZT8OmQSZLGm3qWfgpey-Cy7yR6DbfSt2H45tYou6EXGpEj4Xwzq3O0_7DFBQ79K5JxggG--n_o33zgM_YJtCXTm9xN8ExoX9qOn494AX49HrlzGZ2rOb4R8owCwY3s3V5XyLTvwB7kZ8lJ0bc_TdyfeAQhXdzfQ5JM2yhhJO1K6h9dLbWGAEjqKLDbQ8akxU_jNAYSUwDwhVg9B_6uPqtxQv9pC3bOK6vs" style="animation: subtleZoom 20s infinite alternate;"/>
+<style>
+    @keyframes subtleZoom {
+        from { transform: scale(1); }
+        to { transform: scale(1.05); }
+    }
+</style>
+<div class="absolute inset-0 bg-gradient-to-b from-surface/40 via-surface/40 to-background"></div>
+</div>
+<!-- 3D Animation Background -->
+<div class="absolute inset-0 z-0 opacity-30 mix-blend-screen pointer-events-none">
+</div>
+<div class="relative z-10 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop grid md:grid-cols-2 gap-gutter items-center pt-12 md:pt-0">
+<div class="flex flex-col gap-6 md:gap-8 max-w-2xl reveal active">
+<div class="inline-flex items-center gap-2 bg-surface-variant/50 backdrop-blur border border-outline/20 px-4 py-2 rounded-full w-fit">
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#71d8c8] animate-pulse"></span>
+<span class="font-label-sm text-primary uppercase text-[10px] md:text-xs">The New Standard</span>
+</div>
+<h1 class="font-display-lg text-4xl md:text-6xl text-white leading-tight">
+                    Your Entire <span class="text-gradient">Campus.</span><br/>Connected.
+                </h1>
+<p class="font-body-lg text-base md:text-lg text-on-surface-variant max-w-xl">
+                    CampusSync brings announcements, schedules, events, resources and intelligent academic assistance into one beautifully connected student experience.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 mt-2 md:mt-4">
+<button class="bg-primary text-on-primary px-6 md:px-8 py-3 md:py-4 rounded-xl font-label-sm uppercase tracking-wider hover:bg-primary-fixed transition-colors glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)] w-full sm:w-auto text-center">
+                        Enter CampusSync
+                    </button>
+<button class="border border-outline text-on-surface px-6 md:px-8 py-3 md:py-4 rounded-xl font-label-sm uppercase tracking-wider hover:bg-surface-variant transition-colors backdrop-blur-sm w-full sm:w-auto text-center">
+                        Explore the Experience
+                    </button>
+</div>
+</div>
+<!-- Floating Dashboard Preview -->
+<div class="hidden md:block relative h-[600px] perspective-1000 reveal active" style="transition-delay: 0.2s;">
+<!-- Main Dashboard Panel -->
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-[480px] glass-card rounded-2xl border border-outline/20 shadow-[0_20px_40px_rgba(4,19,42,0.8)] float-animation overflow-hidden z-20">
+<div class="bg-surface-container/80 p-4 border-b border-outline/10 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+<span class="font-body-md text-white font-semibold">Today's Overview</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">more_horiz</span>
+</div>
+<div class="p-6 flex flex-col gap-4">
+<div class="bg-surface/50 rounded-xl p-4 border border-outline/10 flex gap-4 items-start">
+<div class="w-12 h-12 rounded-lg bg-secondary-container/30 flex items-center justify-center text-secondary-fixed">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<div>
+<h4 class="font-body-md text-white">Advanced Physics Lab</h4>
+<p class="text-sm text-on-surface-variant mt-1">10:00 AM - Science Bldg, Room 402</p>
+</div>
+</div>
+<div class="bg-surface/50 rounded-xl p-4 border border-outline/10 flex gap-4 items-start">
+<div class="w-12 h-12 rounded-lg bg-tertiary-container/30 flex items-center justify-center text-tertiary-fixed">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<div>
+<h4 class="font-body-md text-white">Study Group: Calculus</h4>
+<p class="text-sm text-on-surface-variant mt-1">2:00 PM - Main Library, Pod B</p>
+</div>
+</div>
+<!-- Progress -->
+<div class="mt-2">
+<div class="flex justify-between text-sm mb-2">
+<span class="text-on-surface-variant">Daily Progress</span>
+<span class="text-primary font-semibold">65%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[65%] rounded-full shadow-[0_0_10px_#71d8c8]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Notice Panel -->
+<div class="absolute -right-8 top-1/4 w-[320px] glass-card rounded-xl border border-error/30 shadow-xl float-animation-delayed z-30 p-4 backdrop-blur-xl">
+<div class="flex items-start gap-3">
+<div class="text-error bg-error/10 p-2 rounded-lg">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<div>
+<h4 class="font-label-sm text-error uppercase tracking-wider">Urgent Notice</h4>
+<p class="text-sm text-white mt-1">Mid-term Examination Schedule Updated. Check portal.</p>
+</div>
+</div>
+</div>
+<!-- Floating Event Panel -->
+<div class="absolute right-32 bottom-12 w-[340px] glass-card rounded-xl border border-primary/20 shadow-xl float-animation z-10 p-4">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 relative">
+<div class="w-full h-full bg-cover bg-center" data-alt="Tech Event" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB5jXPfylE7j7JakUiF0du50ydq0KIO56XHDyCkmlO8GOfN58YJF5G51zKxzmpZQUwF7mq1rJMJQ3nA2AhH5rGGrTR2r2XUF327OlBFufQcgfzgcaZcwjNWx2HQLRdodIrRRHuZCLZQFc05JrvoyfVjncwpixl3UReuf9Iekhqyxu6xguOhf57MVXjAGfebQVodbOqoEx0d6EEDtu91R8PlUkNplfQs03asa7ccpRnUdz7yGr8BNv78VA");'></div>
+</div>
+<div>
+<h4 class="font-label-sm text-primary uppercase tracking-wider mb-1">Upcoming Event</h4>
+<p class="text-sm text-white font-semibold line-clamp-2">Annual Tech Symposium 2026</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Section 1: Connected Campus -->
+<section class="py-section-gap bg-[#faf9f6] text-[#1c1b1f] relative overflow-hidden reveal">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative z-10">
+<div class="text-center mb-12">
+<h2 class="font-display-md text-3xl md:text-5xl mb-4 text-[#04132a]">Everything students need, finally connected.</h2>
+</div>
+<div class="w-full h-[400px] md:h-[500px] relative rounded-3xl overflow-hidden bg-[#04132a] border border-outline/10 shadow-2xl">
+<div class="absolute inset-0" id="threejs-container-CORE_NETWORK"></div>
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+<!-- Overlay labels could go here, but keeping clean for the 3D effect -->
+</div>
+</div>
+</div>
+</section>
+<!-- 1. Community Feed -->
+<section class="py-section-gap bg-surface relative overflow-hidden reveal">
+<div class="absolute top-0 right-0 w-full h-[600px] z-0 opacity-40 pointer-events-none" id="threejs-container-COMMUNITY_SPHERE"></div>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative z-10">
+<div class="mb-12 text-center">
+<h2 class="font-display-md text-3xl md:text-5xl text-white mb-4">Campus conversations, all in one place</h2>
+<p class="font-body-lg text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto">Connect with your peers, join discussions, and stay updated with the pulse of the campus.</p>
+</div>
+<!-- Mobile Filters (Horizontal Scroll) -->
+<div class="lg:hidden flex gap-3 overflow-x-auto hide-scrollbar mb-6 pb-2">
+<button class="whitespace-nowrap px-4 py-2 bg-surface-bright/50 text-white rounded-full text-sm border border-primary/20 flex items-center gap-2"><span class="material-symbols-outlined text-sm">public</span> All Campus</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface/50 text-on-surface-variant border border-outline/10 rounded-full text-sm flex items-center gap-2"><span class="material-symbols-outlined text-sm">science</span> Comp Sci</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface/50 text-on-surface-variant border border-outline/10 rounded-full text-sm flex items-center gap-2"><span class="material-symbols-outlined text-sm">groups</span> Clubs</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface/50 text-on-surface-variant border border-outline/10 rounded-full text-sm flex items-center gap-2"><span class="material-symbols-outlined text-sm">campaign</span> Official</button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+<!-- Filters Column (Desktop) -->
+<div class="hidden lg:flex flex-col gap-4 col-span-1">
+<div class="glass-card rounded-2xl p-6 sticky top-24">
+<h3 class="font-label-sm text-primary uppercase tracking-wider mb-6">Explore Feeds</h3>
+<ul class="space-y-4">
+<li><a class="flex items-center gap-3 text-white hover:text-primary transition-colors bg-surface-bright/30 p-2 rounded-lg border border-primary/20" href="#"><span class="material-symbols-outlined">public</span> All Campus</a></li>
+<li><a class="flex items-center gap-3 text-on-surface-variant hover:text-white transition-colors p-2" href="#"><span class="material-symbols-outlined">science</span> Computer Science</a></li>
+<li><a class="flex items-center gap-3 text-on-surface-variant hover:text-white transition-colors p-2" href="#"><span class="material-symbols-outlined">groups</span> My Clubs</a></li>
+<li><a class="flex items-center gap-3 text-on-surface-variant hover:text-white transition-colors p-2" href="#"><span class="material-symbols-outlined">campaign</span> Official</a></li>
+</ul>
+</div>
+</div>
+<!-- Feed Column -->
+<div class="col-span-1 lg:col-span-2 flex flex-col gap-6">
+<!-- Create Post Preview -->
+<div class="glass-card rounded-2xl p-6 border border-primary/20 bg-surface-bright/20">
+<div class="flex gap-4 items-start">
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb4cfLgNTlmT8Tn3kF-po5lnL6BirDhyss-lwP7jmIaKjpkjRQekg_QLZTosPlWM9r69-9LWqnhGpprCFDnrl87etwHtDuuIRizQZKKwihllttDsR0NJp-4d0l7ST0w6tsj9dUZTEHooj0THoc_Qw640ezi1cUBq0qElgXb8B9zhogK1xNZFW_ZJRPcZIIAutVq3js9OahgBZBq_VSnnJ2jTp8eD5a9l4WtrQ9UC7SWVlzLJaOKfTGBA"/>
+</div>
+<div class="flex-1">
+<div class="bg-surface/50 rounded-xl px-4 py-3 text-on-surface-variant text-sm border border-outline/10 mb-3 cursor-text">
+                Share something with the campus...
+            </div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<button class="p-2 text-primary hover:bg-surface-bright rounded-lg transition-colors" title="Add Image"><span class="material-symbols-outlined text-lg">image</span></button>
+<button class="p-2 text-secondary hover:bg-surface-bright rounded-lg transition-colors" title="Add Document"><span class="material-symbols-outlined text-lg">description</span></button>
+<button class="p-2 text-tertiary hover:bg-surface-bright rounded-lg transition-colors" title="Create Poll"><span class="material-symbols-outlined text-lg">poll</span></button>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-on-surface-variant hidden sm:inline-block flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span> Verified Student Only</span>
+<button class="bg-primary/20 text-primary px-4 py-1.5 rounded-full text-sm font-semibold opacity-50 cursor-not-allowed">Post</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Post 1 -->
+<div class="glass-card rounded-2xl p-6 transition-all hover:border-primary/30 group">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">CC</div>
+<div>
+<h4 class="font-body-md text-white font-semibold">Coding Club</h4>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant mt-0.5">
+<span class="bg-surface-bright px-2 py-0.5 rounded text-xs">Official</span>
+<span>•</span>
+<span>2h ago</span>
+</div>
+</div>
+</div>
+<div class="relative group">
+<button class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">more_vert</span></button>
+<div class="absolute right-0 mt-2 w-32 bg-surface-bright border border-outline/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 flex flex-col overflow-hidden">
+<button class="px-4 py-2 text-sm text-left hover:bg-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">bookmark</span> Save</button>
+<button class="px-4 py-2 text-sm text-left hover:bg-surface-variant text-error flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">flag</span> Report</button>
+</div>
+</div>
+</div>
+<p class="text-on-surface mb-4">Excited to announce our upcoming Advanced React Workshop! 🚀 Join us this Saturday at the Main Lab. We'll be building a full-stack application from scratch. Don't forget your laptops!</p>
+<div class="rounded-xl overflow-hidden mb-4 border border-outline/10 h-48 bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-primary/50">code</span>
+</div>
+<div class="flex items-center gap-6 border-t border-outline/10 pt-4">
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">favorite</span> 124</button>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">chat_bubble</span> 32</button>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors ml-auto"><span class="material-symbols-outlined text-sm">share</span> Share</button>
+</div>
+</div>
+<!-- Post 2 -->
+<div class="glass-card rounded-2xl p-6 transition-all hover:border-tertiary/30 group">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary/20 flex items-center justify-center text-tertiary font-bold">JD</div>
+<div>
+<h4 class="font-body-md text-white font-semibold">Jane Doe</h4>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant mt-0.5">
+<span class="bg-surface-bright px-2 py-0.5 rounded text-xs">CS Year 3</span>
+<span>•</span>
+<span>5h ago</span>
+</div>
+</div>
+</div>
+<div class="relative group">
+<button class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">more_vert</span></button>
+<div class="absolute right-0 mt-2 w-32 bg-surface-bright border border-outline/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 flex flex-col overflow-hidden">
+<button class="px-4 py-2 text-sm text-left hover:bg-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">bookmark</span> Save</button>
+<button class="px-4 py-2 text-sm text-left hover:bg-surface-variant text-error flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">flag</span> Report</button>
+</div>
+</div>
+</div>
+<p class="text-on-surface mb-4">Anyone want to form a study group for the upcoming Machine Learning midterms? Looking for 2-3 people to review past papers in the library this weekend. 📚🧠</p>
+<div class="flex items-center gap-6 border-t border-outline/10 pt-4">
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-tertiary transition-colors"><span class="material-symbols-outlined text-sm">favorite</span> 15</button>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-tertiary transition-colors"><span class="material-symbols-outlined text-sm">chat_bubble</span> 8</button>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-tertiary transition-colors ml-auto"><span class="material-symbols-outlined text-sm">share</span> Share</button>
+</div>
+</div>
+</div>
+<!-- Trends Column -->
+<div class="hidden lg:flex flex-col gap-6 col-span-1">
+<div class="glass-card rounded-2xl p-6 sticky top-24">
+<h3 class="font-label-sm text-primary uppercase tracking-wider mb-6">Trending Topics</h3>
+<div class="space-y-4">
+<div class="group cursor-pointer">
+<p class="text-sm text-on-surface-variant">1. Event</p>
+<p class="font-semibold text-white group-hover:text-primary transition-colors">#TechSymposium26</p>
+<p class="text-xs text-on-surface-variant mt-1">450 posts</p>
+</div>
+<div class="group cursor-pointer">
+<p class="text-sm text-on-surface-variant">2. Academics</p>
+<p class="font-semibold text-white group-hover:text-primary transition-colors">Midterms Prep</p>
+<p class="text-xs text-on-surface-variant mt-1">320 posts</p>
+</div>
+<div class="group cursor-pointer">
+<p class="text-sm text-on-surface-variant">3. Campus Life</p>
+<p class="font-semibold text-white group-hover:text-primary transition-colors">New Cafe Menu</p>
+<p class="text-xs text-on-surface-variant mt-1">185 posts</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Clubs & Communities -->
+<section class="py-section-gap bg-surface-container-lowest relative overflow-hidden reveal">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
+<div class="max-w-2xl">
+<h2 class="font-display-md text-3xl md:text-5xl text-white mb-4">Find your people.<br/>Build something together.</h2>
+<p class="font-body-lg text-base md:text-lg text-on-surface-variant">Discover over 50+ student-led organizations covering arts, technology, sports, and entrepreneurship.</p>
+</div>
+<button class="hidden md:block border border-outline text-on-surface px-6 py-2 rounded-full font-label-sm uppercase tracking-wider hover:bg-surface-variant transition-colors whitespace-nowrap">View All Clubs</button>
+</div>
+<!-- Mobile Carousel Container -->
+<div class="flex overflow-x-auto hide-scrollbar gap-6 pb-8 -mx-margin-mobile px-margin-mobile snap-x snap-mandatory md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3">
+<!-- Club Card 1 -->
+<div class="glass-card rounded-3xl overflow-hidden border border-outline/10 hover:-translate-y-2 transition-transform duration-300 group min-w-[280px] snap-center flex-shrink-0 md:min-w-0">
+<div class="h-32 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBBAMxWMbzO72c92JTA0Z4EQGYTOrcjdibq1M3z2kkSO98DeUoyQBFompqvo4_V-vWjBk6f09Hlo9g1bWYJAHWQXh8bZScqS6YnF8wtfBqufAu7Wp8voitWpgrjRxklE_ZWxWRuPuWdCLwA9q5B2LjRRCYT-p6jjLsbjFi2Z7NgEAq9-zUhVT4qp_uUlMnmAwa4K00I-6ptkLwmMJVxwR2AYgG3a_KEkHypRymHjOzjjPVUbbuxf4B0bA');">
+<div class="w-full h-full bg-surface/50 backdrop-blur-sm flex items-center justify-center">
+<div class="w-16 h-16 rounded-2xl bg-primary/20 backdrop-blur-md border border-primary/30 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-lg">
+<span class="material-symbols-outlined text-3xl">code_blocks</span>
+</div>
+</div>
+</div>
+<div class="p-6">
+<h3 class="text-2xl text-white font-headline-md mb-2">Coding Club</h3>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Building the future, one line of code at a time. Join us for hackathons and workshops.</p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-surface-bright border-2 border-surface-container-lowest z-30"></div>
+<div class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest z-20"></div>
+<div class="w-8 h-8 rounded-full bg-surface border-2 border-surface-container-lowest z-10 flex items-center justify-center text-xs text-white">+120</div>
+</div>
+<button class="text-primary font-label-sm uppercase hover:text-primary-fixed transition-colors">Join Club</button>
+</div>
+</div>
+</div>
+<!-- Club Card 2 -->
+<div class="glass-card rounded-3xl overflow-hidden border border-outline/10 hover:-translate-y-2 transition-transform duration-300 group min-w-[280px] snap-center flex-shrink-0 md:min-w-0 lg:translate-y-8">
+<div class="h-32 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBciqEZTmtAHmcSWfaL3iLbtMGxlj9jwezOOkBI5eJIF4t0Pn4Xfey2dfa7ylYbWDsnRSSsiB2kPGp860jDq5NKB3Xfwvr9a5HYY-nRawWkc-nYomwJTfI543vgMm-fomnhO_died5buq13Pxs42fNt1AbEsXXw81z7Jsml87eZTXxR6KQ67mUGsqgbHq4wJvdvUdobcNJJjBF2V2nZ9r8k_FcAC1bJVfyUXtj-38POiUHbo72rNGuklw');">
+<div class="w-full h-full bg-surface/50 backdrop-blur-sm flex items-center justify-center">
+<div class="w-16 h-16 rounded-2xl bg-tertiary/20 backdrop-blur-md border border-tertiary/30 flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform shadow-lg">
+<span class="material-symbols-outlined text-3xl">precision_manufacturing</span>
+</div>
+</div>
+</div>
+<div class="p-6">
+<h3 class="text-2xl text-white font-headline-md mb-2">Robotics Society</h3>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Designing autonomous systems and participating in national robotics competitions.</p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-surface-bright border-2 border-surface-container-lowest z-30"></div>
+<div class="w-8 h-8 rounded-full bg-surface border-2 border-surface-container-lowest z-10 flex items-center justify-center text-xs text-white">+85</div>
+</div>
+<button class="text-tertiary font-label-sm uppercase hover:text-tertiary-fixed transition-colors">Join Club</button>
+</div>
+</div>
+</div>
+<!-- Club Card 3 -->
+<div class="glass-card rounded-3xl overflow-hidden border border-outline/10 hover:-translate-y-2 transition-transform duration-300 group min-w-[280px] snap-center flex-shrink-0 md:min-w-0">
+<div class="h-32 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAY9KRjPh_ddODP3b0LQhe1eNqTfZX0VedMpYIlW_nIkaB1jzD57004QgZrPPpZHlaLB7f_4IThSKJR0volI3DvXB69pj0snzinEFkIdfCv3nk412f__XrF7kYcjMecNqGkP5wy6gOapOBVUiZpv4-8OzfQJ3AMSTrIPM6oZZryntPOZ2uYhxsg5S1b9kRiAdNP_6_-SKzbZAJ_2jMTBrtTE5XVsxdk7hlS04aLdE2_CdKGS9KF7_3vVA');">
+<div class="w-full h-full bg-surface/50 backdrop-blur-sm flex items-center justify-center">
+<div class="w-16 h-16 rounded-2xl bg-secondary/20 backdrop-blur-md border border-secondary/30 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform shadow-lg">
+<span class="material-symbols-outlined text-3xl">palette</span>
+</div>
+</div>
+</div>
+<div class="p-6">
+<h3 class="text-2xl text-white font-headline-md mb-2">Arts &amp; Cultural</h3>
+<p class="text-sm text-on-surface-variant mb-6 line-clamp-2">Celebrating creativity through music, dance, theatre, and visual arts.</p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-surface-bright border-2 border-surface-container-lowest z-30"></div>
+<div class="w-8 h-8 rounded-full bg-surface-variant border-2 border-surface-container-lowest z-20"></div>
+<div class="w-8 h-8 rounded-full bg-surface border-2 border-surface-container-lowest z-10 flex items-center justify-center text-xs text-white">+150</div>
+</div>
+<button class="text-secondary font-label-sm uppercase hover:text-secondary-fixed transition-colors">Join Club</button>
+</div>
+</div>
+</div>
+</div>
+<button class="md:hidden w-full border border-outline text-on-surface px-6 py-3 mt-4 rounded-xl font-label-sm uppercase tracking-wider hover:bg-surface-variant transition-colors">View All Clubs</button>
+</div>
+</section>
+<!-- 3. Upcoming Events -->
+<section class="py-section-gap bg-surface relative overflow-hidden reveal">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<h2 class="font-display-md text-3xl md:text-5xl text-white mb-8 md:mb-12 text-center">Featured Events</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Event 1 -->
+<div class="glass-card rounded-3xl overflow-hidden border border-outline/10 group">
+<div class="h-48 md:h-64 bg-surface-container relative overflow-hidden bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAmUkjAYcJOEjVGc8sovruZ1wYMmQAmPckWJV9H84SLiyOrEJCqOWPIcTJbHw36Opb_aUtPC7e9J3thDiwSbcpfKTlG9b5jWlkaDyul4rV1Hmsfa_QPWrVMueEHAC1XjsO29TWGgfQ4UOu96Wy-onvdm2VSvaT9S8BOXsdmGm_Tx9pV1eU5wVzzm9JzPB-TF9m0_UYyD5-WIyjnmP8NAknLVtmxNOqDYkUlWX5LJYxi_uP-zG4IhzOt_g');">
+<div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent/30 z-10"></div>
+<div class="absolute bottom-4 left-6 z-20">
+<span class="bg-primary text-on-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">Technical</span>
+</div>
+</div>
+<div class="p-6 md:p-8">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="text-2xl md:text-3xl text-white font-headline-md mb-2">Tech Symposium 2026</h3>
+<p class="text-sm md:text-base text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">calendar_month</span> Oct 15 - 17, Main Auditorium</p>
+</div>
+<div class="text-center bg-surface-bright rounded-xl p-3 border border-outline/10 shrink-0">
+<span class="block text-lg md:text-xl font-bold text-primary">15</span>
+<span class="block text-xs text-on-surface-variant uppercase">Oct</span>
+</div>
+</div>
+<p class="text-sm md:text-base text-on-surface-variant mb-6">Annual technical festival featuring hackathons, guest lectures from industry leaders, and project showcases.</p>
+<div class="flex items-center justify-between pt-4 border-t border-outline/10">
+<span class="text-sm text-primary">Registration Open</span>
+<button class="bg-surface-bright hover:bg-surface-variant text-white px-4 md:px-6 py-2 rounded-full text-xs md:text-sm font-label-sm uppercase transition-colors border border-outline/20">Register Now</button>
+</div>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="glass-card rounded-3xl overflow-hidden border border-outline/10 group">
+<div class="h-48 md:h-64 bg-surface-container relative overflow-hidden bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDHKED6PnSYAHlQGCcEaRp8oha7KM-G1fRp5Oe9gRyJqbqs34lFp-UEoIgiAiHr4Z8vFTJ85qnjmcXMmPeoEgSLC7FTymKJX8BbVJ71MRSB-nwu-w-WOp8KvcTJpQtK0OO4p9mNuGIL-sanVQ34WcRRFNDo_0uJ17tIJmtICzSZuP5ZEjN4_qz0k4z3lRtMBlt7Mwu438gO7m3gEvX_pw274fv3dI6YhxTZTebx2rxUHq5fG8UFbFa36w');">
+<div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent/30 z-10"></div>
+<div class="absolute bottom-4 left-6 z-20">
+<span class="bg-tertiary text-on-tertiary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">Cultural</span>
+</div>
+</div>
+<div class="p-6 md:p-8">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="text-2xl md:text-3xl text-white font-headline-md mb-2">Rhythm &amp; Arts Fest</h3>
+<p class="text-sm md:text-base text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-sm">calendar_month</span> Nov 05, Open Air Theatre</p>
+</div>
+<div class="text-center bg-surface-bright rounded-xl p-3 border border-outline/10 shrink-0">
+<span class="block text-lg md:text-xl font-bold text-tertiary">05</span>
+<span class="block text-xs text-on-surface-variant uppercase">Nov</span>
+</div>
+</div>
+<p class="text-sm md:text-base text-on-surface-variant mb-6">A celebration of diversity and talent. Join us for an evening of music, dance, and theatrical performances.</p>
+<div class="flex items-center justify-between pt-4 border-t border-outline/10">
+<span class="text-sm text-on-surface-variant">Opening soon</span>
+<button class="bg-surface-bright/50 text-on-surface-variant px-4 md:px-6 py-2 rounded-full text-xs md:text-sm font-label-sm uppercase border border-outline/10 cursor-not-allowed">Notify Me</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Personalized 'For You' -->
+<section class="py-section-gap bg-surface-container-lowest relative overflow-hidden reveal">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="mb-8 md:mb-12">
+<h2 class="font-display-md text-3xl md:text-5xl text-white mb-4">Curated for you</h2>
+<p class="font-body-lg text-base md:text-lg text-on-surface-variant">Personalized updates, deadlines, and recommendations based on your profile.</p>
+</div>
+<div class="glass-card rounded-3xl border border-outline/10 p-6 md:p-8 shadow-2xl relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-tertiary"></div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Column 1: Deadlines -->
+<div class="col-span-1 flex flex-col gap-4">
+<h3 class="font-label-sm text-error uppercase tracking-wider mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-sm">schedule</span> Approaching Deadlines</h3>
+<div class="bg-surface/50 rounded-xl p-4 border border-error/20 border-l-4 border-l-error">
+<h4 class="font-body-md text-white">Database Systems Project Phase 2</h4>
+<p class="text-sm text-error mt-1 font-semibold">Due in 2 days (Friday, 11:59 PM)</p>
+</div>
+<div class="bg-surface/50 rounded-xl p-4 border border-outline/10">
+<h4 class="font-body-md text-white">Library Book Return</h4>
+<p class="text-sm text-on-surface-variant mt-1">Due in 5 days</p>
+</div>
+</div>
+<!-- Column 2: Department Announcements -->
+<div class="col-span-1 flex flex-col gap-4">
+<h3 class="font-label-sm text-secondary uppercase tracking-wider mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-sm">domain</span> Dept of Computer Science</h3>
+<div class="bg-surface/50 rounded-xl p-4 border border-outline/10 hover:border-secondary/30 transition-colors cursor-pointer">
+<span class="text-xs bg-secondary/10 text-secondary px-2 py-0.5 rounded mb-2 inline-block">Announcement</span>
+<h4 class="font-body-md text-white">Elective Selection for Spring 2026</h4>
+<p class="text-sm text-on-surface-variant mt-1 line-clamp-2">The portal for selecting your departmental electives will open on Monday. Please review the syllabus document beforehand.</p>
+</div>
+</div>
+<!-- Column 3: Recommendations -->
+<div class="col-span-1 flex flex-col gap-4">
+<h3 class="font-label-sm text-tertiary uppercase tracking-wider mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-sm">auto_awesome</span> Recommended for you</h3>
+<div class="bg-surface/50 rounded-xl p-4 border border-outline/10 hover:border-tertiary/30 transition-colors cursor-pointer flex gap-4 items-start">
+<div class="w-10 h-10 rounded-lg bg-tertiary/20 flex items-center justify-center text-tertiary shrink-0">
+<span class="material-symbols-outlined text-sm">school</span>
+</div>
+<div>
+<h4 class="font-body-md text-white text-sm font-semibold">Workshop: Intro to Web3</h4>
+<p class="text-xs text-on-surface-variant mt-1">Based on your interest in Blockchain</p>
+<button class="mt-2 text-xs text-tertiary uppercase font-bold">View Details</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. CampusSync AI Section -->
+<section class="py-section-gap bg-surface relative overflow-hidden reveal">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div class="flex flex-col gap-6 relative z-10 order-2 lg:order-1">
+<div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-2 rounded-full w-fit">
+<span class="material-symbols-outlined text-primary text-sm">smart_toy</span>
+<span class="font-label-sm text-primary uppercase text-[10px] md:text-xs">CampusSync AI</span>
+</div>
+<h2 class="font-display-md text-3xl md:text-5xl text-white">Ask your campus.<br/>Get the right answer.</h2>
+<p class="font-body-lg text-base md:text-lg text-on-surface-variant max-w-xl">
+                    Our context-aware AI knows your schedule, the syllabus, library inventory, and campus events. Just ask naturally.
+                </p>
+<div class="glass-card rounded-2xl p-6 border border-outline/10 shadow-xl mt-4">
+<div class="flex flex-col gap-4">
+<div class="bg-surface-bright/50 rounded-xl p-4 rounded-tr-sm self-start max-w-[85%] border border-outline/10">
+<p class="text-sm text-white">Where is my next class and how long will it take to walk there from the library?</p>
+</div>
+<div class="bg-primary/10 rounded-xl p-4 rounded-tl-sm self-end max-w-[85%] border border-primary/20">
+<p class="text-sm text-on-primary-container">Your next class is Advanced Physics Lab in Science Bldg, Room 402. It's about a 7-minute walk from your current location at the Main Library.</p>
+</div>
+</div>
+<div class="mt-6 relative">
+<input class="w-full bg-surface-container rounded-full py-3 px-6 pr-12 text-sm text-white placeholder:text-on-surface-variant border border-outline/20 focus:outline-none focus:border-primary/50 transition-colors" placeholder="Ask anything about your campus life..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-on-primary hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-[16px]">send</span>
+</button>
+</div>
+</div>
+</div>
+<div class="h-[400px] lg:h-[600px] relative order-1 lg:order-2 flex items-center justify-center">
+<div class="absolute inset-0 z-0" id="threejs-container-AI_KNOWLEDGE"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="relative py-section-gap flex items-center justify-center text-center overflow-hidden reveal">
+<div class="absolute inset-0 z-0">
+<img alt="Campus CTA" class="w-full h-full object-cover opacity-30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpW_vuozuh-4UQjcpX3vryO1hhyu6hSvNkk0PX1MBm0OTZDi8uyP2P-TDbYTVMfI9DCixi1cnwHz1z2EKBWjmKcDDRZh-hKNIS7gYsL84vBUVBgNipZl6gd7BDdakiGNJ33foUCw6HalVnSGYLnYS6KyO1VZv_kJre0ViqR4mtZyvBvgHTG1nEIrGx8lXb-3IFF6IPsA-lqzkDL92HJQEmMVC2d763GEGHaTjpLseN--6wUaysUGNR0UEbkIozmbuD0gY"/>
+<div class="absolute inset-0 bg-background/80"></div>
+</div>
+<div class="relative z-10 max-w-3xl px-margin-mobile md:px-margin-desktop">
+<h2 class="font-display-md text-3xl md:text-5xl text-white mb-6">Campus life moves quickly. Stay connected to all of it.</h2>
+<button class="bg-primary text-on-primary px-8 py-4 rounded-xl font-label-sm uppercase tracking-wider hover:bg-primary-fixed transition-colors glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)]">
+                Open Student Portal
+            </button>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant/10 w-full py-section-gap mt-8 md:mt-section-gap">
+<div class="grid grid-cols-1 md:grid-cols-4 px-margin-mobile md:px-margin-desktop gap-8 md:gap-gutter max-w-container-max mx-auto">
+<div class="col-span-1 md:col-span-1 flex flex-col gap-4">
+<div class="font-display-md text-display-md text-primary text-4xl">CampusSync</div>
+<p class="text-on-surface-variant mt-2 md:mt-4 font-body-md text-sm md:text-body-md">
+                    © 2026 CampusSync Institutional. All rights reserved.
+                </p>
+</div>
+<div class="col-span-1 md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-8">
+<div class="flex flex-col gap-3">
+<h5 class="text-white font-semibold font-label-sm uppercase tracking-wider mb-2">Legal</h5>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm" href="#">Terms of Service</a>
+</div>
+<div class="flex flex-col gap-3">
+<h5 class="text-white font-semibold font-label-sm uppercase tracking-wider mb-2">Campus</h5>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm" href="#">Campus Map</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm" href="#">Directory</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm" href="#">Library Resources</a>
+</div>
+<div class="flex flex-col gap-3">
+<h5 class="text-white font-semibold font-label-sm uppercase tracking-wider mb-2">Community</h5>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm" href="#">Clubs &amp; Orgs</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm" href="#">Events Calendar</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors text-sm" href="#">Student Council</a>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Simple nav blur effect on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('main-nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-surface/90', 'shadow-md');
+                nav.classList.remove('bg-surface/80');
+            } else {
+                nav.classList.remove('bg-surface/90', 'shadow-md');
+                nav.classList.add('bg-surface/80');
+            }
+        });
+
+        // Mobile menu toggle
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if(hamburgerBtn && mobileMenu) {
+            hamburgerBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenu.classList.toggle('mobile-menu-active');
+                
+                const icon = hamburgerBtn.querySelector('span');
+                if(mobileMenu.classList.contains('mobile-menu-active')) {
+                    icon.textContent = 'close';
+                } else {
+                    icon.textContent = 'menu';
+                }
+            });
+        }
+
+        // Scroll Reveal Animation
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 150;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        // Trigger once on load
+        setTimeout(reveal, 100);
+    </script>
+<script>
+(function() {
+  const container = document.getElementById('threejs-container-COMMUNITY_SPHERE');
+  if (!container) return;
+  const width = container.clientWidth || window.innerWidth;
+  const height = container.clientHeight || window.innerHeight;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  // Core Connection Sphere
+  const geom = new THREE.IcosahedronGeometry(2, 1);
+  const mat = new THREE.MeshPhongMaterial({
+    color: 0x36A395,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.3
+  });
+  const mesh = new THREE.Mesh(geom, mat);
+  group.add(mesh);
+
+  // Floating "Activity" Particles
+  const particlesGeom = new THREE.BufferGeometry();
+  const particlesCount = 40;
+  const posArray = new Float32Array(particlesCount * 3);
+  for(let i=0; i<particlesCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 6;
+  }
+  particlesGeom.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  const particlesMat = new THREE.PointsMaterial({ size: 0.05, color: 0x36A395 });
+  const particlesMesh = new THREE.Points(particlesGeom, particlesMat);
+  group.add(particlesMesh);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+  const pointLight = new THREE.PointLight(0x36A395, 1);
+  pointLight.position.set(5, 5, 5);
+  scene.add(pointLight);
+
+  camera.position.z = 5;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    group.rotation.y += 0.002;
+    group.rotation.x += 0.001;
+    renderer.render(scene, camera);
+  }
+
+  window.addEventListener('resize', () => {
+    const w = container.clientWidth || window.innerWidth;
+    const h = container.clientHeight || window.innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+
+  animate();
+})();
+</script>
+<script>
+// Core Network Animation
+(function() {
+  const container = document.getElementById('threejs-container-CORE_NETWORK');
+  if (!container) return;
+  const width = container.clientWidth || window.innerWidth;
+  const height = container.clientHeight || window.innerHeight;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  // Central Central Sphere
+  const coreGeom = new THREE.IcosahedronGeometry(1.5, 2);
+  const coreMat = new THREE.MeshPhongMaterial({
+    color: 0x36A395,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.4
+  });
+  const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+  group.add(coreMesh);
+
+  // Orbiting Nodes (Announcements, Timetable, Events, Resources, AI, Community)
+  const nodeColors = [0x36A395, 0x637CFF, 0xD5B269, 0x36A395, 0xFCFCFA, 0x637CFF];
+  const nodes = [];
+  
+  for(let i = 0; i < 6; i++) {
+    const nodePivot = new THREE.Group();
+    const angle = (i / 6) * Math.PI * 2;
+    const distance = 3.5;
+    
+    const nodeGeom = new THREE.SphereGeometry(0.2, 16, 16);
+    const nodeMat = new THREE.MeshPhongMaterial({ color: nodeColors[i], emissive: nodeColors[i], emissiveIntensity: 0.5 });
+    const node = new THREE.Mesh(nodeGeom, nodeMat);
+    
+    node.position.set(Math.cos(angle) * distance, Math.sin(angle) * distance, (Math.random() - 0.5) * 2);
+    nodePivot.add(node);
+    
+    // Connection Path (Curved)
+    const curve = new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(node.position.x * 0.5, node.position.y * 1.2, node.position.z * 0.5),
+      node.position
+    );
+    const points = curve.getPoints(50);
+    const lineGeom = new THREE.BufferGeometry().setFromPoints(points);
+    const lineMat = new THREE.LineBasicMaterial({ color: 0x36A395, transparent: true, opacity: 0.2 });
+    const line = new THREE.Line(lineGeom, lineMat);
+    nodePivot.add(line);
+
+    group.add(nodePivot);
+    nodes.push({ pivot: nodePivot, speed: 0.005 + Math.random() * 0.005 });
+  }
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+  const pointLight = new THREE.PointLight(0x71d8c8, 1.5, 20);
+  pointLight.position.set(5, 5, 5);
+  scene.add(pointLight);
+
+  camera.position.z = 8;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    group.rotation.y += 0.002;
+    nodes.forEach(n => {
+      n.pivot.rotation.z += n.speed;
+    });
+    renderer.render(scene, camera);
+  }
+
+  window.addEventListener('resize', () => {
+    const w = container.clientWidth || window.innerWidth;
+    const h = container.clientHeight || window.innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+
+  animate();
+})();
+</script>
+<script>
+// AI Knowledge Animation
+(function() {
+  const container = document.getElementById('threejs-container-AI_KNOWLEDGE');
+  if (!container) return;
+  const width = container.clientWidth || container.parentElement.clientWidth;
+  const height = container.clientHeight || container.parentElement.clientHeight;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  // AI Core
+  const coreGeom = new THREE.SphereGeometry(1, 32, 32);
+  const coreMat = new THREE.MeshPhongMaterial({
+    color: 0x36A395,
+    emissive: 0x36A395,
+    emissiveIntensity: 0.2,
+    transparent: true,
+    opacity: 0.8
+  });
+  const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+  group.add(coreMesh);
+
+  // Outer Shell
+  const shellGeom = new THREE.IcosahedronGeometry(2.5, 1);
+  const shellMat = new THREE.MeshPhongMaterial({
+    color: 0xFCFCFA,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.1
+  });
+  const shellMesh = new THREE.Mesh(shellGeom, shellMat);
+  group.add(shellMesh);
+
+  // Knowledge Nodes
+  const nodesCount = 20;
+  for(let i=0; i<nodesCount; i++) {
+    const nodeGeom = new THREE.SphereGeometry(0.08, 8, 8);
+    const nodeMat = new THREE.MeshBasicMaterial({ color: 0x36A395 });
+    const node = new THREE.Mesh(nodeGeom, nodeMat);
+    
+    const phi = Math.acos(-1 + (2 * i) / nodesCount);
+    const theta = Math.sqrt(nodesCount * Math.PI) * phi;
+    
+    node.position.setFromSphericalCoords(2.5, phi, theta);
+    group.add(node);
+    
+    // Connection to Core
+    const lineGeom = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), node.position]);
+    const lineMat = new THREE.LineBasicMaterial({ color: 0x36A395, transparent: true, opacity: 0.1 });
+    const line = new THREE.Line(lineGeom, lineMat);
+    group.add(line);
+  }
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+  const pointLight = new THREE.PointLight(0x36A395, 2, 10);
+  pointLight.position.set(2, 2, 2);
+  scene.add(pointLight);
+
+  camera.position.z = 6;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    group.rotation.y += 0.003;
+    group.rotation.x += 0.001;
+    renderer.render(scene, camera);
+  }
+
+  window.addEventListener('resize', () => {
+    const w = container.clientWidth || container.parentElement.clientWidth;
+    const h = container.clientHeight || container.parentElement.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+
+  animate();
+})();
+</script>
+</body></html>
