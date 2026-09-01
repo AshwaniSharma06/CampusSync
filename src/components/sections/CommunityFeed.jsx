@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import CommunitySphereCanvas from '../three/CommunitySphereCanvas';
+import communityBg from '../../assets/community-bg.png';
 
 const INITIAL_POSTS = [
   {
     id: 1,
-    author: 'Coding Club',
-    initials: 'CC',
+    author: 'Technotsav & PCC Club',
+    initials: 'PCC',
     avatarBg: 'bg-primary/20 text-primary',
-    tag: 'Official',
+    tag: 'Official ECA Club',
     time: '2h ago',
     content:
-      "Excited to announce our upcoming Advanced React Workshop! 🚀 Join us this Saturday at the Main Lab. We'll be building a full-stack application from scratch. Don't forget your laptops!",
+      "Excited to announce our upcoming Advanced React & Machine Learning Workshop! 🚀 Join us this Saturday at Barliya Block Lab 204. We'll be building a full-stack AI application from scratch. Don't forget your laptops!",
     likes: 124,
     comments: 32,
     icon: 'code',
@@ -18,24 +19,53 @@ const INITIAL_POSTS = [
   },
   {
     id: 2,
-    author: 'Jane Doe',
-    initials: 'JD',
+    author: 'Priya Sharma',
+    initials: 'PS',
     avatarBg: 'bg-tertiary/20 text-tertiary',
-    tag: 'CS Year 3',
+    tag: 'CS Sem V',
     time: '5h ago',
     content:
-      'Anyone want to form a study group for the upcoming Machine Learning midterms? Looking for 2-3 people to review past papers in the library this weekend. 📚🧠',
-    likes: 15,
+      'Anyone want to form a study group for the upcoming BTU Machine Learning midterms? Looking for 2-3 people to review past papers in the central library this weekend. 📚🧠',
+    likes: 18,
     comments: 8,
+    icon: null,
+    isLiked: false,
+  },
+  {
+    id: 3,
+    author: 'Rohan Verma',
+    initials: 'RV',
+    avatarBg: 'bg-secondary/20 text-secondary',
+    tag: 'ECE Sem III',
+    time: '8h ago',
+    content:
+      'Lost a black Dell laptop charger near Barliya CSE Block Room 402 around 2 PM today. If anyone found it, please hand it over to the SAC office or drop a message here!',
+    likes: 24,
+    comments: 12,
     icon: null,
     isLiked: false,
   },
 ];
 
-export default function CommunityFeed({ onActionNotification }) {
+export default function CommunityFeed({ currentUser, onActionNotification }) {
   const [activeFilter, setActiveFilter] = useState('All Campus');
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [newPostText, setNewPostText] = useState('');
+
+  const postAuthorName = currentUser && currentUser.name ? currentUser.name : 'Unknown User';
+  const postAuthorInitials = currentUser && currentUser.name
+    ? currentUser.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase()
+    : 'UU';
+  const postAuthorTag = currentUser
+    ? currentUser.department
+      ? `${currentUser.department} Student`
+      : 'Verified Student'
+    : 'Guest User';
 
   const handleCreatePost = (e) => {
     e.preventDefault();
@@ -43,10 +73,10 @@ export default function CommunityFeed({ onActionNotification }) {
 
     const newEntry = {
       id: Date.now(),
-      author: 'Alex Morgan',
-      initials: 'AM',
-      avatarBg: 'bg-secondary/20 text-secondary',
-      tag: 'CS Year 2',
+      author: postAuthorName,
+      initials: postAuthorInitials,
+      avatarBg: currentUser ? 'bg-primary/20 text-primary' : 'bg-surface-bright/60 text-on-surface-variant',
+      tag: postAuthorTag,
       time: 'Just now',
       content: newPostText,
       likes: 0,
@@ -57,7 +87,7 @@ export default function CommunityFeed({ onActionNotification }) {
 
     setPosts([newEntry, ...posts]);
     setNewPostText('');
-    onActionNotification('Post published to Campus Feed!');
+    onActionNotification(`Post published as ${postAuthorName}!`);
   };
 
   const handleLike = (id) => {
@@ -76,7 +106,21 @@ export default function CommunityFeed({ onActionNotification }) {
   };
 
   return (
-    <section className="py-section-gap bg-surface relative overflow-hidden" id="community">
+    <section className="py-section-gap bg-background relative overflow-hidden" id="community">
+      {/* Prominent Campus Courtyard Background Image Backdrop */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <img
+          src={communityBg}
+          alt="Campus Courtyard Community Background"
+          className="w-full h-full object-cover object-center opacity-70 scale-105 transition-transform duration-1000"
+          style={{ animation: 'subtleZoom 30s infinite alternate' }}
+        />
+        {/* Transparent gradient vignette for high clarity and crisp text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/40 to-background"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
+      </div>
+
       <div className="absolute top-0 right-0 w-full h-[600px] z-0 opacity-40 pointer-events-none">
         <CommunitySphereCanvas />
       </div>
@@ -154,15 +198,19 @@ export default function CommunityFeed({ onActionNotification }) {
             {/* Post Creator */}
             <div className="glass-card rounded-2xl p-6 border border-primary/20 bg-surface-bright/20">
               <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-full bg-surface-variant overflow-hidden shrink-0 flex items-center justify-center text-primary font-bold font-sans">
-                  AM
+                <div className="w-10 h-10 rounded-full bg-surface-variant border border-outline/20 overflow-hidden shrink-0 flex items-center justify-center text-primary font-bold font-sans text-xs shadow-sm">
+                  {postAuthorInitials}
                 </div>
                 <div className="flex-1">
                   <textarea
                     rows={2}
                     value={newPostText}
                     onChange={(e) => setNewPostText(e.target.value)}
-                    placeholder="Share something with the campus..."
+                    placeholder={
+                      currentUser
+                        ? `Share something with ECA campus, ${currentUser.name.split(' ')[0]}...`
+                        : 'Share something with the campus (Posting as Unknown User)...'
+                    }
                     className="w-full bg-surface/50 rounded-xl px-4 py-3 text-white text-sm font-sans border border-outline/10 placeholder:text-on-surface-variant focus:outline-none focus:border-primary/50 transition-colors resize-none mb-3"
                   />
                   <div className="flex items-center justify-between">
@@ -194,7 +242,10 @@ export default function CommunityFeed({ onActionNotification }) {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-on-surface-variant hidden sm:inline-flex items-center gap-1 font-sans">
-                        <span className="material-symbols-outlined text-[14px]">verified</span> Verified Student
+                        <span className="material-symbols-outlined text-[14px]">
+                          {currentUser ? 'verified' : 'account_circle'}
+                        </span>{' '}
+                        {currentUser ? `Posting as ${postAuthorName}` : 'Posting as Unknown User'}
                       </span>
                       <button
                         onClick={handleCreatePost}

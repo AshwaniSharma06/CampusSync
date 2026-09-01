@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [mode, setMode] = useState('login'); // 'login' or 'signup'
   const [formData, setFormData] = useState({
-    email: 'alex.morgan@campussync.edu',
+    email: 'aarav.sharma@ecajmer.ac.in',
     password: 'password123',
-    fullName: 'Alex Morgan',
-    studentId: 'CS2026-8941',
+    fullName: 'Aarav Sharma',
+    studentId: 'ECA2026-8941',
     department: 'Computer Science',
   });
 
@@ -15,7 +15,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onAuthSuccess({
-      name: formData.fullName || 'Alex Morgan',
+      name: formData.fullName || 'Aarav Sharma',
       email: formData.email,
       studentId: formData.studentId,
       department: formData.department,

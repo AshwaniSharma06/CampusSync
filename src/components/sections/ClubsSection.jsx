@@ -1,4 +1,5 @@
 import React from 'react';
+import clubsBg from '../../assets/clubs-bg.jpg';
 
 const ECA_CLUBS = [
   {
@@ -7,8 +8,7 @@ const ECA_CLUBS = [
     icon: 'code_blocks',
     accentColor: 'text-primary',
     bgBadge: 'bg-primary/20 border-primary/30',
-    bgImg:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBBAMxWMbzO72c92JTA0Z4EQGYTOrcjdibq1M3z2kkSO98DeUoyQBFompqvo4_V-vWjBk6f09Hlo9g1bWYJAHWQXh8bZScqS6YnF8wtfBqufAu7Wp8voitWpgrjRxklE_ZWxWRuPuWdCLwA9q5B2LjRRCYT-p6jjLsbjFi2Z7NgEAq9-zUhVT4qp_uUlMnmAwa4K00I-6ptkLwmMJVxwR2AYgG3a_KEkHypRymHjOzjjPVUbbuxf4B0bA',
+    bgImg: clubsBg,
     description:
       'The premier technical programming and robotics society of Engineering College Ajmer. PCC Club conducts competitive programming sessions, hackathons, and designs autonomous robots for state and national level competitions.',
     focusAreas: ['Competitive Coding', 'Autonomous Robotics', 'Hackathons', 'Web Development'],
@@ -22,8 +22,7 @@ const ECA_CLUBS = [
     icon: 'palette',
     accentColor: 'text-tertiary',
     bgBadge: 'bg-tertiary/20 border-tertiary/30',
-    bgImg:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAY9KRjPh_ddODP3b0LQhe1eNqTfZX0VedMpYIlW_nIkaB1jzD57004QgZrPPpZHlaLB7f_4IThSKJR0volI3DvXB69pj0snzinEFkIdfCv3nk412f__XrF7kYcjMecNqGkP5wy6gOapOBVUiZpv4-8OzfQJ3AMSTrIPM6oZZryntPOZ2uYhxsg5S1b9kRiAdNP_6_-SKzbZAJ_2jMTBrtTE5XVsxdk7hlS04aLdE2_CdKGS9KF7_3vVA',
+    bgImg: clubsBg,
     description:
       'ECA’s apex cultural organization responsible for nurturing student talents in performing arts, music, dance, theatrical acts, photography, and literature. CAS is the lead host of ECA’s annual fest Tarangini.',
     focusAreas: ['Music & Vocal Performance', 'Folk & Contemporary Dance', 'Theater & Skits', 'Fine Arts'],
@@ -38,8 +37,7 @@ const ECA_CLUBS = [
     icon: 'smart_toy',
     accentColor: 'text-secondary',
     bgBadge: 'bg-secondary/20 border-secondary/30',
-    bgImg:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBciqEZTmtAHmcSWfaL3iLbtMGxlj9jwezOOkBI5eJIF4t0Pn4Xfey2dfa7ylYbWDsnRSSsiB2kPGp860jDq5NKB3Xfwvr9a5HYY-nRawWkc-nYomwJTfI543vgMm-fomnhO_died5buq13Pxs42fNt1AbEsXXw81z7Jsml87eZTXxR6KQ67mUGsqgbHq4wJvdvUdobcNJJjBF2V2nZ9r8k_FcAC1bJVfyUXtj-38POiUHbo72rNGuklw',
+    bgImg: clubsBg,
     description:
       'Specialized technical wing under the Department of Computer Science & Engineering. Focuses on Deep Learning, Machine Learning models, Computer Vision, Data Science pipelines, and AI research projects.',
     focusAreas: ['Neural Networks', 'Natural Language Processing', 'Computer Vision', 'Data Analytics'],
@@ -51,8 +49,22 @@ const ECA_CLUBS = [
 
 export default function ClubsSection({ onActionNotification }) {
   return (
-    <section className="py-section-gap bg-surface-container-lowest relative overflow-hidden" id="clubs">
-      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+    <section className="py-section-gap bg-background relative overflow-hidden" id="clubs">
+      {/* Prominent Campus Background Image Backdrop */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <img
+          src={clubsBg}
+          alt="Engineering College Ajmer Campus Backdrop"
+          className="w-full h-full object-cover object-center opacity-75 scale-105 transition-transform duration-1000"
+          style={{ animation: 'subtleZoom 25s infinite alternate' }}
+        />
+        {/* Transparent gradient vignette for high visual clarity and readable text */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/40 to-background"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none"></div>
+      </div>
+
+      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-6">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-3 py-1 rounded-full text-xs font-bold text-primary mb-3 uppercase tracking-wider">

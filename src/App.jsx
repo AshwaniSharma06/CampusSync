@@ -75,7 +75,7 @@ export default function App() {
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}
           />
-          <CommunityFeed onActionNotification={showToast} />
+          <CommunityFeed currentUser={currentUser} onActionNotification={showToast} />
           <ClubsSection onActionNotification={showToast} />
           <EventsSection onActionNotification={showToast} />
           <CuratedForYou onActionNotification={showToast} />

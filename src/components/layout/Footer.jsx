@@ -16,7 +16,7 @@ export default function Footer({ onActionNotification }) {
             <br />
             Badliya Chouraha, N.H.8, Ajmer, Rajasthan 305025
             <br />
-            <span className="text-xs text-primary/80 mt-1 inline-block">Affiliated with BTU &amp; RTU • Approved by AICTE</span>
+            <span className="text-xs text-primary/80 mt-1 inline-block">Affiliated with BTU • Approved by AICTE</span>
           </p>
           <p className="font-sans text-xs text-on-surface-variant/70 mt-1">
             © 2026 Engineering College Ajmer. All rights reserved.

@@ -8,7 +8,7 @@ const ECA_PROMPTS = [
   },
   {
     q: 'Which university is ECA Ajmer affiliated with?',
-    a: 'Engineering College Ajmer is affiliated with Bikaner Technical University (BTU) and Rajasthan Technical University (RTU), approved by AICTE.',
+    a: 'Engineering College Ajmer is affiliated with Bikaner Technical University (BTU), approved by AICTE.',
   },
   {
     q: 'When are Technotsav and Tarangini hosted at ECA?',

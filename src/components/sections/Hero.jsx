@@ -20,7 +20,7 @@ export default function Hero({ onEnter, onExplore }) {
           <div className="inline-flex items-center gap-2 bg-surface-variant/60 backdrop-blur-md border border-outline/20 px-4 py-2 rounded-full w-fit shadow-sm">
             <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#71d8c8] animate-pulse"></span>
             <span className="font-sans font-bold text-primary uppercase tracking-[0.15em] text-[10px] md:text-xs">
-              Engineering College Ajmer • BTU & RTU Affiliated
+              Engineering College Ajmer • BTU Affiliated
             </span>
           </div>
           <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-normal leading-[1.05] tracking-tight drop-shadow-md">
