@@ -1,0 +1,32 @@
+# CampusSync Workspace Rules for Roo Code & Ralph Loop
+
+## 🎓 Project Context
+CampusSync is a smart campus management platform built with React 18, Vite, Tailwind CSS v3, and Three.js. It features a modern, editorial "Cinematic Academic" design aesthetic.
+
+## 🎨 Design System Guidelines (DESIGN.md)
+- **Palette**:
+  - Primary Surface: Midnight Navy (`#04132a`)
+  - Elevated Container: Academic Navy (`#112037` / `#1c2a42`)
+  - Primary Action / Accent: Intelligent Teal (`#71d8c8`)
+  - Achievement / Highlight: Soft Gold (`#e6c277`)
+  - Body Text: Warm Ivory / Light Blue (`#d7e3ff`)
+- **Typography**:
+  - Editorial Headlines: `font-serif` (Instrument Serif)
+  - UI Controls & Body Copy: `font-sans` (Manrope)
+- **Shape & Depth**:
+  - Main Cards / Containers: `rounded-2xl` / `rounded-3xl` with thin 1px glassmorphism border (`border-white/10` or illuminated teal glow).
+  - Subtle micro-animations, smooth hover states, fine background gradients.
+
+## ⚡ Coding & Architecture Standards
+1. **React 18 & Vite**:
+   - Use clean functional components with modern hooks.
+   - Component files belong in `src/components/` structured logically by section or domain.
+2. **Three.js & Canvas**:
+   - WebGL components (e.g. `CommunitySphereCanvas.jsx`) must clean up requestAnimationFrame, dispose of geometries, materials, and textures on unmount.
+3. **Tailwind CSS**:
+   - Utility classes should adhere to design tokens in `tailwind.config.js` and `DESIGN.md`.
+
+## 🔁 Ralph Loop & Agent Execution Protocol
+- **Build Verification**: Run `npm run build` after making structural edits to verify clean compilation.
+- **Root Cause Fixes**: Fix core underlying bugs rather than swallowing errors or masking symptoms.
+- **Completion Criteria**: A task is complete when code builds cleanly without errors and satisfies visual/functional design rules.
