@@ -6,6 +6,16 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   const [aiQuery, setAiQuery] = useState('');
   const [aiResponse, setAiResponse] = useState('');
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [noticeFilter, setNoticeFilter] = useState('All');
+
+  const noticesData = [
+    { id: 1, title: 'End Semester Examination Schedule Fall 2026', type: 'Official', date: 'Sept 1, 2026', bookmarked: true },
+    { id: 2, title: 'Call for Papers: IEEE Student Conference', type: 'Department', date: 'Aug 28, 2026', bookmarked: false },
+    { id: 3, title: 'TechFest 2026: Registration Now Open', type: 'Events', date: 'Aug 25, 2026', bookmarked: false },
+    { id: 4, title: 'Updated Guidelines for Final Year Projects', type: 'Official', date: 'Aug 20, 2026', bookmarked: true },
+  ];
+
   const notifications = [
     { id: 1, title: 'BTU Exam Registration Open', time: '10 mins ago', urgent: true },
     { id: 2, title: 'Physics Lab Report Graded (A)', time: '2 hours ago', urgent: false },
@@ -35,6 +45,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     { id: 'courses', label: 'Courses', icon: 'library_books', badge: '4' },
     { id: 'schedule', label: 'Schedule', icon: 'calendar_today', badge: null },
     { id: 'assignments', label: 'Assignments', icon: 'assignment', badge: '2', badgeColor: 'bg-red-100 text-red-700' },
+    { id: 'notices', label: 'Notices & Resources', icon: 'campaign', badge: 'New', badgeColor: 'bg-amber-100 text-amber-700' },
     { id: 'ai_assistant', label: 'CampusSync AI', icon: 'smart_toy', badge: 'AI', badgeColor: 'bg-teal-100 text-teal-800' },
   ];
 
@@ -556,6 +567,105 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     Submit Notebook
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: NOTICES & RESOURCES TAB */}
+          {activeTab === 'notices' && (
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/90 shadow-sm animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b border-slate-100 gap-4">
+                <div>
+                  <h3 className="text-3xl text-slate-900 font-extrabold tracking-tight">Notices & Academic Resources</h3>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">Official announcements and study materials</p>
+                </div>
+                
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:w-64">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input
+                      type="text"
+                      placeholder="Search notices..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                    />
+                  </div>
+                  <button className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors shrink-0">
+                    <span className="material-symbols-outlined text-sm">filter_list</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-2 mb-6 overflow-x-auto hide-scrollbar pb-2">
+                {['All', 'Official', 'Department', 'Events'].map(filter => (
+                  <button
+                    key={filter}
+                    onClick={() => setNoticeFilter(filter)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors whitespace-nowrap ${
+                      noticeFilter === filter 
+                        ? 'bg-teal-600 text-white shadow-xs' 
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-3">
+                {noticesData
+                  .filter(n => (noticeFilter === 'All' || n.type === noticeFilter) && n.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(notice => (
+                  <div key={notice.id} className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-teal-300 hover:shadow-2xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        notice.type === 'Official' ? 'bg-amber-100 text-amber-700' :
+                        notice.type === 'Department' ? 'bg-indigo-100 text-indigo-700' :
+                        'bg-teal-100 text-teal-700'
+                      }`}>
+                        <span className="material-symbols-outlined text-lg">
+                          {notice.type === 'Official' ? 'campaign' : notice.type === 'Department' ? 'school' : 'event'}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase ${
+                            notice.type === 'Official' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                            notice.type === 'Department' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                            'bg-teal-50 text-teal-700 border border-teal-200'
+                          }`}>
+                            {notice.type}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-medium">{notice.date}</span>
+                        </div>
+                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition-colors">{notice.title}</h4>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                      <button 
+                        onClick={() => onActionNotification(notice.bookmarked ? 'Removed from saved items' : 'Saved to bookmarks')}
+                        className={`p-2 rounded-lg transition-colors ${notice.bookmarked ? 'text-amber-500 bg-amber-50' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'}`}
+                      >
+                        <span className={`material-symbols-outlined text-sm ${notice.bookmarked ? 'fill-current' : ''}`}>bookmark</span>
+                      </button>
+                      <button 
+                        onClick={() => onActionNotification('Downloading notice document...')}
+                        className="p-2 rounded-lg text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-sm">download</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                
+                {noticesData.filter(n => (noticeFilter === 'All' || n.type === noticeFilter) && n.title.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                  <div className="py-12 text-center flex flex-col items-center">
+                    <span className="material-symbols-outlined text-4xl text-slate-300 mb-3">search_off</span>
+                    <h4 className="text-sm font-bold text-slate-700 mb-1">No notices found</h4>
+                    <p className="text-xs text-slate-500">Try adjusting your filters or search query.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
