@@ -2,6 +2,14 @@ import React, { useState } from 'react';
 
 export default function StudentDashboard({ user, onSignOut, onActionNotification }) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
   const [showNotifications, setShowNotifications] = useState(false);
   const [aiQuery, setAiQuery] = useState('');
   const [aiResponse, setAiResponse] = useState('');
@@ -87,6 +95,21 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       grade: 'B+',
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="dashboard-simple-font min-h-screen bg-[#F8FAFC] text-slate-900 pt-20 pb-16 px-4 md:px-8 max-w-[1400px] mx-auto animate-pulse flex flex-col gap-8">
+        <div className="bg-slate-200 h-32 rounded-3xl w-full"></div>
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="w-full lg:w-64 h-96 bg-slate-200 rounded-3xl shrink-0"></div>
+          <div className="flex-1 space-y-6">
+            <div className="h-64 bg-slate-200 rounded-3xl w-full"></div>
+            <div className="h-64 bg-slate-200 rounded-3xl w-full"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-simple-font min-h-screen bg-[#F8FAFC] text-slate-900 font-sans pt-20 pb-16 px-4 md:px-8 max-w-[1400px] mx-auto animate-in fade-in duration-300">
