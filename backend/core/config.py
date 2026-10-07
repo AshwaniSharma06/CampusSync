@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/campussync")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg2://user:password@localhost/campussync")
     
     # Authentication
     SECRET_KEY: str = os.getenv("SECRET_KEY", "super-secret-key-for-dev")
