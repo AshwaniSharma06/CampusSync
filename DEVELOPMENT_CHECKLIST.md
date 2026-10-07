@@ -67,16 +67,16 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Update the React app to send the JWT in the Authorization header.
 
 ## 7. Build the core APIs
-- [ ] Student profile API.
-- [ ] Dashboard summary API.
-- [ ] Courses API.
-- [ ] Notices and resources APIs.
-- [ ] Events and clubs APIs.
-- [ ] Assignments API.
-- [ ] Saved-items API.
-- [ ] Community-post API.
-- [ ] Notifications API.
-- [ ] Support only the operations required by the current student interface.
+- [x] Student profile API.
+- [x] Dashboard summary API.
+- [x] Courses API.
+- [x] Notices and resources APIs.
+- [x] Events and clubs APIs.
+- [x] Assignments API.
+- [x] Saved-items API.
+- [x] Community-post API.
+- [x] Notifications API.
+- [x] Support only the operations required by the current student interface.
 
 ## 8. Build the notice and resource collection system
 - [ ] Identify official BTU and college information sources.
