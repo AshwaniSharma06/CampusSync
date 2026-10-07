@@ -47,12 +47,12 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [ ] Test APIs through FastAPI Swagger documentation.
 
 ## 5. Design the PostgreSQL database
-- [ ] Create tables for users and student profiles.
-- [ ] Create tables for courses, notices, academic resources, events, and clubs.
-- [ ] Create tables for assignments, deadlines, saved items, and community posts.
-- [ ] Create tables for notifications, chat sessions, chat messages, and ingested documents.
+- [x] Create tables for users and student profiles.
+- [x] Create tables for courses, notices, academic resources, events, and clubs.
+- [x] Create tables for assignments, deadlines, saved items, and community posts.
+- [x] Create tables for notifications, chat sessions, chat messages, and ingested documents.
 - [ ] Create an ER diagram.
-- [ ] Add primary keys, foreign keys, timestamps, and indexes.
+- [x] Add primary keys, foreign keys, timestamps, and indexes.
 - [ ] Insert realistic demonstration data.
 - [ ] Add database migrations.
 
