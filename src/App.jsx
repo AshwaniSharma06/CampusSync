@@ -7,6 +7,7 @@ import AiWidget from './components/ui/AiWidget';
 import AuthModal from './components/ui/AuthModal';
 import StudentDashboard from './components/portal/StudentDashboard';
 import LandingPage from './pages/LandingPage';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
 export default function App() {
   const [toastMessage, setToastMessage] = useState('');
@@ -56,7 +57,7 @@ export default function App() {
         <Route 
           path="/dashboard" 
           element={
-            currentUser ? (
+            <ProtectedRoute user={currentUser}>
               <main>
                 <div className="bg-surface-container border-b border-outline/10 pt-20 px-margin-mobile md:px-margin-desktop text-center py-2">
                   <button
@@ -72,9 +73,7 @@ export default function App() {
                   onActionNotification={showToast}
                 />
               </main>
-            ) : (
-              <Navigate to="/" replace />
-            )
+            </ProtectedRoute>
           } 
         />
         <Route path="*" element={<Navigate to="/" replace />} />
