@@ -17,8 +17,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
   const [searchQuery, setSearchQuery] = useState('');
   const [noticeFilter, setNoticeFilter] = useState('All');
-
-
+  const [noticeSortOrder, setNoticeSortOrder] = useState('newest');
 
   const handleAiPromptClick = (promptText) => {
     setAiQuery(promptText);
@@ -556,22 +555,27 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   <p className="text-xs text-slate-500 mt-1 font-medium">Official announcements and study materials</p>
                 </div>
                 
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <div className="relative flex-1 sm:w-64">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
-                    <input
-                      type="text"
-                      placeholder="Search notices..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
-                    />
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:w-64">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                      <input
+                        type="text"
+                        placeholder="Search notices..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                      />
+                    </div>
+                    <select
+                      value={noticeSortOrder}
+                      onChange={(e) => setNoticeSortOrder(e.target.value)}
+                      className="bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-slate-600 text-xs focus:outline-none focus:border-teal-400"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                    </select>
                   </div>
-                  <button className="bg-slate-50 border border-slate-200 p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors shrink-0">
-                    <span className="material-symbols-outlined text-sm">filter_list</span>
-                  </button>
                 </div>
-              </div>
 
               <div className="flex gap-2 mb-6 overflow-x-auto hide-scrollbar pb-2">
                 {['All', 'Official', 'Department', 'Events'].map(filter => (
@@ -592,6 +596,12 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
               <div className="space-y-3">
                 {noticesData
                   .filter(n => (noticeFilter === 'All' || n.type === noticeFilter) && n.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .sort((a, b) => {
+                    // Very simple string comparison for mock dates. Real dates should parse correctly.
+                    if (noticeSortOrder === 'newest') return -1;
+                    if (noticeSortOrder === 'oldest') return 1;
+                    return 0;
+                  })
                   .map(notice => (
                   <div key={notice.id} className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-teal-300 hover:shadow-2xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
                     <div className="flex items-start gap-4">
