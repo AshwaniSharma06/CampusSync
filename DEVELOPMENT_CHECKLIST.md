@@ -38,12 +38,12 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Recommended folders: components, pages, layouts, services, hooks, context, data, assets, and utils.
 
 ## 4. Set up the FastAPI backend
-- [ ] Create a separate backend folder.
-- [ ] Install FastAPI, Uvicorn, SQLAlchemy, Pydantic, and required packages.
-- [ ] Add environment-variable configuration.
-- [ ] Configure CORS for the React application.
-- [ ] Create a health-check endpoint.
-- [ ] Organize routes, models, schemas, services, and database configuration.
+- [x] Create a separate backend folder.
+- [x] Install FastAPI, Uvicorn, SQLAlchemy, Pydantic, and required packages.
+- [x] Add environment-variable configuration.
+- [x] Configure CORS for the React application.
+- [x] Create a health-check endpoint.
+- [x] Organize routes, models, schemas, services, and database configuration.
 - [ ] Test APIs through FastAPI Swagger documentation.
 
 ## 5. Design the PostgreSQL database
