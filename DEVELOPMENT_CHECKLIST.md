@@ -58,12 +58,13 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 
 ## 6. Implement authentication
 - [x] Use Firebase Authentication for identity and PostgreSQL for student profile information.
-- [ ] Implement student registration, email/password login, logout, and password reset.
-- [ ] Maintain the login session after page refresh.
+- [x] Implement student registration, email/password login, logout, and password reset.
+- [x] Maintain the login session after page refresh.
 - [x] Protect student dashboard routes.
 - [x] Verify Firebase authentication tokens in FastAPI.
 - [ ] Implement student profile creation and editing.
-- [ ] Add input validation and readable authentication errors.
+- [x] Add input validation and readable authentication errors.
+- [x] Update the React app to send the JWT in the Authorization header.
 
 ## 7. Build the core APIs
 - [ ] Student profile API.

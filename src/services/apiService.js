@@ -8,6 +8,26 @@ import { noticesData, notifications, enrolledCourses } from '../data/mockData';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('campussync_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
+export const apiClient = async (endpoint, options = {}) => {
+    const url = `http://localhost:8000/api/v1${endpoint}`;
+    const headers = {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+        ...options.headers,
+    };
+    
+    const response = await fetch(url, { ...options, headers });
+    if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+    }
+    return response.json();
+};
+
 export const apiService = {
   // Student Profile
   getStudentProfile: async () => {
