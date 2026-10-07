@@ -57,11 +57,11 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Add database migrations.
 
 ## 6. Implement authentication
-- [ ] Use Firebase Authentication for identity and PostgreSQL for student profile information.
+- [x] Use Firebase Authentication for identity and PostgreSQL for student profile information.
 - [ ] Implement student registration, email/password login, logout, and password reset.
 - [ ] Maintain the login session after page refresh.
-- [ ] Protect student dashboard routes.
-- [ ] Verify Firebase authentication tokens in FastAPI.
+- [x] Protect student dashboard routes.
+- [x] Verify Firebase authentication tokens in FastAPI.
 - [ ] Implement student profile creation and editing.
 - [ ] Add input validation and readable authentication errors.
 

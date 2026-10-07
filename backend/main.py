@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from backend.core.config import settings
+from backend.api.v1 import api_router
 
 app = FastAPI(
-    title="CampusSync API",
+    title=settings.PROJECT_NAME,
     description="Backend API for CampusSync Student Portal",
-    version="1.0.0"
+    version=settings.VERSION
 )
 
 # Configure CORS for the React application
@@ -35,6 +37,8 @@ async def health_check():
         status="ok",
         message="CampusSync FastAPI backend is operational."
     )
+
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
     import uvicorn
