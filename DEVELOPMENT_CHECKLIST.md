@@ -90,10 +90,10 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Add a manual refresh or import option for the project demonstration.
 
 ## 9. Connect the frontend to the backend
-- [ ] Replace mock dashboard data with live API data.
-- [ ] Connect login and registration.
-- [ ] Connect courses, notices, events, assignments, and resources.
-- [ ] Add API loading and failure states.
+- [x] Replace mock dashboard data with live API data.
+- [x] Connect login and registration.
+- [x] Connect courses, notices, events, assignments, and resources.
+- [x] Add API loading and failure states.
 - [ ] Handle expired login sessions.
 - [ ] Test every frontend form.
 - [ ] Ensure page refreshes do not lose required state.

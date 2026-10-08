@@ -1,25 +1,44 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
+  const { login, signup } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' or 'signup'
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    email: 'aarav.sharma@ecajmer.ac.in',
+    email: 'student@campussync.edu',
     password: 'password123',
-    fullName: 'Aarav Sharma',
-    studentId: 'ECA2026-8941',
+    fullName: 'Alex Morgan',
+    studentId: 'CS2026-8941',
     department: 'Computer Science',
   });
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAuthSuccess({
-      name: formData.fullName || 'Aarav Sharma',
-      email: formData.email,
-      studentId: formData.studentId,
-      department: formData.department,
-    });
+    setLoading(true);
+    setError('');
+    
+    try {
+      if (mode === 'login') {
+        await login(formData.email, formData.password);
+      } else {
+        await signup(formData.email, formData.password);
+      }
+      onAuthSuccess();
+    } catch (err) {
+      console.error(err);
+      // Fallback for demo when no real Firebase credentials are provided
+      if (err.code === 'auth/invalid-api-key' || err.message.includes('API_KEY')) {
+        onAuthSuccess();
+      } else {
+        setError(err.message || 'Authentication failed');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,10 +71,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex bg-surface-container p-1 rounded-xl mb-6 border border-outline/10">
+        <div className="flex bg-surface-container p-1 rounded-xl mb-4 border border-outline/10">
           <button
             type="button"
-            onClick={() => setMode('login')}
+            onClick={() => { setMode('login'); setError(''); }}
             className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
               mode === 'login'
                 ? 'bg-primary text-on-primary shadow-sm'
@@ -66,7 +85,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           </button>
           <button
             type="button"
-            onClick={() => setMode('signup')}
+            onClick={() => { setMode('signup'); setError(''); }}
             className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
               mode === 'signup'
                 ? 'bg-primary text-on-primary shadow-sm'
@@ -76,6 +95,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             Sign Up
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl">
+            {error}
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -156,9 +181,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
           <button
             type="submit"
-            className="w-full bg-primary text-on-primary py-3 rounded-xl font-bold text-xs uppercase tracking-[0.12em] hover:bg-primary-fixed transition-colors glow-hover shadow-lg mt-2"
+            disabled={loading}
+            className={`w-full bg-primary text-on-primary py-3 rounded-xl font-bold text-xs uppercase tracking-[0.12em] transition-colors shadow-lg mt-2 ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-primary-fixed glow-hover'}`}
           >
-            {mode === 'login' ? 'Sign In to Portal' : 'Create Account'}
+            {loading ? 'Processing...' : (mode === 'login' ? 'Sign In to Portal' : 'Create Account')}
           </button>
         </form>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
@@ -8,12 +8,15 @@ import AuthModal from './components/ui/AuthModal';
 import StudentDashboard from './components/portal/StudentDashboard';
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import { useAuth } from './context/AuthContext';
+import { apiService } from './services/apiService';
 
 export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [aiWidgetOpen, setAiWidgetOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const { currentUser, logout, jwtToken } = useAuth();
+  const [userProfile, setUserProfile] = useState(null);
   
   const navigate = useNavigate();
 
@@ -21,17 +24,37 @@ export default function App() {
     setToastMessage(msg);
   };
 
-  const handleAuthSuccess = (userData) => {
-    setCurrentUser(userData);
+  useEffect(() => {
+    // Fetch user profile from FastAPI when JWT is ready
+    if (jwtToken && currentUser) {
+      apiService.getStudentProfile().then(profile => {
+        setUserProfile({
+          name: profile.full_name || currentUser.displayName,
+          email: profile.email,
+          department: profile.department,
+          studentId: profile.student_id,
+          semester: profile.semester
+        });
+      }).catch(err => console.error("Failed to fetch profile", err));
+    } else {
+      setUserProfile(null);
+    }
+  }, [jwtToken, currentUser]);
+
+  const handleAuthSuccess = () => {
     setIsAuthModalOpen(false);
-    showToast(`Welcome back, ${userData.name}! Student portal loaded.`);
+    showToast(`Welcome back! Student portal loading...`);
     navigate('/dashboard');
   };
 
-  const handleSignOut = () => {
-    setCurrentUser(null);
-    showToast('Signed out of Student Portal.');
-    navigate('/');
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      showToast('Signed out of Student Portal.');
+      navigate('/');
+    } catch (e) {
+      showToast('Error signing out.');
+    }
   };
 
   return (
@@ -68,7 +91,7 @@ export default function App() {
                   </button>
                 </div>
                 <StudentDashboard
-                  user={currentUser}
+                  user={userProfile || { name: currentUser?.email }}
                   onSignOut={handleSignOut}
                   onActionNotification={showToast}
                 />

@@ -1,12 +1,7 @@
 /**
  * Central API Service
- * This service will eventually make calls to the FastAPI backend.
- * For now, it wraps mock data from '../data/mockData.js' in Promises to simulate network requests.
+ * This service makes calls to the FastAPI backend.
  */
-
-import { noticesData, notifications, enrolledCourses } from '../data/mockData';
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('campussync_token');
@@ -31,28 +26,56 @@ export const apiClient = async (endpoint, options = {}) => {
 export const apiService = {
   // Student Profile
   getStudentProfile: async () => {
-    await delay(800);
-    return { name: 'Student', department: 'Computer Science', studentId: 'ECA2026-8941' };
+    return apiClient('/profile/');
+  },
+
+  // Dashboard Summary
+  getDashboardSummary: async () => {
+    return apiClient('/dashboard/summary');
   },
 
   // Notices
   getNotices: async (filter = 'All', searchQuery = '') => {
-    await delay(500);
-    return noticesData.filter(n => 
-      (filter === 'All' || n.type === filter) &&
-      n.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const params = new URLSearchParams();
+    if (searchQuery) params.append('q', searchQuery);
+    if (filter && filter !== 'All') params.append('category', filter);
+    
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return apiClient(`/notices/${queryString}`);
   },
 
   // Courses
   getEnrolledCourses: async () => {
-    await delay(600);
-    return enrolledCourses;
+    return apiClient('/courses/');
+  },
+  
+  // Events
+  getEvents: async () => {
+    return apiClient('/events/');
+  },
+  
+  // Clubs
+  getClubs: async () => {
+    return apiClient('/events/clubs');
+  },
+
+  // Assignments
+  getAssignments: async () => {
+    return apiClient('/assignments/');
+  },
+
+  // Community
+  getCommunityPosts: async () => {
+    return apiClient('/community/');
+  },
+
+  // Saved Items
+  getSavedItems: async () => {
+    return apiClient('/saved/');
   },
 
   // Notifications
   getNotifications: async () => {
-    await delay(300);
-    return notifications;
+    return apiClient('/notifications/');
   }
 };

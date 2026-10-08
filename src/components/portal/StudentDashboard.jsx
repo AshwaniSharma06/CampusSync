@@ -1,15 +1,35 @@
-import React, { useState } from 'react';
-import { noticesData, notifications, enrolledCourses } from '../../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { apiService } from '../../services/apiService';
 
 export default function StudentDashboard({ user, onSignOut, onActionNotification }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(true);
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [notices, setNotices] = useState([]);
+  const [notificationsData, setNotificationsData] = useState([]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [summary, coursesData, noticesData, notifs] = await Promise.all([
+          apiService.getDashboardSummary(),
+          apiService.getEnrolledCourses(),
+          apiService.getNotices(),
+          apiService.getNotifications()
+        ]);
+        setDashboardData(summary);
+        setCourses(coursesData);
+        setNotices(noticesData);
+        setNotificationsData(notifs);
+      } catch (err) {
+        console.error("Failed to load dashboard data", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
   }, []);
   const [showNotifications, setShowNotifications] = useState(false);
   const [aiQuery, setAiQuery] = useState('');
@@ -125,16 +145,19 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">3 Unread</span>
                   </div>
                   <div className="space-y-2">
-                    {notifications.map((n) => (
+                    {notificationsData.map((n) => (
                       <div
                         key={n.id}
                         onClick={() => onActionNotification(`Opening notification: ${n.title}`)}
                         className="p-2.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer border border-slate-100"
                       >
                         <p className="text-xs font-semibold text-slate-800">{n.title}</p>
-                        <span className="text-[10px] text-slate-500 mt-0.5 block">{n.time}</span>
+                        <span className="text-[10px] text-slate-500 mt-0.5 block">{new Date(n.created_at).toLocaleString()}</span>
                       </div>
                     ))}
+                    {notificationsData.length === 0 && (
+                      <div className="text-xs text-center py-4 text-slate-500">No new notifications</div>
+                    )}
                   </div>
                 </div>
               )}
@@ -426,18 +449,18 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {enrolledCourses.map((c) => (
-                  <div key={c.code} className="bg-slate-50/70 rounded-2xl p-6 border border-slate-200 hover:border-teal-400 transition-all shadow-2xs">
+                {courses.map((c) => (
+                  <div key={c.id || c.code} className="bg-slate-50/70 rounded-2xl p-6 border border-slate-200 hover:border-teal-400 transition-all shadow-2xs">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <span className="text-xs font-bold px-3 py-1 rounded-md bg-teal-100 text-teal-800 border border-teal-200">
                           {c.code}
                         </span>
                         <h4 className="text-xl text-slate-900 font-bold mt-2">{c.title}</h4>
-                        <p className="text-xs text-slate-500 mt-1 font-medium">{c.instructor} • Department of CSE</p>
+                        <p className="text-xs text-slate-500 mt-1 font-medium">{c.instructor} • {c.department}</p>
                       </div>
                       <span className="text-sm font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-lg border border-amber-300">
-                        Grade {c.grade}
+                        Grade {c.grade || 'N/A'}
                       </span>
                     </div>
 
@@ -453,10 +476,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     <div className="pt-3 border-t border-slate-200">
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-slate-500 font-medium">Course Completion</span>
-                        <span className="font-bold text-teal-700">{c.progress}</span>
+                        <span className="font-bold text-teal-700">{c.progress || '50%'}</span>
                       </div>
                       <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-teal-600" style={{ width: c.progress }}></div>
+                        <div className="h-full bg-teal-600" style={{ width: c.progress || '50%' }}></div>
                       </div>
                     </div>
                   </div>
@@ -594,36 +617,37 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
               </div>
 
               <div className="space-y-3">
-                {noticesData
-                  .filter(n => (noticeFilter === 'All' || n.type === noticeFilter) && n.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                {notices
+                  .filter(n => (noticeFilter === 'All' || n.notice_type === noticeFilter) && n.title.toLowerCase().includes(searchQuery.toLowerCase()))
                   .sort((a, b) => {
-                    // Very simple string comparison for mock dates. Real dates should parse correctly.
-                    if (noticeSortOrder === 'newest') return -1;
-                    if (noticeSortOrder === 'oldest') return 1;
+                    const dateA = new Date(a.published_date || a.date).getTime();
+                    const dateB = new Date(b.published_date || b.date).getTime();
+                    if (noticeSortOrder === 'newest') return dateB - dateA;
+                    if (noticeSortOrder === 'oldest') return dateA - dateB;
                     return 0;
                   })
                   .map(notice => (
                   <div key={notice.id} className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-teal-300 hover:shadow-2xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
                     <div className="flex items-start gap-4">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                        notice.type === 'Official' ? 'bg-amber-100 text-amber-700' :
-                        notice.type === 'Department' ? 'bg-indigo-100 text-indigo-700' :
+                        notice.notice_type === 'Official' ? 'bg-amber-100 text-amber-700' :
+                        notice.notice_type === 'Department' ? 'bg-indigo-100 text-indigo-700' :
                         'bg-teal-100 text-teal-700'
                       }`}>
                         <span className="material-symbols-outlined text-lg">
-                          {notice.type === 'Official' ? 'campaign' : notice.type === 'Department' ? 'school' : 'event'}
+                          {notice.notice_type === 'Official' ? 'campaign' : notice.notice_type === 'Department' ? 'school' : 'event'}
                         </span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase ${
-                            notice.type === 'Official' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            notice.type === 'Department' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                            notice.notice_type === 'Official' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                            notice.notice_type === 'Department' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
                             'bg-teal-50 text-teal-700 border border-teal-200'
                           }`}>
-                            {notice.type}
+                            {notice.notice_type}
                           </span>
-                          <span className="text-[10px] text-slate-500 font-medium">{notice.date}</span>
+                          <span className="text-[10px] text-slate-500 font-medium">{notice.published_date ? new Date(notice.published_date).toLocaleDateString() : notice.date}</span>
                         </div>
                         <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700 transition-colors">{notice.title}</h4>
                       </div>
