@@ -10,6 +10,7 @@ from backend.api.v1.assignments import router as assignments_router
 from backend.api.v1.saved import router as saved_router
 from backend.api.v1.community import router as community_router
 from backend.api.v1.notifications import router as notifications_router
+from backend.api.v1.scraper import router as scraper_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
@@ -22,3 +23,4 @@ api_router.include_router(assignments_router, prefix="/assignments", tags=["assi
 api_router.include_router(saved_router, prefix="/saved", tags=["saved"])
 api_router.include_router(community_router, prefix="/community", tags=["community"])
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
+api_router.include_router(scraper_router, prefix="/scraper", tags=["scraper"])

@@ -79,15 +79,15 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Support only the operations required by the current student interface.
 
 ## 8. Build the notice and resource collection system
-- [ ] Identify official BTU and college information sources.
-- [ ] Scrape simple pages using BeautifulSoup.
-- [ ] Use Playwright only where JavaScript rendering is required.
-- [ ] Extract text from uploaded or downloaded PDFs.
-- [ ] Save the title, date, category, source URL, content, and document type.
-- [ ] Prevent duplicate notices.
-- [ ] Add search and filtering.
-- [ ] Display the original source link for verification.
-- [ ] Add a manual refresh or import option for the project demonstration.
+- [x] Identify official BTU and college information sources.
+- [x] Scrape simple pages using BeautifulSoup.
+- [x] Use Playwright only where JavaScript rendering is required.
+- [x] Extract text from uploaded or downloaded PDFs.
+- [x] Save the title, date, category, source URL, content, and document type.
+- [x] Prevent duplicate notices.
+- [x] Add search and filtering.
+- [x] Display the original source link for verification.
+- [x] Add a manual refresh or import option for the project demonstration.
 
 ## 9. Connect the frontend to the backend
 - [ ] Replace mock dashboard data with live API data.
