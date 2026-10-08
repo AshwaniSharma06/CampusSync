@@ -77,5 +77,13 @@ export const apiService = {
   // Notifications
   getNotifications: async () => {
     return apiClient('/notifications/');
+  },
+  
+  // AI RAG Chatbot
+  chatWithAI: async (query) => {
+    return apiClient('/rag/chat', {
+      method: 'POST',
+      body: JSON.stringify({ query })
+    });
   }
 };

@@ -99,16 +99,16 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Ensure page refreshes do not lose required state.
 
 ## 10. Build the CampusSync RAG system
-- [ ] Do not train a large language model from scratch.
-- [ ] Clean the extracted notice and resource text.
-- [ ] Divide documents into useful chunks.
-- [ ] Generate embeddings and store them in one vector database: ChromaDB.
-- [ ] Retrieve the most relevant chunks for each question.
-- [ ] Send the retrieved context and question to Gemini.
-- [ ] Return answers with document titles and original source links.
-- [ ] Add conversation history and suggested questions.
-- [ ] Prevent the chatbot from inventing unsupported answers.
-- [ ] Show a clear no-information response when evidence is missing.
+- [x] Do not train a large language model from scratch.
+- [x] Clean the extracted notice and resource text.
+- [x] Divide documents into useful chunks.
+- [x] Generate embeddings and store them in one vector database: ChromaDB.
+- [x] Retrieve the most relevant chunks for each question.
+- [x] Send the retrieved context and question to Gemini.
+- [x] Return answers with document titles and original source links.
+- [x] Add conversation history and suggested questions.
+- [x] Prevent the chatbot from inventing unsupported answers.
+- [x] Show a clear no-information response when evidence is missing.
 
 ## 11. Add personalization and alerts
 - [ ] Start with simple rule-based logic instead of complex machine learning.

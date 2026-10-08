@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from backend.models.academic import Notice, NoticeType
+from backend.services.rag_service import index_document
 
 # Mock source URLs for demonstration purposes
 SOURCES = [
@@ -58,6 +59,15 @@ def scrape_btu_notices(db: Session):
                 published_date=item["published_date"]
             )
             db.add(new_notice)
+            
+            # Index into RAG vector database
+            index_document(
+                doc_id=item["source_url"],
+                title=item["title"],
+                text=item["content"],
+                source_url=item["source_url"]
+            )
+            
             scraped_count += 1
             
     if scraped_count > 0:

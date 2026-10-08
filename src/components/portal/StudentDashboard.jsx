@@ -39,22 +39,24 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   const [noticeFilter, setNoticeFilter] = useState('All');
   const [noticeSortOrder, setNoticeSortOrder] = useState('newest');
 
-  const handleAiPromptClick = (promptText) => {
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleAiPromptClick = async (promptText) => {
     setAiQuery(promptText);
-    if (promptText.includes('focus')) {
-      setAiResponse(
-        '🎯 **Today\'s Priority Focus:** 1) Prepare for Advanced Physics Lab at 10:00 AM in Science Bldg Room 402. 2) Review CS 401 Database Systems Assignment before Friday.'
-      );
-    } else if (promptText.includes('deadlines') || promptText.includes('Summarize')) {
-      setAiResponse(
-        '📅 **Upcoming Key Deadlines:** Oct 18 - CS 401 Midterm Exam (10:00 AM) • Oct 22 - CS 450 ML Exam (02:00 PM) • 2 lab reports due this week.'
-      );
-    } else {
-      setAiResponse(
-        '📊 **Attendance & BTU Status:** You are currently at 94.2% attendance (47/50 classes). You are fully eligible for BTU End-Sem Examinations!'
-      );
-    }
+    setAiLoading(true);
+    setAiResponse('');
     onActionNotification(`AI Copilot: Processing "${promptText}"`);
+    
+    try {
+      const response = await apiService.chatWithAI(promptText);
+      setAiResponse(response.answer);
+      // In a more complete UI, we could also display response.sources
+    } catch (err) {
+      console.error(err);
+      setAiResponse("⚠️ Failed to reach the CampusSync AI service. Please ensure the backend is running.");
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const navItems = [
@@ -382,12 +384,20 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   </div>
 
                   {/* AI Output Display Box */}
-                  {aiResponse && (
+                  {(aiLoading || aiResponse) && (
                     <div className="p-4 rounded-2xl bg-slate-900 text-slate-100 text-xs leading-relaxed animate-in fade-in duration-200 shadow-md">
                       <div className="flex items-center gap-1.5 text-teal-400 font-bold text-[11px] mb-1.5">
-                        <span className="material-symbols-outlined text-sm">smart_toy</span> AI Response:
+                        <span className="material-symbols-outlined text-sm">smart_toy</span> {aiLoading ? 'AI is thinking...' : 'AI Response:'}
                       </div>
-                      {aiResponse}
+                      {aiLoading ? (
+                        <div className="flex gap-1 mt-2">
+                           <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce"></div>
+                           <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                           <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                      ) : (
+                        <div className="whitespace-pre-wrap">{aiResponse}</div>
+                      )}
                     </div>
                   )}
                 </div>
