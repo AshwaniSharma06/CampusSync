@@ -94,9 +94,9 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Connect login and registration.
 - [x] Connect courses, notices, events, assignments, and resources.
 - [x] Add API loading and failure states.
-- [ ] Handle expired login sessions.
-- [ ] Test every frontend form.
-- [ ] Ensure page refreshes do not lose required state.
+- [x] Handle expired login sessions.
+- [x] Test every frontend form.
+- [x] Ensure page refreshes do not lose required state.
 
 ## 10. Build the CampusSync RAG system
 - [ ] Do not train a large language model from scratch.
