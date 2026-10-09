@@ -177,3 +177,5 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - Multiple vector databases.
 - Real-time chat and video calling.
 - Payment processing or attendance hardware integration.
+ 
+ 
