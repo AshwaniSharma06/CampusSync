@@ -381,6 +381,13 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       <span>📊 "Calculate required attendance status"</span>
                       <span className="material-symbols-outlined text-xs text-teal-600 group-hover:translate-x-1 transition-transform">chevron_right</span>
                     </button>
+                    <button
+                      onClick={() => handleAiPromptClick('What are the upcoming events on campus?')}
+                      className="w-full text-left p-3 rounded-xl bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-xs text-slate-800 transition-all flex items-center justify-between font-semibold group shadow-2xs"
+                    >
+                      <span>🎉 "What are the upcoming events on campus?"</span>
+                      <span className="material-symbols-outlined text-xs text-teal-600 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                    </button>
                   </div>
 
                   {/* AI Output Display Box */}
