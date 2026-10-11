@@ -30,3 +30,4 @@ CampusSync is a smart campus management platform built with React 18, Vite, Tail
 - **Build Verification**: Run `npm run build` after making structural edits to verify clean compilation.
 - **Root Cause Fixes**: Fix core underlying bugs rather than swallowing errors or masking symptoms.
 - **Completion Criteria**: A task is complete when code builds cleanly without errors and satisfies visual/functional design rules.
+- **Git Commit & Push Protocol**: Always commit with clear conventional messages and immediately `git push` after every change/feature step to maintain active contribution history.
