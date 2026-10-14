@@ -1,167 +1,123 @@
-# 🎓 CampusSync
+# 🎓 CampusSync — Intelligent Campus Management Platform
 
-**CampusSync** is a smart campus management platform designed to bring important academic information, notices, events, resources, and student services together in one place.
+[![Frontend Build](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![Styling](https://img.shields.io/badge/CSS-Tailwind%20v3-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Vector Database](https://img.shields.io/badge/VectorDB-ChromaDB-FF6F00)](https://www.trychroma.com/)
+[![LLM](https://img.shields.io/badge/AI-Google%20Gemini%20Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-The goal is to make it easier for students to access relevant campus information without searching across multiple websites, groups, and portals.
-
-## 🚀 Features
-
-* 🔐 User Login & Authentication
-* 🏠 Student Dashboard
-* 📢 Notices & Announcements
-* 📅 College Events
-* 📚 Academic Information
-* 🔗 Important Resources & Links
-* 🔍 Search and Filter Information
-* 🤖 Smart Information Collection & Processing
-* 📱 Responsive Web Interface
-* 👤 Student Profile
-
-## 🛠️ Tech Stack
-
-### Frontend
-
-* React.js
-* JavaScript
-* HTML5
-* CSS3
-
-### Backend
-
-* Node.js
-* Express.js
-* REST APIs
-
-### Database
-
-* MongoDB / Firebase
-
-### Other Tools
-
-* Git & GitHub
-* VS Code
-* Postman
-* Vercel
-
-## 📁 Project Structure
-
-```text
-CampusSync/
-│
-├── frontend/
-│   ├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-│
-├── backend/
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
-│   └── middleware/
-│
-├── docs/
-│
-├── .gitignore
-├── README.md
-└── package.json
-```
-
-## ⚙️ Installation
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/USERNAME/CampusSync.git
-```
-
-### 2. Open the project
-
-```bash
-cd CampusSync
-```
-
-### 3. Install dependencies
-
-```bash
-npm install
-```
-
-### 4. Start the development server
-
-```bash
-npm run dev
-```
-
-## 🌿 Branching Strategy
-
-Team members should work on separate feature branches instead of directly modifying the `main` branch.
-
-Example:
-
-```text
-main
-├── feature/frontend
-├── feature/backend
-├── feature/database
-└── feature/ai-integration
-```
-
-Create a branch:
-
-```bash
-git checkout -b feature/your-feature
-```
-
-Push your changes:
-
-```bash
-git add .
-git commit -m "Add feature description"
-git push origin feature/your-feature
-```
-
-Then create a **Pull Request** on GitHub to merge the changes into `main`.
-
-## 👥 Team Workflow
-
-1. Pull the latest code from `main`.
-2. Create or switch to your feature branch.
-3. Develop the assigned feature.
-4. Test your changes locally.
-5. Commit your changes with a clear message.
-6. Push the branch to GitHub.
-7. Create a Pull Request.
-8. Get the code reviewed by another team member.
-9. Merge the Pull Request into `main`.
-
-## 🎯 Project Objective
-
-CampusSync aims to provide students with a centralized and easy-to-use platform for accessing campus-related information and services.
-
-The system is designed to reduce information fragmentation and improve communication between students and the institution.
-
-## 🔮 Future Enhancements
-
-* AI-powered information extraction
-* Automatic college website data collection
-* Personalized student notifications
-* Smart academic recommendations
-* Mobile application
-* Admin dashboard
-* Placement and internship updates
-* AI chatbot for campus-related queries
-
-## 🤝 Contributing
-
-This project is being developed collaboratively by a four-member team.
-
-Please create a separate branch for your feature and submit a Pull Request before merging any changes into `main`.
-
-## 📄 Project Type
-
-**Final Year B.Tech Computer Science Engineering Project**
+**CampusSync** is an intelligent, unified campus command center engineered for university students. Featuring an editorial **"Cinematic Academic"** visual design, CampusSync brings together official university notices, department circulars, upcoming assignment deadlines, student club communities, and a context-grounded **Gemini RAG Copilot**.
 
 ---
 
-⭐ If you find CampusSync useful, consider giving the repository a star!
+## 🌟 Key Features
+
+* 🏛️ **Student Command Center**: Real-time overview of semester progress, cumulative attendance, pending assignments, and enrolled courses.
+* 🤖 **CampusSync AI Copilot (RAG)**: Grounded question answering powered by ChromaDB vector search and Google Gemini Flash with verified citations.
+* 🎯 **Rule-Based Personalization**: Dynamic "Curated for You" engine recommending department-specific circulars, workshops, and hackathons based on branch, semester, and interests.
+* 📢 **Verified Notice Ingestion**: Web scrapers (BeautifulSoup & Playwright) and PDF text extraction pipelines collecting real BTU & college updates.
+* 💬 **Interactive Student Feed**: Sanitized peer discussions, technical questions, and club events with XSS protection and like reactions.
+* 🌐 **Three.js WebGL Community Sphere**: Interactive 3D visualization connecting campus departments, clubs, and research cells.
+* 🛡️ **Full-Stack Resilience**: Firebase Authentication, PostgreSQL relational storage, JWT verification, and React ErrorBoundary protection.
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+flowchart LR
+    A[React 18 + Vite] -->|REST / JWT| B[FastAPI Gateway]
+    B --> C[(PostgreSQL 15)]
+    B --> D[(ChromaDB Embeddings)]
+    B --> E[Google Gemini Flash API]
+    F[Scraper / PDF Engine] --> D
+```
+
+For detailed architecture diagrams, ER schemas, and endpoint references, see [ARCHITECTURE.md](ARCHITECTURE.md) and [DEVELOPMENT_CHECKLIST.md](DEVELOPMENT_CHECKLIST.md).
+
+---
+
+## ⚙️ Quickstart Guide
+
+### Prerequisites
+- **Node.js** (v18.0 or higher) and `npm`
+- **Python** (v3.10 or higher) and `pip`
+- **PostgreSQL** (v14+ recommended) or SQLite for local dev
+
+### 1. Frontend Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/AshwaniSharma06/CampusSync.git
+cd CampusSync
+
+# Install frontend dependencies
+npm install
+
+# Start Vite development server
+npm run dev
+```
+The React frontend will be accessible at `http://localhost:5173`.
+
+### 2. Backend Setup
+
+```bash
+# Navigate to backend directory
+cd backend
+
+# Create and activate Python virtual environment
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Start FastAPI application
+uvicorn main:app --reload --port 8000
+```
+Interactive Swagger documentation will be available at `http://localhost:8000/docs`.
+
+### 3. Environment Configuration
+
+Create a `.env` file in the root and in `backend/` using the provided templates:
+
+```env
+# Frontend .env
+VITE_API_URL=http://localhost:8000/api/v1
+VITE_APP_ENV=development
+```
+
+```env
+# Backend .env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/campussync
+SECRET_KEY=your-secret-key-here
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+---
+
+## 🧪 Testing
+
+Run backend tests using `pytest`:
+
+```bash
+pytest backend/tests/
+```
+
+Verify frontend production build:
+
+```bash
+npm run build
+```
+
+---
+
+## 📄 Academic Project Context
+
+* **Project**: Final Year B.Tech Computer Science Engineering Capstone
+* **Scope**: Semester 7 (Student Portal, Personalization, RAG Assistant)
+* **University Affiliation**: Bikaner Technical University (BTU) / Engineering College Ajmer (ECA)
