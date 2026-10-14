@@ -7,9 +7,12 @@ import AiWidget from './components/ui/AiWidget';
 import AuthModal from './components/ui/AuthModal';
 import StudentDashboard from './components/portal/StudentDashboard';
 import LandingPage from './pages/LandingPage';
+import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 import { useAuth } from './context/AuthContext';
 import { apiService } from './services/apiService';
+
 
 export default function App() {
   const [toastMessage, setToastMessage] = useState('');
@@ -58,7 +61,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+    <ErrorBoundary>
+      <div className="min-h-screen bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+
       <Navbar
         onOpenSignIn={() => setIsAuthModalOpen(true)}
         onOpenAiAgent={() => setAiWidgetOpen(true)}
@@ -99,7 +104,7 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
       <Footer onActionNotification={showToast} />
@@ -111,5 +116,7 @@ export default function App() {
         onAuthSuccess={handleAuthSuccess}
       />
     </div>
+    </ErrorBoundary>
   );
 }
+
