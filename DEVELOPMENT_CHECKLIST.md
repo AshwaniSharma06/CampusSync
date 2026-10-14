@@ -62,7 +62,7 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Maintain the login session after page refresh.
 - [x] Protect student dashboard routes.
 - [x] Verify Firebase authentication tokens in FastAPI.
-- [ ] Implement student profile creation and editing.
+- [x] Implement student profile creation and editing.
 - [x] Add input validation and readable authentication errors.
 - [x] Update the React app to send the JWT in the Authorization header.
 
@@ -111,24 +111,24 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Show a clear no-information response when evidence is missing.
 
 ## 11. Add personalization and alerts
-- [ ] Start with simple rule-based logic instead of complex machine learning.
-- [ ] Save the student's branch, semester, courses, clubs, and interests.
-- [ ] Recommend relevant notices, resources, clubs, and events.
-- [ ] Display upcoming assignments and exams.
-- [ ] Add due-soon and new-notice indicators.
-- [ ] Add a personalized Curated for You section.
-- [ ] Allow students to save or dismiss recommendations.
+- [x] Start with simple rule-based logic instead of complex machine learning.
+- [x] Save the student's branch, semester, courses, clubs, and interests.
+- [x] Recommend relevant notices, resources, clubs, and events.
+- [x] Display upcoming assignments and exams.
+- [x] Add due-soon and new-notice indicators.
+- [x] Add a personalized Curated for You section.
+- [x] Allow students to save or dismiss recommendations.
 
 ## 12. Testing and security
-- [ ] Test backend endpoints.
-- [ ] Test registration, login, logout, and protected routes.
+- [x] Test backend endpoints.
+- [x] Test registration, login, logout, and protected routes.
 - [ ] Test scraping and duplicate detection.
 - [ ] Test document retrieval and chatbot responses.
-- [ ] Test mobile and desktop layouts.
-- [ ] Validate all user inputs and sanitize community post content.
-- [ ] Add API rate limiting where appropriate.
-- [ ] Keep Firebase, Gemini, and database secrets out of GitHub.
-- [ ] Add friendly 404 and error pages.
+- [x] Test mobile and desktop layouts.
+- [x] Validate all user inputs and sanitize community post content.
+- [x] Add API rate limiting where appropriate.
+- [x] Keep Firebase, Gemini, and database secrets out of GitHub.
+- [x] Add friendly 404 and error pages.
 - [ ] Ask classmates to perform user testing and record their feedback.
 
 ## 13. Deployment
@@ -144,8 +144,8 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 
 ## 14. Documentation and final presentation
 - [ ] Update the README with installation and deployment steps.
-- [ ] Create the system architecture diagram, database ER diagram, and RAG workflow diagram.
-- [ ] Document all API endpoints.
+- [x] Create the system architecture diagram, database ER diagram, and RAG workflow diagram.
+- [x] Document all API endpoints.
 - [ ] Prepare screenshots of every major module.
 - [ ] Complete the 14-week progress report.
 - [ ] Update the CampusSync presentation.
@@ -177,5 +177,3 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - Multiple vector databases.
 - Real-time chat and video calling.
 - Payment processing or attendance hardware integration.
- 
- 
