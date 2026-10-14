@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
+import EditProfileModal from './EditProfileModal';
 
 export default function StudentDashboard({ user, onSignOut, onActionNotification }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(true);
+  const [studentProfile, setStudentProfile] = useState(user);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  useEffect(() => {
+    setStudentProfile(user);
+  }, [user]);
 
   const [dashboardData, setDashboardData] = useState(null);
   const [courses, setCourses] = useState([]);
@@ -114,14 +121,14 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl text-slate-900 font-extrabold tracking-tight">
-                Welcome back, <span className="text-teal-600">{user.name || 'Student'}</span>!
+                Welcome back, <span className="text-teal-600">{studentProfile?.name || 'Student'}</span>!
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-medium">
-                <span>{user.department || 'Computer Science Engineering'}</span>
+                <span>{studentProfile?.department || 'Computer Science Engineering'}</span>
                 <span className="text-slate-300">•</span>
-                <span className="text-indigo-600 font-semibold">ID: {user.studentId || 'ECA2026-8941'}</span>
+                <span className="text-indigo-600 font-semibold">ID: {studentProfile?.studentId || 'ECA2026-8941'}</span>
                 <span className="text-slate-300">•</span>
-                <span className="text-amber-700 font-semibold">Semester V (BTU Affiliated)</span>
+                <span className="text-amber-700 font-semibold">Semester {studentProfile?.semester || 7} (BTU Affiliated)</span>
               </p>
             </div>
           </div>
@@ -166,10 +173,11 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             </div>
 
             <button
-              onClick={() => onActionNotification('Opening Student Profile Settings...')}
-              className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all hover:border-teal-400 shadow-2xs"
+              onClick={() => setIsProfileModalOpen(true)}
+              className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all hover:border-teal-400 shadow-2xs flex items-center gap-1.5"
             >
-              Profile
+              <span className="material-symbols-outlined text-sm text-teal-600">manage_accounts</span>
+              Edit Profile
             </button>
             <button
               onClick={onSignOut}
@@ -740,6 +748,14 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
           )}
         </main>
       </div>
+
+      <EditProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        currentProfile={studentProfile}
+        onProfileUpdated={(updated) => setStudentProfile(updated)}
+        onNotification={onActionNotification}
+      />
     </div>
   );
 }
