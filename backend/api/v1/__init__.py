@@ -12,6 +12,7 @@ from backend.api.v1.community import router as community_router
 from backend.api.v1.notifications import router as notifications_router
 from backend.api.v1.scraper import router as scraper_router
 from backend.api.v1.rag import router as rag_router
+from backend.api.v1.recommendations import router as recommendations_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
@@ -26,3 +27,5 @@ api_router.include_router(community_router, prefix="/community", tags=["communit
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(scraper_router, prefix="/scraper", tags=["scraper"])
 api_router.include_router(rag_router, prefix="/rag", tags=["rag"])
+api_router.include_router(recommendations_router, prefix="/recommendations", tags=["recommendations"])
+
