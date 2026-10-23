@@ -44,7 +44,7 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Configure CORS for the React application.
 - [x] Create a health-check endpoint.
 - [x] Organize routes, models, schemas, services, and database configuration.
-- [ ] Test APIs through FastAPI Swagger documentation.
+- [x] Test APIs through FastAPI Swagger documentation.
 
 ## 5. Design the PostgreSQL database
 - [x] Create tables for users and student profiles.
@@ -143,7 +143,7 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [ ] Add the live website link to GitHub.
 
 ## 14. Documentation and final presentation
-- [ ] Update the README with installation and deployment steps.
+- [x] Update the README with installation and deployment steps.
 - [x] Create the system architecture diagram, database ER diagram, and RAG workflow diagram.
 - [x] Document all API endpoints.
 - [ ] Prepare screenshots of every major module.
