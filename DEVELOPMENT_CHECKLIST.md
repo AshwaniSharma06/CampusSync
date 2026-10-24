@@ -10,8 +10,8 @@ A practical, ordered solo-development roadmap for completing the student-facing 
 - [x] Pull or open the latest CampusSync GitHub repository.
 - [x] Create a new branch such as `student-module-development`.
 - [x] Run `npm install`, `npm run dev`, and `npm run build`.
-- [ ] Verify every existing section and navigation link.
-- [ ] List broken layouts, buttons, images, routes, and console errors.
+- [x] Verify every existing section and navigation link.
+- [x] List broken layouts, buttons, images, routes, and console errors.
 - [x] Remove unused components and duplicated CSS.
 - [x] Move API keys and configuration into environment variables.
 - [ ] Create a GitHub Project board with To Do, In Progress, Testing, and Done columns.
