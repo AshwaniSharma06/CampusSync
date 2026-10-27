@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import CommunitySphereCanvas from '../three/CommunitySphereCanvas';
-import communityBg from '../../assets/community-bg.png';
 
 const INITIAL_POSTS = [
   {
     id: 1,
     author: 'Technotsav & PCC Club',
     initials: 'PCC',
-    avatarBg: 'bg-primary/20 text-primary',
-    tag: 'Official ECA Club',
+    avatarBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/40',
+    tag: 'Official Club',
     time: '2h ago',
     content:
       "Excited to announce our upcoming Advanced React & Machine Learning Workshop! 🚀 Join us this Saturday at Barliya Block Lab 204. We'll be building a full-stack AI application from scratch. Don't forget your laptops!",
@@ -21,8 +20,8 @@ const INITIAL_POSTS = [
     id: 2,
     author: 'Priya Sharma',
     initials: 'PS',
-    avatarBg: 'bg-tertiary/20 text-tertiary',
-    tag: 'CS Sem V',
+    avatarBg: 'bg-amber-500/20 text-amber-300 border border-amber-500/40',
+    tag: 'CS Sem VII',
     time: '5h ago',
     content:
       'Anyone want to form a study group for the upcoming BTU Machine Learning midterms? Looking for 2-3 people to review past papers in the central library this weekend. 📚🧠',
@@ -35,8 +34,8 @@ const INITIAL_POSTS = [
     id: 3,
     author: 'Rohan Verma',
     initials: 'RV',
-    avatarBg: 'bg-secondary/20 text-secondary',
-    tag: 'ECE Sem III',
+    avatarBg: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40',
+    tag: 'ECE Sem V',
     time: '8h ago',
     content:
       'Lost a black Dell laptop charger near Barliya CSE Block Room 402 around 2 PM today. If anyone found it, please hand it over to the SAC office or drop a message here!',
@@ -52,7 +51,7 @@ export default function CommunityFeed({ currentUser, onActionNotification }) {
   const [posts, setPosts] = useState(INITIAL_POSTS);
   const [newPostText, setNewPostText] = useState('');
 
-  const postAuthorName = currentUser && currentUser.name ? currentUser.name : 'Unknown User';
+  const postAuthorName = currentUser && currentUser.name ? currentUser.name : 'Ashwani Sharma';
   const postAuthorInitials = currentUser && currentUser.name
     ? currentUser.name
         .split(' ')
@@ -60,12 +59,12 @@ export default function CommunityFeed({ currentUser, onActionNotification }) {
         .join('')
         .substring(0, 2)
         .toUpperCase()
-    : 'UU';
+    : 'AS';
   const postAuthorTag = currentUser
     ? currentUser.department
       ? `${currentUser.department} Student`
-      : 'Verified Student'
-    : 'Guest User';
+      : 'CSE VII Sem'
+    : 'CSE VII Sem';
 
   const handleCreatePost = (e) => {
     e.preventDefault();
@@ -75,7 +74,7 @@ export default function CommunityFeed({ currentUser, onActionNotification }) {
       id: Date.now(),
       author: postAuthorName,
       initials: postAuthorInitials,
-      avatarBg: currentUser ? 'bg-primary/20 text-primary' : 'bg-surface-bright/60 text-on-surface-variant',
+      avatarBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/40',
       tag: postAuthorTag,
       time: 'Just now',
       content: newPostText,
@@ -87,7 +86,7 @@ export default function CommunityFeed({ currentUser, onActionNotification }) {
 
     setPosts([newEntry, ...posts]);
     setNewPostText('');
-    onActionNotification(`Post published as ${postAuthorName}!`);
+    onActionNotification?.(`Post published as ${postAuthorName}!`);
   };
 
   const handleLike = (id) => {
@@ -106,157 +105,106 @@ export default function CommunityFeed({ currentUser, onActionNotification }) {
   };
 
   return (
-    <section className="py-section-gap bg-background relative overflow-hidden" id="community">
-      {/* Prominent Campus Courtyard Background Image Backdrop */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <img
-          src={communityBg}
-          alt="Campus Courtyard Community Background"
-          className="w-full h-full object-cover object-center opacity-70 scale-105 transition-transform duration-1000"
-          style={{ animation: 'subtleZoom 30s infinite alternate' }}
-        />
-        {/* Transparent gradient vignette for high clarity and crisp text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/40 to-background"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
-      </div>
-
-      <div className="absolute top-0 right-0 w-full h-[600px] z-0 opacity-40 pointer-events-none">
+    <section className="py-16 md:py-24 bg-background relative overflow-hidden" id="community">
+      <div className="absolute top-0 right-0 w-full h-[500px] z-0 opacity-25 pointer-events-none">
         <CommunitySphereCanvas />
       </div>
 
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative z-10">
-        <div className="mb-12 text-center">
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-4 tracking-tight">
-            Campus conversations, <span className="font-serif-italic text-gradient">all in one place</span>
-          </h2>
-          <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto">
-            Connect with your peers, join discussions, and stay updated with the pulse of the campus.
-          </p>
-        </div>
-
-        {/* Mobile Filters */}
-        <div className="lg:hidden flex gap-3 overflow-x-auto hide-scrollbar mb-6 pb-2">
-          {['All Campus', 'Comp Sci', 'Clubs', 'Official'].map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-sans font-bold uppercase tracking-[0.08em] flex items-center gap-2 transition-colors ${
-                activeFilter.includes(filter)
-                  ? 'bg-surface-bright/80 text-white border border-primary/40'
-                  : 'bg-surface/50 text-on-surface-variant border border-outline/10'
-              }`}
-            >
-              <span className="material-symbols-outlined text-sm">
-                {filter === 'All Campus'
-                  ? 'public'
-                  : filter.includes('Sci')
-                  ? 'science'
-                  : filter === 'Clubs'
-                  ? 'groups'
-                  : 'campaign'}
-              </span>
-              {filter}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Desktop Filter Sidebar */}
-          <div className="hidden lg:flex flex-col gap-4 col-span-1">
-            <div className="glass-card rounded-2xl p-6 sticky top-24">
-              <h3 className="font-sans text-xs font-bold text-primary uppercase tracking-[0.12em] mb-6">
-                Explore Feeds
-              </h3>
-              <ul className="space-y-3">
-                {[
-                  { name: 'All Campus', icon: 'public' },
-                  { name: 'Computer Science', icon: 'science' },
-                  { name: 'My Clubs', icon: 'groups' },
-                  { name: 'Official', icon: 'campaign' },
-                ].map((item) => (
-                  <li key={item.name}>
-                    <button
-                      onClick={() => setActiveFilter(item.name)}
-                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-left font-sans text-sm transition-all ${
-                        activeFilter === item.name
-                          ? 'text-white bg-surface-bright/50 border border-primary/30 font-bold'
-                          : 'text-on-surface-variant hover:text-white hover:bg-surface-bright/20 font-medium'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined">{item.icon}</span>
-                      {item.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+        {/* Compact, clean sans-serif heading that does not push feed down */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-8 gap-3">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full text-xs font-bold text-teal-400 mb-2 uppercase tracking-wider">
+              Student Square
             </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Campus community
+            </h2>
+            <p className="text-sm md:text-base text-on-surface-variant mt-1 max-w-2xl">
+              Live discussions, peer study groups, and updates from students and ECA societies.
+            </p>
           </div>
 
-          {/* Main Feed */}
-          <div className="col-span-1 lg:col-span-2 flex flex-col gap-6">
-            {/* Post Creator */}
-            <div className="glass-card rounded-2xl p-6 border border-primary/20 bg-surface-bright/20">
-              <div className="flex gap-4 items-start">
-                <div className="w-10 h-10 rounded-full bg-surface-variant border border-outline/20 overflow-hidden shrink-0 flex items-center justify-center text-primary font-bold font-sans text-xs shadow-sm">
+          {/* Quick Filter Pills */}
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+            {['All Campus', 'Comp Sci', 'Clubs', 'Official'].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
+                  activeFilter.includes(filter)
+                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/40 shadow-sm'
+                    : 'bg-slate-800/60 text-slate-400 hover:text-white border-slate-700/60 hover:bg-slate-800'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Layout: Main Feed takes most of the width (3 of 4 columns) */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+          {/* Main Feed Container (75% width on desktop) */}
+          <div className="col-span-1 lg:col-span-3 flex flex-col gap-6">
+            {/* Post Composer right at the top */}
+            <div className="bg-[#0d213b]/90 rounded-2xl p-5 border border-slate-700/80 shadow-md">
+              <div className="flex gap-3.5 items-start">
+                <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 text-teal-300 font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
                   {postAuthorInitials}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <textarea
                     rows={2}
                     value={newPostText}
                     onChange={(e) => setNewPostText(e.target.value)}
-                    placeholder={
-                      currentUser
-                        ? `Share something with ECA campus, ${currentUser.name.split(' ')[0]}...`
-                        : 'Share something with the campus (Posting as Unknown User)...'
-                    }
-                    className="w-full bg-surface/50 rounded-xl px-4 py-3 text-white text-sm font-sans border border-outline/10 placeholder:text-on-surface-variant focus:outline-none focus:border-primary/50 transition-colors resize-none mb-3"
+                    placeholder={`Share an update, ask a question, or organize a study group, ${postAuthorName.split(' ')[0]}...`}
+                    className="w-full bg-slate-900/90 rounded-xl px-4 py-3 text-white text-sm border border-slate-700/80 placeholder:text-slate-500 focus:outline-none focus:border-teal-500/60 transition-colors resize-none mb-3"
                   />
                   <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5 text-slate-400">
                       <button
                         type="button"
-                        onClick={() => onActionNotification('Image upload feature ready')}
-                        className="p-2 text-primary hover:bg-surface-bright rounded-lg transition-colors"
+                        onClick={() => onActionNotification?.('Image upload ready')}
+                        className="p-1.5 hover:text-teal-400 hover:bg-slate-800/80 rounded-lg transition-colors"
                         title="Add Image"
                       >
                         <span className="material-symbols-outlined text-lg">image</span>
                       </button>
                       <button
                         type="button"
-                        onClick={() => onActionNotification('Document attachment feature ready')}
-                        className="p-2 text-secondary hover:bg-surface-bright rounded-lg transition-colors"
+                        onClick={() => onActionNotification?.('Document attachment ready')}
+                        className="p-1.5 hover:text-indigo-400 hover:bg-slate-800/80 rounded-lg transition-colors"
                         title="Add Document"
                       >
                         <span className="material-symbols-outlined text-lg">description</span>
                       </button>
                       <button
                         type="button"
-                        onClick={() => onActionNotification('Poll generator ready')}
-                        className="p-2 text-tertiary hover:bg-surface-bright rounded-lg transition-colors"
+                        onClick={() => onActionNotification?.('Poll generator ready')}
+                        className="p-1.5 hover:text-amber-400 hover:bg-slate-800/80 rounded-lg transition-colors"
                         title="Create Poll"
                       >
                         <span className="material-symbols-outlined text-lg">poll</span>
                       </button>
                     </div>
+
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-on-surface-variant hidden sm:inline-flex items-center gap-1 font-sans">
-                        <span className="material-symbols-outlined text-[14px]">
-                          {currentUser ? 'verified' : 'account_circle'}
-                        </span>{' '}
-                        {currentUser ? `Posting as ${postAuthorName}` : 'Posting as Unknown User'}
+                      <span className="text-xs text-slate-400 hidden sm:inline-flex items-center gap-1 font-medium">
+                        <span className="material-symbols-outlined text-sm text-teal-400">account_circle</span>
+                        Posting as {postAuthorName}
                       </span>
                       <button
                         onClick={handleCreatePost}
                         disabled={!newPostText.trim()}
-                        className={`px-5 py-1.5 rounded-full text-xs font-sans font-bold uppercase tracking-[0.1em] transition-all ${
+                        className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm ${
                           newPostText.trim()
-                            ? 'bg-primary text-on-primary hover:bg-primary-fixed shadow-md cursor-pointer'
-                            : 'bg-primary/20 text-primary opacity-50 cursor-not-allowed'
+                            ? 'bg-teal-600 hover:bg-teal-500 text-white cursor-pointer shadow-[0_0_15px_rgba(20,184,166,0.3)]'
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                         }`}
                       >
-                        Post
+                        <span>Publish</span>
+                        <span className="material-symbols-outlined text-xs">send</span>
                       </button>
                     </div>
                   </div>
@@ -268,104 +216,117 @@ export default function CommunityFeed({ currentUser, onActionNotification }) {
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="glass-card rounded-2xl p-6 transition-all hover:border-primary/30 group"
+                className="bg-[#0d213b]/90 rounded-2xl p-5 md:p-6 border border-slate-700/70 hover:border-teal-400/40 transition-all shadow-md group"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-4">
+                <div className="flex items-start justify-between mb-3.5">
+                  <div className="flex items-center gap-3">
                     <div
-                      className={`w-12 h-12 rounded-full ${post.avatarBg} flex items-center justify-center font-bold font-sans`}
+                      className={`w-11 h-11 rounded-xl ${post.avatarBg} flex items-center justify-center font-bold text-xs shrink-0 shadow-sm`}
                     >
                       {post.initials}
                     </div>
                     <div>
-                      <h4 className="font-sans text-white font-semibold">{post.author}</h4>
-                      <div className="flex items-center gap-2 text-sm text-on-surface-variant mt-0.5 font-sans">
-                        <span className="bg-surface-bright px-2 py-0.5 rounded text-xs font-medium">{post.tag}</span>
+                      <h4 className="text-white font-bold text-sm tracking-tight group-hover:text-teal-300 transition-colors">
+                        {post.author}
+                      </h4>
+                      <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                        <span className="bg-slate-800/90 text-slate-300 px-2 py-0.5 rounded text-[11px] font-medium border border-slate-700/50">
+                          {post.tag}
+                        </span>
                         <span>•</span>
                         <span>{post.time}</span>
                       </div>
                     </div>
                   </div>
                   <button
-                    onClick={() => onActionNotification('Options menu opened')}
-                    className="text-on-surface-variant hover:text-white"
+                    onClick={() => onActionNotification?.('Options menu opened')}
+                    className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/60 transition-colors"
                   >
-                    <span className="material-symbols-outlined">more_vert</span>
+                    <span className="material-symbols-outlined text-lg">more_vert</span>
                   </button>
                 </div>
-                <p className="font-sans text-on-surface mb-4 leading-relaxed">{post.content}</p>
+
+                <p className="text-sm text-slate-200 mb-4 leading-relaxed font-sans">{post.content}</p>
+
                 {post.icon && (
-                  <div className="rounded-xl overflow-hidden mb-4 border border-outline/10 h-48 bg-surface-container flex items-center justify-center">
-                    <span className="material-symbols-outlined text-4xl text-primary/50">{post.icon}</span>
+                  <div className="rounded-xl overflow-hidden mb-4 border border-slate-700/60 h-32 bg-slate-900/60 flex items-center justify-center gap-3 text-teal-400">
+                    <span className="material-symbols-outlined text-3xl">terminal</span>
+                    <span className="text-xs font-mono font-semibold text-slate-300">
+                      npm run start:ai-workshop --host=0.0.0.0
+                    </span>
                   </div>
                 )}
-                <div className="flex items-center gap-6 border-t border-outline/10 pt-4 font-sans text-sm">
+
+                <div className="flex items-center gap-5 border-t border-slate-700/60 pt-3 text-xs text-slate-400">
                   <button
                     onClick={() => handleLike(post.id)}
-                    className={`flex items-center gap-2 transition-colors ${
-                      post.isLiked ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'
+                    className={`flex items-center gap-1.5 transition-colors ${
+                      post.isLiked ? 'text-teal-400 font-bold' : 'hover:text-teal-300'
                     }`}
                   >
-                    <span className="material-symbols-outlined text-sm">
+                    <span className="material-symbols-outlined text-base">
                       {post.isLiked ? 'favorite' : 'favorite_border'}
-                    </span>{' '}
-                    {post.likes}
+                    </span>
+                    <span>{post.likes}</span>
                   </button>
                   <button
-                    onClick={() => onActionNotification(`Opening comments for ${post.author}'s post`)}
-                    className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors"
+                    onClick={() => onActionNotification?.(`Opening comments for ${post.author}'s post`)}
+                    className="flex items-center gap-1.5 hover:text-teal-300 transition-colors"
                   >
-                    <span className="material-symbols-outlined text-sm">chat_bubble</span> {post.comments}
+                    <span className="material-symbols-outlined text-base">chat_bubble</span>
+                    <span>{post.comments} comments</span>
                   </button>
                   <button
-                    onClick={() => onActionNotification('Post link copied to clipboard')}
-                    className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors ml-auto"
+                    onClick={() => onActionNotification?.('Post link copied to clipboard')}
+                    className="flex items-center gap-1.5 hover:text-teal-300 transition-colors ml-auto"
                   >
-                    <span className="material-symbols-outlined text-sm">share</span> Share
+                    <span className="material-symbols-outlined text-base">share</span>
+                    <span>Share</span>
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Trending Topics Column */}
-          <div className="hidden lg:flex flex-col gap-6 col-span-1">
-            <div className="glass-card rounded-2xl p-6 sticky top-24">
-              <h3 className="font-sans text-xs font-bold text-primary uppercase tracking-[0.12em] mb-6">
-                Trending Topics
+          {/* Slim Sidebar: Channels & Trending (25% width on desktop) */}
+          <div className="col-span-1 flex flex-col gap-5 sticky top-24">
+            {/* Trending Topics Card */}
+            <div className="bg-[#0d213b]/90 rounded-2xl p-5 border border-slate-700/70 shadow-md">
+              <h3 className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm">trending_up</span> Trending Topics
               </h3>
-              <div className="space-y-4 font-sans">
-                <div
-                  onClick={() => onActionNotification('Viewing #TechSymposium26 trend')}
-                  className="group cursor-pointer p-2 hover:bg-surface-bright/30 rounded-lg transition-colors"
-                >
-                  <p className="text-xs text-on-surface-variant font-medium">1. Event</p>
-                  <p className="font-semibold text-white group-hover:text-primary transition-colors mt-0.5">
-                    #TechSymposium26
-                  </p>
-                  <p className="text-xs text-on-surface-variant mt-1">450 posts</p>
-                </div>
-                <div
-                  onClick={() => onActionNotification('Viewing Midterms Prep trend')}
-                  className="group cursor-pointer p-2 hover:bg-surface-bright/30 rounded-lg transition-colors"
-                >
-                  <p className="text-xs text-on-surface-variant font-medium">2. Academics</p>
-                  <p className="font-semibold text-white group-hover:text-primary transition-colors mt-0.5">
-                    Midterms Prep
-                  </p>
-                  <p className="text-xs text-on-surface-variant mt-1">320 posts</p>
-                </div>
-                <div
-                  onClick={() => onActionNotification('Viewing New Cafe Menu trend')}
-                  className="group cursor-pointer p-2 hover:bg-surface-bright/30 rounded-lg transition-colors"
-                >
-                  <p className="text-xs text-on-surface-variant font-medium">3. Student Activities</p>
-                  <p className="font-semibold text-white group-hover:text-primary transition-colors mt-0.5">
-                    New Cafe Menu
-                  </p>
-                  <p className="text-xs text-on-surface-variant mt-1">185 posts</p>
-                </div>
+              <div className="space-y-3">
+                {[
+                  { tag: '#Technotsav26', count: '450 posts', category: 'Fest' },
+                  { tag: '#BTUMidterms', count: '320 posts', category: 'Academics' },
+                  { tag: '#SIH2026', count: '185 posts', category: 'Hackathon' },
+                  { tag: '#RobowarECA', count: '112 posts', category: 'Robotics' },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => onActionNotification?.(`Viewing trend: ${item.tag}`)}
+                    className="group cursor-pointer p-2 rounded-xl hover:bg-slate-800/70 transition-all border border-transparent hover:border-slate-700/60"
+                  >
+                    <div className="flex items-center justify-between text-[11px] text-slate-400">
+                      <span>{item.category}</span>
+                      <span className="text-teal-400/80 font-medium">{item.count}</span>
+                    </div>
+                    <p className="font-bold text-white text-xs group-hover:text-teal-300 transition-colors mt-0.5">
+                      {item.tag}
+                    </p>
+                  </div>
+                ))}
               </div>
+            </div>
+
+            {/* Quick SAC Notice Card */}
+            <div className="bg-[#0d213b]/90 rounded-2xl p-5 border border-slate-700/70 shadow-md">
+              <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm">campaign</span> SAC Guidelines
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Posts representing student clubs must adhere to the ECA Student Activity Center code of conduct.
+              </p>
             </div>
           </div>
         </div>

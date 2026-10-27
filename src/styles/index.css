@@ -6,40 +6,34 @@
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Outfit', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color: #d7e3ff;
   }
 
-  h1, h2, h3, h4, .font-serif, .font-display, .font-headline, .font-display-lg, .font-display-md, .font-headline-md, .font-headline-lg {
-    font-family: 'Instrument Serif', Georgia, serif;
-    font-weight: 400;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Outfit', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
-.font-serif-italic {
+/* Landing Page Decorative Headline Only */
+.font-landing-headline {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-weight: 400;
+}
+
+.font-landing-headline-italic {
   font-family: 'Instrument Serif', Georgia, serif;
   font-style: italic;
 }
 
-/* Dashboard Simple Clean Sans-Serif Typography */
-.dashboard-simple-font, 
-.dashboard-simple-font h1, 
-.dashboard-simple-font h2, 
-.dashboard-simple-font h3, 
-.dashboard-simple-font h4,
-.dashboard-simple-font p,
-.dashboard-simple-font button {
-  font-family: 'Plus Jakarta Sans', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-.dashboard-simple-font .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined' !important;
-}
-
+/* Brand logo typography */
 .font-brand {
-  font-family: 'Instrument Serif', Georgia, serif;
+  font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
   letter-spacing: -0.03em;
+  font-weight: 700;
 }
 
 .film-grain {
@@ -89,10 +83,15 @@
 }
 
 .glass-card {
-  background: rgba(4, 19, 42, 0.65);
+  background: rgba(13, 27, 49, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(135, 147, 144, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.glass-card:hover {
+  border-color: rgba(113, 216, 200, 0.35);
 }
 
 .text-gradient {

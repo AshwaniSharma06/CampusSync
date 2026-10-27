@@ -23,10 +23,10 @@ export default function Hero({ onEnter, onExplore }) {
               Engineering College Ajmer • BTU Affiliated
             </span>
           </div>
-          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-normal leading-[1.05] tracking-tight drop-shadow-md">
+          <h1 className="font-landing-headline text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-normal leading-[1.05] tracking-tight drop-shadow-md">
             One Campus.
             <br />
-            <span className="font-serif-italic text-gradient">One Platform.</span>
+            <span className="font-landing-headline-italic text-gradient">One Platform.</span>
           </h1>
           <p className="font-sans text-base sm:text-lg md:text-xl font-normal text-on-surface-variant/90 leading-relaxed max-w-xl">
             Welcome to the official student portal for Engineering College Ajmer (ECA). Unified announcements, BTU schedules, Technotsav events, and AI assistance.

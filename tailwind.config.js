@@ -72,17 +72,18 @@ export default {
       },
       fontFamily: {
         serif: ['"Instrument Serif"', "Georgia", "serif"],
-        display: ['"Instrument Serif"', "Georgia", "serif"],
-        headline: ['"Instrument Serif"', "Georgia", "serif"],
-        sans: ['"Plus Jakarta Sans"', '"Manrope"', "sans-serif"],
+        "landing-headline": ['"Instrument Serif"', "Georgia", "serif"],
+        display: ['"Plus Jakarta Sans"', '"Outfit"', '"Manrope"', "sans-serif"],
+        headline: ['"Plus Jakarta Sans"', '"Outfit"', '"Manrope"', "sans-serif"],
+        sans: ['"Plus Jakarta Sans"', '"Outfit"', '"Manrope"', "sans-serif"],
         body: ['"Plus Jakarta Sans"', '"Manrope"', "sans-serif"],
         label: ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"],
-        // Legacy class aliases from Stitch
-        "display-lg": ['"Instrument Serif"', "Georgia", "serif"],
-        "display-md": ['"Instrument Serif"', "Georgia", "serif"],
-        "headline-lg": ['"Instrument Serif"', "Georgia", "serif"],
-        "headline-md": ['"Instrument Serif"', "Georgia", "serif"],
-        "headline-lg-mobile": ['"Instrument Serif"', "Georgia", "serif"],
+        // Legacy class aliases mapped to clean sans-serif
+        "display-lg": ['"Plus Jakarta Sans"', '"Outfit"', "sans-serif"],
+        "display-md": ['"Plus Jakarta Sans"', '"Outfit"', "sans-serif"],
+        "headline-lg": ['"Plus Jakarta Sans"', '"Outfit"', "sans-serif"],
+        "headline-md": ['"Plus Jakarta Sans"', '"Outfit"', "sans-serif"],
+        "headline-lg-mobile": ['"Plus Jakarta Sans"', '"Outfit"', "sans-serif"],
         "body-lg": ['"Plus Jakarta Sans"', '"Manrope"', "sans-serif"],
         "body-md": ['"Plus Jakarta Sans"', '"Manrope"', "sans-serif"],
         "label-sm": ['"Outfit"', '"Plus Jakarta Sans"', "sans-serif"]

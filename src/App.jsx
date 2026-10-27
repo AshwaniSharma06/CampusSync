@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Toast from './components/ui/Toast';
@@ -22,6 +22,8 @@ export default function App() {
   const [userProfile, setUserProfile] = useState(null);
   
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith('/dashboard');
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -32,11 +34,11 @@ export default function App() {
     if (jwtToken && currentUser) {
       apiService.getStudentProfile().then(profile => {
         setUserProfile({
-          name: profile.full_name || currentUser.displayName,
+          name: profile.full_name || currentUser.displayName || 'Ashwani Sharma',
           email: profile.email,
-          department: profile.department,
-          studentId: profile.student_id,
-          semester: profile.semester
+          department: profile.department || 'Computer Science & Engineering',
+          studentId: profile.student_id || 'ECA2026-8941',
+          semester: profile.semester || 7
         });
       }).catch(err => console.error("Failed to fetch profile", err));
     } else {
@@ -60,16 +62,26 @@ export default function App() {
     }
   };
 
+  const effectiveUser = userProfile || {
+    name: currentUser?.displayName || (currentUser?.email ? currentUser.email.split('@')[0] : 'Ashwani Sharma'),
+    email: currentUser?.email || 'ashwani.sharma@eca.ac.in',
+    department: 'Computer Science & Engineering',
+    studentId: 'ECA2026-8941',
+    semester: 7
+  };
+
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
 
-      <Navbar
-        onOpenSignIn={() => setIsAuthModalOpen(true)}
-        onOpenAiAgent={() => setAiWidgetOpen(true)}
-        currentUser={currentUser}
-        onOpenPortalView={() => navigate('/dashboard')}
-      />
+      {!isDashboard && (
+        <Navbar
+          onOpenSignIn={() => setIsAuthModalOpen(true)}
+          onOpenAiAgent={() => setAiWidgetOpen(true)}
+          currentUser={currentUser}
+          onOpenPortalView={() => navigate('/dashboard')}
+        />
+      )}
 
       <Routes>
         <Route 
@@ -86,28 +98,19 @@ export default function App() {
           path="/dashboard" 
           element={
             <ProtectedRoute user={currentUser}>
-              <main>
-                <div className="bg-surface-container border-b border-outline/10 pt-20 px-margin-mobile md:px-margin-desktop text-center py-2">
-                  <button
-                    onClick={() => navigate('/')}
-                    className="text-xs text-primary font-bold uppercase tracking-wider hover:underline flex items-center justify-center gap-1 mx-auto"
-                  >
-                    <span className="material-symbols-outlined text-sm">arrow_back</span> Return to CampusSync Landing Page
-                  </button>
-                </div>
-                <StudentDashboard
-                  user={userProfile || { name: currentUser?.email }}
-                  onSignOut={handleSignOut}
-                  onActionNotification={showToast}
-                />
-              </main>
+              <StudentDashboard
+                user={effectiveUser}
+                onSignOut={handleSignOut}
+                onActionNotification={showToast}
+                onReturnHome={() => navigate('/')}
+              />
             </ProtectedRoute>
           } 
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
-      <Footer onActionNotification={showToast} />
+      {!isDashboard && <Footer onActionNotification={showToast} />}
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />
       <AiWidget isOpenExternal={aiWidgetOpen} setIsOpenExternal={setAiWidgetOpen} />
       <AuthModal

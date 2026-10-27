@@ -12,10 +12,10 @@ export default function CtaSection({ onOpenSignIn }) {
         <div className="absolute inset-0 bg-background/80"></div>
       </div>
       <div className="relative z-10 max-w-3xl px-margin-mobile md:px-margin-desktop">
-        <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-white mb-6 tracking-tight leading-tight">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-tight">
           Campus life moves quickly.
           <br />
-          <span className="font-serif-italic text-gradient">Stay connected to all of it.</span>
+          <span className="text-gradient">Stay connected to all of it.</span>
         </h2>
         <button
           onClick={onOpenSignIn}
