@@ -1,8 +1,8 @@
+from typing import Any, Optional
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from typing import Any
 
-from backend.api.deps import get_current_user
+from backend.api.deps import get_optional_current_user
 from backend.models.user import User
 from backend.services.rag_service import query_rag
 
@@ -15,7 +15,7 @@ class ChatRequest(BaseModel):
 @router.post("/chat")
 def chat_with_ai(
     request: ChatRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_optional_current_user)
 ) -> Any:
     """
     Send a question to the CampusSync AI Assistant and get a RAG-backed answer.
