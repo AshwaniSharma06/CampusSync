@@ -155,17 +155,31 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
       onAuthSuccess?.(studentProfilePayload);
     } catch (err) {
-      console.error('Auth handler notification:', err);
-      // Fallback for live demo when Firebase is offline or using dev keys
+      console.warn('Auth handler fallback triggered:', err);
+      const code = (err?.code || '').toLowerCase();
+      const msg = (err?.message || '').toLowerCase();
+
+      // Gracefully handle unconfigured/invalid Firebase API keys, offline, or network errors
       if (
-        err.code === 'auth/invalid-api-key' ||
-        err.code === 'auth/network-request-failed' ||
-        err.message?.includes('API_KEY') ||
-        err.message?.includes('offline')
+        code.includes('api-key') ||
+        code.includes('invalid-api-key') ||
+        code.includes('api-key-not-valid') ||
+        code.includes('network-request-failed') ||
+        code.includes('app-not-authorized') ||
+        msg.includes('api-key') ||
+        msg.includes('api key') ||
+        msg.includes('offline') ||
+        msg.includes('network')
       ) {
         localStorage.setItem('campussync_student_profile', JSON.stringify(studentProfilePayload));
         localStorage.setItem('campussync_demo_user', 'true');
         onAuthSuccess?.(studentProfilePayload);
+      } else if (code === 'auth/email-already-in-use') {
+        setError('An account with this email already exists. Please switch to Sign In.');
+      } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        setError('Incorrect password or credentials. Please try again.');
+      } else if (code === 'auth/user-not-found') {
+        setError('No account found for this email. Please sign up first.');
       } else {
         setError(err.message || 'Authentication error. Please check your credentials.');
       }

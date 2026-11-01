@@ -5,7 +5,7 @@ import {
     createUserWithEmailAndPassword, 
     signOut 
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth, isFirebaseConfigured } from '../config/firebase';
 
 const AuthContext = createContext();
 
@@ -13,21 +13,55 @@ export function useAuth() {
     return useContext(AuthContext);
 }
 
-export function AuthProvider({ children }) {
-    const [currentUser, setCurrentUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [jwtToken, setJwtToken] = useState(null);
+function isFirebaseKeyOrNetworkError(err) {
+    if (!err) return false;
+    const code = (err.code || '').toLowerCase();
+    const msg = (err.message || '').toLowerCase();
+    return (
+        code.includes('api-key') ||
+        code.includes('invalid-api-key') ||
+        code.includes('api-key-not-valid') ||
+        code.includes('app-not-authorized') ||
+        code.includes('network-request-failed') ||
+        code.includes('internal-error') ||
+        code.includes('config') ||
+        msg.includes('api-key') ||
+        msg.includes('api key') ||
+        msg.includes('network') ||
+        msg.includes('offline')
+    );
+}
 
-    // Sync Firebase Auth State
+export function AuthProvider({ children }) {
+    const [currentUser, setCurrentUser] = useState(() => {
+        const saved = localStorage.getItem('campussync_student_profile');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                return {
+                    displayName: data.name,
+                    email: data.email,
+                    uid: data.studentId || 'local-demo-uid',
+                };
+            } catch (_) {}
+        }
+        return null;
+    });
+    const [loading, setLoading] = useState(false);
+    const [jwtToken, setJwtToken] = useState(() => localStorage.getItem('campussync_token') || null);
+
+    // Sync Firebase Auth State when real Firebase is configured
     useEffect(() => {
+        if (!isFirebaseConfigured) {
+            return;
+        }
+
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setCurrentUser(user);
                 // Get Firebase ID token to send to FastAPI for session JWT
-                const token = await user.getIdToken();
-                
                 try {
-                    // Swap Firebase Token for backend JWT
+                    const token = await user.getIdToken();
                     const res = await fetch('http://localhost:8000/api/v1/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -39,29 +73,85 @@ export function AuthProvider({ children }) {
                         localStorage.setItem('campussync_token', data.access_token);
                     }
                 } catch (err) {
-                    console.error("Failed to authenticate with backend API", err);
+                    console.warn("Backend API auth sync skipped:", err);
                 }
             } else {
-                setCurrentUser(null);
-                setJwtToken(null);
-                localStorage.removeItem('campussync_token');
+                if (!localStorage.getItem('campussync_demo_user')) {
+                    setCurrentUser(null);
+                    setJwtToken(null);
+                    localStorage.removeItem('campussync_token');
+                }
             }
-            setLoading(false);
         });
 
         return unsubscribe;
     }, []);
 
-    const login = (email, password) => {
-        return signInWithEmailAndPassword(auth, email, password);
+    const login = async (email, password) => {
+        if (!isFirebaseConfigured) {
+            const mockUser = {
+                displayName: email.split('@')[0],
+                email: email,
+                uid: 'local-' + Date.now(),
+            };
+            setCurrentUser(mockUser);
+            return mockUser;
+        }
+        try {
+            return await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            if (isFirebaseKeyOrNetworkError(err)) {
+                console.warn('Firebase key unconfigured or offline, continuing in local mode:', err);
+                const mockUser = {
+                    displayName: email.split('@')[0],
+                    email: email,
+                    uid: 'local-' + Date.now(),
+                };
+                setCurrentUser(mockUser);
+                return mockUser;
+            }
+            throw err;
+        }
     };
 
-    const signup = (email, password) => {
-        return createUserWithEmailAndPassword(auth, email, password);
+    const signup = async (email, password) => {
+        if (!isFirebaseConfigured) {
+            const mockUser = {
+                displayName: email.split('@')[0],
+                email: email,
+                uid: 'local-' + Date.now(),
+            };
+            setCurrentUser(mockUser);
+            return mockUser;
+        }
+        try {
+            return await createUserWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            if (isFirebaseKeyOrNetworkError(err)) {
+                console.warn('Firebase key unconfigured or offline, continuing in local mode:', err);
+                const mockUser = {
+                    displayName: email.split('@')[0],
+                    email: email,
+                    uid: 'local-' + Date.now(),
+                };
+                setCurrentUser(mockUser);
+                return mockUser;
+            }
+            throw err;
+        }
     };
 
-    const logout = () => {
-        return signOut(auth);
+    const logout = async () => {
+        try {
+            if (isFirebaseConfigured) {
+                await signOut(auth);
+            }
+        } catch (_) {}
+        setCurrentUser(null);
+        setJwtToken(null);
+        localStorage.removeItem('campussync_token');
+        localStorage.removeItem('campussync_demo_user');
+        localStorage.removeItem('campussync_student_profile');
     };
 
     const value = {

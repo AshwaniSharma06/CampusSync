@@ -313,9 +313,11 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[12px] text-slate-500 font-medium">
               <div className="flex items-center gap-1.5 text-teal-700 font-bold mb-0.5">
                 <span className="w-2 h-2 rounded-full bg-teal-600 animate-pulse"></span>
-                <span>Fall 2026 Session</span>
+                <span>{studentProfile?.session ? studentProfile.session.split('(')[0].trim() : 'Session 2022 – 2026'}</span>
               </div>
-              B.Tech VII Sem • Section CS-A
+              <p className="truncate" title={studentProfile?.department || 'Computer Engineering (CSE)'}>
+                {studentProfile?.department || 'Computer Engineering (CSE)'} • Sem {studentProfile?.semester || 7}
+              </p>
             </div>
           </div>
         </aside>
