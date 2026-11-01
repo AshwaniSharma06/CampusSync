@@ -112,7 +112,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     { id: 'academics', label: 'Academics', icon: 'school', badge: '4 Courses' },
     { id: 'community', label: 'Community', icon: 'forum', badge: 'Active' },
     { id: 'clubs', label: 'Clubs', icon: 'groups', badge: '3 Joined' },
-    { id: 'events', label: 'Events', icon: 'event', badge: 'Oct 15' },
+    { id: 'events', label: 'Events', icon: 'event', badge: 'Nov 5' },
     { id: 'resources', label: 'Resources', icon: 'folder_open', badge: 'BTU Docs' },
     { id: 'ai', label: 'Campus AI', icon: 'smart_toy', badge: '24/7 AI', badgeColor: 'bg-teal-100 text-teal-800 border border-teal-300' },
   ];
@@ -234,7 +234,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   {displayName}
                 </p>
                 <p className="text-[12px] text-slate-500 font-medium">
-                  ID: {studentProfile?.studentId || 'ECA2026-8941'}
+                  ID: {studentProfile?.studentId || 'ECA2026-8941'} • Sem {studentProfile?.semester || 7}
                 </p>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-sm hidden sm:block">
@@ -333,7 +333,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   <div>
                     <div className="inline-flex items-center gap-1.5 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full text-[12px] font-bold text-teal-700 uppercase tracking-wider mb-2">
                       <span className="w-2 h-2 rounded-full bg-teal-600 animate-ping"></span>
-                      Academic Command Center • Semester VII
+                      Academic Command Center • Semester {studentProfile?.semester || 'VII'} • {studentProfile?.department || 'Computer Science & Engineering'}
                     </div>
                     <h2 className="text-[28px] sm:text-[32px] font-extrabold text-slate-900 tracking-tight leading-tight">
                       {getGreeting()}, <span className="text-teal-600">{firstName}</span>!
@@ -822,7 +822,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                           <span className="text-[11px] font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded">Pass Ready ✓</span>
                         </div>
                         <p className="text-[12px] text-slate-500 font-medium mt-1">
-                          Oct 15–17, 2026 • Robowar, Hackathon, Coding
+                          Nov 15–17, 2026 • Robowar, Hackathon, Coding
                         </p>
                       </div>
 
@@ -842,7 +842,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                           <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">Open</span>
                         </div>
                         <p className="text-[12px] text-slate-500 font-medium mt-1">
-                          Oct 10, 2026 • ECA Innovation Cell
+                          Nov 08, 2026 • ECA Innovation Cell
                         </p>
                       </div>
                     </div>
@@ -927,7 +927,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 <div>
                   <h3 className="text-[24px] font-bold text-slate-900 tracking-tight">Academic Curriculum &amp; Courses</h3>
                   <p className="text-[14px] text-slate-500 font-medium mt-0.5">
-                    BTU B.Tech Semester VII • Computer Science &amp; Engineering
+                    BTU B.Tech Semester {studentProfile?.semester || 7} • {studentProfile?.department || 'Computer Science & Engineering'}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1126,7 +1126,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 {[
                   {
                     title: 'Technotsav 2026 - Annual Technical Festival',
-                    date: 'Oct 15 - 17, 2026',
+                    date: 'Nov 15 - 17, 2026',
                     venue: 'ECA Central Labs & Academic Blocks',
                     type: 'Technical',
                     status: 'Digital Pass Issued ✓',
@@ -1142,7 +1142,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   },
                   {
                     title: 'Smart India Hackathon (SIH 2026) College Screening',
-                    date: 'Oct 10, 2026',
+                    date: 'Nov 08, 2026',
                     venue: 'ECA Innovation Center',
                     type: 'Hackathon',
                     status: 'Registration Active',
@@ -1350,21 +1350,21 @@ const DEFAULT_COURSES = [
 const DEFAULT_NOTICES = [
   {
     id: 1,
-    title: 'BTU Semester 7 Mid-Term Exam Time Table Released for CS/IT/AI',
+    title: 'BTU Semester 7 Mid-Term Exam Time Table Released for CS/IT/AI/ECE/EE/ME/CE',
     notice_type: 'Official',
-    date: 'Oct 1, 2026'
+    date: 'Nov 1, 2026'
   },
   {
     id: 2,
     title: 'LEEP 2026-27 Diploma Lateral Entry & 1st Year Branch Sliding Portal Live',
     notice_type: 'Department',
-    date: 'Sept 28, 2026'
+    date: 'Oct 30, 2026'
   },
   {
     id: 3,
     title: 'Central Library Extended Night Reading Hours for Upcoming Midterms',
     notice_type: 'Events',
-    date: 'Sept 25, 2026'
+    date: 'Oct 28, 2026'
   }
 ];
 

@@ -7,7 +7,7 @@ import CuratedForYou from '../components/sections/CuratedForYou';
 import CampusAiSection from '../components/sections/CampusAiSection';
 import CtaSection from '../components/sections/CtaSection';
 
-export default function LandingPage({ currentUser, showToast, setIsAuthModalOpen }) {
+export default function LandingPage({ currentUser, showToast, onOpenAuth }) {
   return (
     <main>
       <Hero
@@ -19,13 +19,14 @@ export default function LandingPage({ currentUser, showToast, setIsAuthModalOpen
           const el = document.getElementById('clubs');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }}
+        onSignUp={() => onOpenAuth?.('signup')}
       />
       <CommunityFeed currentUser={currentUser} onActionNotification={showToast} />
       <ClubsSection onActionNotification={showToast} />
       <EventsSection onActionNotification={showToast} />
       <CuratedForYou onActionNotification={showToast} />
       <CampusAiSection />
-      <CtaSection onOpenSignIn={() => setIsAuthModalOpen(true)} />
+      <CtaSection onOpenAuth={onOpenAuth} />
     </main>
   );
 }

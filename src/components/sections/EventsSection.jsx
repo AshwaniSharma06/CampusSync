@@ -7,9 +7,9 @@ const ECA_EVENTS = [
     category: 'Technical',
     categoryBg: 'bg-teal-500/15 text-teal-300 border-teal-500/30',
     dateBadgeDay: '15',
-    dateBadgeMonth: 'Oct',
+    dateBadgeMonth: 'Nov',
     dateBadgeYear: '2026',
-    dateText: 'Oct 15 - 17, 2026',
+    dateText: 'Nov 15 - 17, 2026',
     venue: 'ECA Central Labs & Campus Grounds',
     description:
       'Flagship technical fest featuring autonomous Robowar, 24-hr Hackathon, coding sprint, and Smart India Hackathon showcase.',

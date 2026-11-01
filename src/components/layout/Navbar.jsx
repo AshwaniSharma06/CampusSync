@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Navbar({ onOpenSignIn, onOpenAiAgent, currentUser, onOpenPortalView }) {
+export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, currentUser, onOpenPortalView }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -52,6 +52,9 @@ export default function Navbar({ onOpenSignIn, onOpenAiAgent, currentUser, onOpe
     }
   };
 
+  const studentDisplayName = currentUser?.name || currentUser?.displayName || 'Student';
+  const firstName = studentDisplayName.split(' ')[0] || 'Student';
+
   return (
     <nav
       className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-outline-variant/10 ${
@@ -71,7 +74,7 @@ export default function Navbar({ onOpenSignIn, onOpenAiAgent, currentUser, onOpe
 
         {/* Desktop Menu */}
         <div
-          className={`hidden md:flex gap-6 lg:gap-8 items-center h-full ${
+          className={`hidden md:flex gap-5 lg:gap-7 items-center h-full ${
             mobileMenuOpen ? '!flex mobile-menu-active' : ''
           }`}
           id="mobile-menu"
@@ -98,38 +101,74 @@ export default function Navbar({ onOpenSignIn, onOpenAiAgent, currentUser, onOpe
               setMobileMenuOpen(false);
               onOpenAiAgent();
             }}
-            className="text-primary hover:text-primary-fixed border border-primary/30 bg-primary/10 px-4 py-1.5 rounded-full flex items-center gap-1.5 font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all hover:bg-primary/20"
+            className="text-primary hover:text-primary-fixed border border-primary/30 bg-primary/10 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all hover:bg-primary/20"
           >
             <span className="material-symbols-outlined text-sm">smart_toy</span>
-            Campus AI Agent
+            Campus AI
           </button>
 
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onOpenPortalView();
-            }}
-            className="md:hidden bg-primary text-on-primary px-6 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] hover:bg-primary-fixed transition-colors mt-4 w-full shadow-sm"
-          >
-            Student Dashboard
-          </button>
+          {/* Mobile-Only Action Controls */}
+          <div className="md:hidden flex flex-col gap-2.5 w-full mt-4">
+            {currentUser ? (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenPortalView();
+                }}
+                className="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-sans text-xs font-bold uppercase tracking-[0.1em] transition-colors w-full flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-sm">dashboard</span>
+                <span>{firstName}'s Dashboard</span>
+              </button>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenSignIn('login');
+                  }}
+                  className="border border-outline/30 text-on-surface hover:text-white px-4 py-2.5 rounded-xl font-sans text-xs font-bold uppercase tracking-[0.1em]"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenSignUp();
+                  }}
+                  className="bg-primary text-on-primary px-4 py-2.5 rounded-xl font-sans text-xs font-bold uppercase tracking-[0.1em]"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-3 z-20">
-          <button
-            onClick={onOpenPortalView}
-            className="hidden md:flex bg-primary text-on-primary hover:bg-primary-fixed px-5 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all glow-hover shadow-sm"
-          >
-            Student Dashboard
-          </button>
-
-          {!currentUser && (
+        {/* Action Controls (Desktop) - Clean & Single State */}
+        <div className="flex items-center gap-2.5 z-20">
+          {!currentUser ? (
+            <div className="hidden sm:flex items-center gap-2">
+              <button
+                onClick={() => onOpenSignIn('login')}
+                className="border border-outline/30 hover:border-primary text-on-surface hover:text-white px-4 py-2 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={onOpenSignUp}
+                className="bg-primary text-on-primary hover:bg-primary-fixed px-5 py-2 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all glow-hover shadow-sm"
+              >
+                Sign Up
+              </button>
+            </div>
+          ) : (
             <button
-              onClick={onOpenSignIn}
-              className="hidden md:flex border border-outline/40 hover:border-primary text-on-surface hover:text-white px-5 py-2.5 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all"
+              onClick={onOpenPortalView}
+              className="hidden sm:flex items-center gap-2 bg-primary text-on-primary hover:bg-primary-fixed px-5 py-2 rounded-full font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all glow-hover shadow-sm"
             >
-              Sign In
+              <span className="material-symbols-outlined text-sm">dashboard</span>
+              <span>{firstName}'s Dashboard</span>
             </button>
           )}
 

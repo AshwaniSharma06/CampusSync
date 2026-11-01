@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const SAMPLE_PROMPTS = [
   'Where is my next class?',
   'When does the Central Library close?',
-  'What BTU mid-terms do I have in Oct 2026?',
+  'What BTU mid-terms do I have in Nov 2026?',
   'How do I register for Technotsav 2026?',
 ];
 
@@ -42,10 +42,10 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
           'The Central Library is open today until 10:00 PM. Study Pod B in Central Library is reserved for Calculus III peer review.';
       } else if (lower.includes('exam') || lower.includes('mid-term') || lower.includes('midterm')) {
         botResponse =
-          'BTU mid-terms begin Oct 18 with Database Systems (CS 401) at 10:00 AM in Exam Hall A, and ML (CS 450) on Oct 22 at 2:00 PM in Hall C.';
+          'BTU mid-terms for Semester 7 begin Nov 12 with Database Systems (CS 401) at 10:00 AM in Exam Hall A, and Machine Learning (CS 450) on Nov 15 at 2:00 PM in Hall C.';
       } else if (lower.includes('technotsav') || lower.includes('register') || lower.includes('fest')) {
         botResponse =
-          'Technotsav 2026 runs Oct 15–17 at ECA Campus. Registrations are open for Robowar and the 24-hr Hackathon.';
+          'Technotsav 2026 runs Nov 15–17 at ECA Campus. Registrations are open for Robowar, the 24-hr Hackathon, and SIH 2026 screening.';
       } else {
         botResponse = `Campus AI Copilot: Logged "${query}" into your student workspace and verified against the Fall 2026 academic catalog.`;
       }

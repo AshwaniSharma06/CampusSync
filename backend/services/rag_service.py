@@ -1,22 +1,17 @@
 import chromadb
+from chromadb.config import Settings as ChromaSettings
 import google.generativeai as genai
 from backend.core.config import settings
 
-# Initialize ChromaDB in-memory or persistent client
-# For development/demo, we use an in-memory client
-chroma_client = chromadb.Client()
+# Initialize ChromaDB client with telemetry disabled to avoid network blocking
+chroma_client = chromadb.Client(ChromaSettings(anonymized_telemetry=False))
 
 # Initialize the Gemini API if the key is provided
 if settings.GEMINI_API_KEY:
     genai.configure(api_key=settings.GEMINI_API_KEY)
 
-# Get or create a collection for our RAG documents
-# ChromaDB uses a default all-MiniLM-L6-v2 embedding model if none is provided,
-# which is perfect for running locally and quickly without additional setup.
-try:
-    collection = chroma_client.get_collection(name="campussync_rag")
-except Exception:
-    collection = chroma_client.create_collection(name="campussync_rag")
+# Get or create collection
+collection = chroma_client.get_or_create_collection(name="campussync_rag")
 
 def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50):
     """

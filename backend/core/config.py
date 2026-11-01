@@ -1,7 +1,11 @@
 import os
+from pathlib import Path
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
+# Load from backend/.env or root .env
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 load_dotenv()
 
 class Settings(BaseSettings):
@@ -9,8 +13,8 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
-    # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg2://user:password@localhost/campussync")
+    # Database (defaults to local SQLite for instant, zero-setup resilience)
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./campussync.db")
     
     # Authentication
     SECRET_KEY: str = os.getenv("SECRET_KEY", "super-secret-key-for-dev")

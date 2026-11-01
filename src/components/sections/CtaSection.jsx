@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function CtaSection({ onOpenSignIn }) {
+export default function CtaSection({ onOpenAuth }) {
   return (
     <section className="relative py-section-gap flex items-center justify-center text-center overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -17,12 +17,20 @@ export default function CtaSection({ onOpenSignIn }) {
           <br />
           <span className="text-gradient">Stay connected to all of it.</span>
         </h2>
-        <button
-          onClick={onOpenSignIn}
-          className="bg-primary text-on-primary px-9 py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.14em] hover:bg-primary-fixed transition-all glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)]"
-        >
-          Sign In to Student Portal
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => onOpenAuth?.('signup')}
+            className="w-full sm:w-auto bg-primary text-on-primary px-8 py-3.5 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.14em] hover:bg-primary-fixed transition-all glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)]"
+          >
+            Create Student Account
+          </button>
+          <button
+            onClick={() => onOpenAuth?.('login')}
+            className="w-full sm:w-auto border border-outline/30 text-on-surface hover:text-white px-8 py-3.5 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.14em] hover:bg-surface-variant transition-all"
+          >
+            Sign In to Portal
+          </button>
+        </div>
       </div>
     </section>
   );

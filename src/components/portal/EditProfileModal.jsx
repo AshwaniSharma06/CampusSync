@@ -13,13 +13,16 @@ const AVAILABLE_INTERESTS = [
 ];
 
 const DEPARTMENTS = [
-  'Computer Science & Engineering',
-  'Information Technology',
-  'Electronics & Communication',
-  'Electrical Engineering',
-  'Mechanical Engineering',
-  'Civil Engineering',
-  'Artificial Intelligence & Data Science',
+  'Computer Engineering (CSE)',
+  'CSE (Cyber Security)',
+  'Information Technology (IT)',
+  'Electronics & Communication Engineering (ECE)',
+  'Electronics Instrumentation & Control Engineering (EIC)',
+  'Electrical Engineering (EE)',
+  'Mechanical Engineering (ME)',
+  'Civil Engineering (CE)',
+  'Master of Computer Applications (MCA)',
+  'Master of Business Administration (MBA)',
 ];
 
 export default function EditProfileModal({ isOpen, onClose, currentProfile, onProfileUpdated, onNotification }) {
