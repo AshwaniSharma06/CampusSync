@@ -1,11 +1,12 @@
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, and_, false
 
-from backend.models.academic import Notice, Assignment, Course, AcademicResource
+from backend.models.academic import Notice, Assignment, Course, AcademicResource, ClassificationScope, VerificationStatus
 from backend.models.social import Event, Club
 from backend.models.user import User, StudentProfile
+from backend.api.deps import normalize_department_code
 
 class RecommendationEngine:
     """
@@ -22,29 +23,37 @@ class RecommendationEngine:
         semester: Optional[int] = None,
         interests: Optional[List[str]] = None
     ) -> Dict[str, Any]:
-        # Extract student profile if user is provided
+        # Enforce server-side student profile when authenticated
         if current_user and current_user.student_profile:
             profile = current_user.student_profile
-            department = department or profile.department
-            semester = semester or profile.semester
+            department = normalize_department_code(profile.department)
+            semester = profile.semester
             if not interests and profile.interests:
                 interests = [i.strip() for i in profile.interests.split(',') if i.strip()]
-
-        department = department or "Computer Science & Engineering"
-        semester = semester or 7
-        interests = interests or ["AI & Machine Learning", "Web Development"]
+        else:
+            department = normalize_department_code(department) if department else None
 
         recommendations: List[Dict[str, Any]] = []
         alerts: List[Dict[str, Any]] = []
 
-        # 1. Urgent Deadlines / Due Soon Assignments
+        # If student profile is incomplete and no cohort is specified, return empty recommendations
+        if not department or not semester:
+            return {"recommendations": [], "alerts": []}
+
+        interests = interests or []
+
+        # 1. Urgent Deadlines / Due Soon Assignments for student's specific cohort
         now = datetime.utcnow()
         due_threshold = now + timedelta(days=7)
         try:
             upcoming_assignments = (
                 db.query(Assignment)
-                .join(Course, Assignment.course_id == Course.id, isouter=True)
-                .filter(Assignment.due_date >= now)
+                .join(Course, Assignment.course_id == Course.id)
+                .filter(
+                    Course.department == department,
+                    Course.semester == semester,
+                    Assignment.due_date >= now
+                )
                 .order_by(Assignment.due_date.asc())
                 .limit(5)
                 .all()
@@ -64,10 +73,24 @@ class RecommendationEngine:
         except Exception:
             pass
 
-        # 2. Recommended Notices for Department & Semester
-        dept_keywords = [department.split()[0].lower(), "exam", "btu", "placement", "semester"]
+        # 2. Recommended Notices for Department & Semester (Strictly Active & Verified)
+        dept_keywords = [department.lower(), "exam", "btu", "placement", "semester"]
         try:
-            notices = db.query(Notice).order_by(Notice.published_date.desc()).limit(15).all()
+            notices = db.query(Notice).filter(
+                Notice.is_active == True,
+                Notice.verification_status == VerificationStatus.VERIFIED.value,
+                Notice.scope != ClassificationScope.UNCLASSIFIED.value,
+                or_(
+                    Notice.scope == ClassificationScope.GLOBAL.value,
+                    and_(
+                        Notice.department_code == department,
+                        or_(
+                            Notice.target_semester == None,
+                            Notice.target_semester == semester
+                        )
+                    )
+                )
+            ).order_by(Notice.published_date.desc()).limit(15).all()
             for notice in notices:
                 score = 0
                 title_lower = notice.title.lower()

@@ -4,19 +4,14 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import firebase_admin
 from firebase_admin import auth as firebase_auth
 from firebase_admin import credentials
 
 from backend.db.session import SessionLocal
 from backend.core.config import settings
-from backend.models.user import User
-
-# Initialize Firebase (Requires FIREBASE_CREDENTIALS path in env or initialized default)
-# if not firebase_admin._apps:
-#     cred = credentials.Certificate("firebase_credentials.json")
-#     firebase_admin.initialize_app(cred)
+from backend.models.user import User, StudentProfile
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"
@@ -43,7 +38,7 @@ def get_current_user(
             detail="Could not validate credentials",
         )
     
-    user = db.query(User).filter(User.id == int(token_data["sub"])).first()
+    user = db.query(User).options(joinedload(User.student_profile)).filter(User.id == int(token_data["sub"])).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -63,3 +58,71 @@ def get_optional_current_user(
     except Exception:
         return None
 
+def normalize_department_code(dept: Optional[str]) -> Optional[str]:
+    """
+    Normalizes varied department names to canonical college codes:
+    e.g. 'Computer Science & Engineering', 'Computer Science', 'CSE' -> 'CSE'
+    """
+    if not dept:
+        return None
+    d = dept.strip().upper()
+    if any(k in d for k in ["CSE", "COMPUTER"]):
+        return "CSE"
+    if any(k in d for k in ["IT", "INFORMATION"]):
+        return "IT"
+    if any(k in d for k in ["ECE", "ELECTRONIC"]):
+        return "ECE"
+    if any(k in d for k in ["EE", "ELECTRICAL"]):
+        return "EE"
+    if any(k in d for k in ["ME", "MECHANICAL"]):
+        return "ME"
+    if any(k in d for k in ["CE", "CIVIL"]):
+        return "CE"
+    if "MCA" in d:
+        return "MCA"
+    if "MBA" in d:
+        return "MBA"
+    return d
+
+class StudentContext:
+    """
+    Authoritative, server-side verified student identity.
+    Constructed exclusively from database state - never trusts frontend parameters.
+    """
+    def __init__(self, user: User, student_id: str, department_code: str, semester: int, academic_year: Optional[str]):
+        self.user = user
+        self.user_id = user.id
+        self.student_id = student_id
+        self.department_code = department_code
+        self.semester = semester
+        self.academic_year = academic_year or "2026-27"
+
+def get_current_student_context(
+    current_user: User = Depends(get_current_user)
+) -> StudentContext:
+    """
+    Enforces server-side authentication and verifies that the student
+    has a complete and valid academic profile. Rejects incomplete profiles
+    with HTTP 403 rather than defaulting to Semester 7 or CSE.
+    """
+    profile = current_user.student_profile
+    if not profile or not profile.department or profile.semester is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Student academic profile is incomplete. Department and semester are required to access cohort records."
+        )
+    
+    dept_code = normalize_department_code(profile.department)
+    if not dept_code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unrecognized department specified in student academic profile."
+        )
+        
+    return StudentContext(
+        user=current_user,
+        student_id=profile.student_id or f"ECA-{current_user.id}",
+        department_code=dept_code,
+        semester=int(profile.semester),
+        academic_year="2026-27"
+    )

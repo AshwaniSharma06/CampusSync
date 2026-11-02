@@ -13,6 +13,7 @@ from backend.api.v1.notifications import router as notifications_router
 from backend.api.v1.scraper import router as scraper_router
 from backend.api.v1.rag import router as rag_router
 from backend.api.v1.recommendations import router as recommendations_router
+from backend.api.v1.examinations import router as examinations_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
@@ -20,6 +21,7 @@ api_router.include_router(profile_router, prefix="/profile", tags=["profile"])
 api_router.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 api_router.include_router(notices_router, prefix="/notices", tags=["notices"])
 api_router.include_router(courses_router, prefix="/courses", tags=["courses"])
+api_router.include_router(examinations_router, prefix="/examinations", tags=["examinations"])
 api_router.include_router(events_router, prefix="/events", tags=["events"])
 api_router.include_router(assignments_router, prefix="/assignments", tags=["assignments"])
 api_router.include_router(saved_router, prefix="/saved", tags=["saved"])
