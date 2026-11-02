@@ -4,7 +4,21 @@
  * environment configuration, and structured error handling.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+// Normalize API base URL: support VITE_API_URL and VITE_API_BASE_URL,
+// and gracefully append /api/v1 if the user provides only the host (e.g. on Vercel/Render)
+const getApiBaseUrl = () => {
+  const raw = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+  const clean = raw.trim().replace(/\/+$/, '');
+  if (clean.endsWith('/api/v1')) {
+    return clean;
+  }
+  if (clean.endsWith('/api')) {
+    return `${clean}/v1`;
+  }
+  return `${clean}/api/v1`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('campussync_token');

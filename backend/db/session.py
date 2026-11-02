@@ -19,19 +19,32 @@ def is_port_reachable(host: str = "127.0.0.1", port: int = 5432) -> bool:
 
 def get_engine():
     db_url = settings.DATABASE_URL
+    # Normalize legacy postgres:// URI for SQLAlchemy 2.0
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
     if "postgresql" in db_url:
-        if is_port_reachable("127.0.0.1", 5432):
-            try:
-                return create_engine(db_url, pool_pre_ping=True)
-            except Exception as e:
-                logger.warning(f"PostgreSQL connection failed ({e}). Falling back to SQLite.")
+        is_local = "127.0.0.1" in db_url or "localhost" in db_url
+        if is_local:
+            if is_port_reachable("127.0.0.1", 5432):
+                try:
+                    return create_engine(db_url, pool_pre_ping=True)
+                except Exception as e:
+                    logger.warning(f"Local PostgreSQL connection failed ({e}). Falling back to SQLite.")
+            else:
+                logger.info("Local PostgreSQL offline on port 5432. Using fail-safe SQLite.")
+            return create_engine("sqlite:///./campussync.db", connect_args={"check_same_thread": False})
         else:
-            logger.info("PostgreSQL service is offline on port 5432. Using local fail-safe SQLite database.")
-        
-        return create_engine(
-            "sqlite:///./campussync.db",
-            connect_args={"check_same_thread": False}
-        )
+            # Managed remote cloud database (e.g. Supabase, Render PostgreSQL, Neon)
+            try:
+                eng = create_engine(db_url, pool_pre_ping=True)
+                with eng.connect() as conn:
+                    pass
+                return eng
+            except Exception as e:
+                logger.warning(f"Remote PostgreSQL connection failed ({e}). Falling back to SQLite.")
+                return create_engine("sqlite:///./campussync.db", connect_args={"check_same_thread": False})
+
     elif "sqlite" in db_url:
         return create_engine(
             db_url,
