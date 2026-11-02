@@ -465,7 +465,7 @@ Core Responsibilities:
 Student Question: {q_clean}
 
 Answer:"""
-            response = model.generate_content(system_prompt)
+            response = model.generate_content(system_prompt, request_options={"timeout": 6.0})
             if response and response.text:
                 return {
                     "answer": response.text.strip(),
