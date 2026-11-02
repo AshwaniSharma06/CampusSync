@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
+import { generateLocalAIResponse } from '../../services/aiSynthesizer';
 import EditProfileModal from './EditProfileModal';
 
 export default function StudentDashboard({ user, onSignOut, onActionNotification, onReturnHome }) {
@@ -75,39 +76,18 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     setAiQuery(query);
     setAiLoading(true);
     setAiResponse('');
-    onActionNotification?.(`Campus AI: Searching knowledge base for "${query}"...`);
+    onActionNotification?.(`Campus AI: Analyzing "${query}"...`);
     
     try {
-      const response = await apiService.chatWithAI(query);
+      const response = await apiService.chatWithAI(query, [], studentProfile);
       if (response && response.answer) {
         setAiResponse(response.answer);
         return;
       }
       throw new Error('No direct answer');
     } catch (err) {
-      console.warn('Live API response fallback to local ECA Copilot engine:', err);
-      // High-accuracy offline / local ECA Copilot engine for any question
-      const lower = query.toLowerCase();
-      let answer = '';
-      if (lower.includes('class') || lower.includes('where') || lower.includes('room') || lower.includes('lecture') || lower.includes('timetable') || lower.includes('schedule')) {
-        answer = "📍 Your next class is Advanced Physics Lab (PHYS 302) at 10:00 AM in Barliya Block, Room 402 with Dr. Marcus Brody. In the afternoon, Machine Learning (CS 450) is in NB-103 at 2:00 PM.";
-      } else if (lower.includes('exam') || lower.includes('mid-term') || lower.includes('midterm') || lower.includes('btu') || lower.includes('date')) {
-        answer = "📅 BTU Semester 7 Mid-Term examinations commence on Nov 12, 2026. Schedule:\n• Nov 12 (10:00 AM): Database Systems (CS 401) — Exam Hall A\n• Nov 15 (02:00 PM): Machine Learning (CS 450) — Exam Hall C\n• Nov 18 (10:00 AM): Cloud Computing (CS 460) — Room NB-102\nRemember to submit your exam registration fee before Nov 10!";
-      } else if (lower.includes('library') || lower.includes('book') || lower.includes('open') || lower.includes('close') || lower.includes('timing')) {
-        answer = "📚 ECA Central Library is open Monday through Saturday from 9:00 AM to 10:00 PM. Digital Library on the 2nd floor offers 50 high-speed terminals with IEEE Xplore access. Study Pod B is reserved for peer review.";
-      } else if (lower.includes('technotsav') || lower.includes('fest') || lower.includes('hackathon') || lower.includes('sih') || lower.includes('event')) {
-        answer = "🎉 Technotsav 2026 is scheduled for Nov 15–17, 2026 at ECA Campus. Highlights include the 24-hr 'CodeECA' Hackathon, Robowar Arena in the Central Amphitheater, and SIH 2026 screenings. Register from the Events tab!";
-      } else if (lower.includes('deadline') || lower.includes('due') || lower.includes('assignment') || lower.includes('project')) {
-        answer = "⚠️ Upcoming Academic Deadlines:\n1) B.Tech Major Project Phase-1 Lab Report (Due Nov 5, 2026)\n2) ML Assignment 3 Neural Networks (Due in 3 days)\n3) BTU Semester Exam Registration Fee (Due in 5 days - Nov 10)";
-      } else if (lower.includes('attendance') || lower.includes('rule') || lower.includes('75') || lower.includes('criteria')) {
-        answer = "📋 BTU Attendance Regulations: Minimum 75% attendance across theory and lab sessions is mandatory to appear for semester examinations. Your current overall attendance is 87% (Good standing).";
-      } else if (lower.includes('hod') || lower.includes('principal') || lower.includes('faculty') || lower.includes('proctor') || lower.includes('dean')) {
-        answer = "🏛️ ECA Administration Directory:\n• Principal: Dr. Rekha Mehra\n• HOD Computer Engineering: Dr. Rakesh Rathi\n• HOD Information Technology: Dr. Jyoti Gajrani\n• Chief Proctor Office: Admin Block Room 104\n• T&P Cell: Barliya Block 2nd Floor";
-      } else if (lower.includes('fee') || lower.includes('gas') || lower.includes('sfs') || lower.includes('tfws') || lower.includes('scholarship')) {
-        answer = "💳 ECA Fee & Admission Schemes:\n• GAS: Government Aided Seat with subsidized state tuition\n• SFS: Self Finance Scheme\n• TFWS: 100% Tuition Fee Waiver Scheme for eligible merit students\n• BTU Semester VII Exam Fee: ₹1,800 (Due before Nov 10)";
-      } else {
-        answer = `🤖 Campus AI Copilot: Verified your query against official ECA & BTU 2026 records for "${query}". Your academic standing is active, all course credits are validated, and your registered department is ${studentProfile?.department || 'Computer Engineering'}.`;
-      }
+      console.warn('Live API response fallback to intelligent synthesizer:', err);
+      const answer = generateLocalAIResponse(query, studentProfile);
       setAiResponse(answer);
     } finally {
       setAiLoading(false);
@@ -1254,22 +1234,24 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
               {/* Quick Prompt Suggestions */}
               <div>
                 <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
-                  Recommended Questions
+                  Academic &amp; Campus Assistance Topics
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                   {[
-                    'What should I focus on today?',
-                    'Summarize my upcoming deadlines and exams',
-                    'Where is my next class and room number?',
-                    'What are the syllabus topics for CS 450 midterm?'
+                    'Explain DBMS normalization with examples',
+                    'Give me 10 Java MCQs for exam preparation',
+                    'Create a 7-day semester exam study timetable',
+                    'Explain polymorphism with a real-world example',
+                    'Tell me the next BTU examination date',
+                    'What is my attendance status?'
                   ].map((p, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleAiPromptClick(p)}
-                      className="text-left p-3 rounded-xl bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-[14px] font-semibold text-slate-800 transition-all flex items-center justify-between"
+                      className="text-left p-3 rounded-xl bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-[13px] font-semibold text-slate-800 transition-all flex items-center justify-between group"
                     >
-                      <span>"{p}"</span>
-                      <span className="material-symbols-outlined text-xs text-teal-600">arrow_forward</span>
+                      <span className="line-clamp-1">"{p}"</span>
+                      <span className="material-symbols-outlined text-xs text-teal-600 group-hover:translate-x-0.5 transition-transform shrink-0 ml-1">arrow_forward</span>
                     </button>
                   ))}
                 </div>

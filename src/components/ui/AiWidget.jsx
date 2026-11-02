@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { apiService } from '../../services/apiService';
+import { generateLocalAIResponse } from '../../services/aiSynthesizer';
 
 const SAMPLE_PROMPTS = [
-  'Where is my next class?',
-  'When does the Central Library close?',
-  'What BTU mid-terms do I have in Nov 2026?',
-  'How do I register for Technotsav 2026?',
+  'Explain DBMS normalization',
+  'Give me 10 Java MCQs',
+  'Create a 7-day study timetable',
+  'Tell me the next examination date',
+  'Explain polymorphism with examples',
+  'What is my attendance status?',
 ];
 
 export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
@@ -16,7 +19,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: 'Hi! 👋 I am your ECA Campus AI Copilot. Ask me about your timetable, BTU mid-terms, Central Library hours, or SAC fest passes.',
+      text: "Hey! 👋 I'm **Campus AI Copilot**. I can help you with academic concepts, exam preparation, study timetables, and verified BTU/ECA college schedules. What would you like to explore today?",
     },
   ]);
   const [inputVal, setInputVal] = useState('');
@@ -27,49 +30,27 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
     if (!query) return;
 
     const newMsg = { role: 'user', text: query };
-    setMessages((prev) => [...prev, newMsg]);
+    const updatedMessages = [...messages, newMsg];
+    setMessages(updatedMessages);
     if (!textOverride) setInputVal('');
     setIsThinking(true);
 
+    const historyPayload = updatedMessages.slice(-6).map((m) => ({
+      role: m.role,
+      content: m.text,
+    }));
+
     try {
-      const response = await apiService.chatWithAI(query);
+      const response = await apiService.chatWithAI(query, historyPayload);
       if (response && response.answer) {
         setMessages((prev) => [...prev, { role: 'assistant', text: response.answer }]);
         return;
       }
       throw new Error('No answer in response');
     } catch (err) {
-      console.warn('AiWidget fallback to local ECA Copilot engine:', err);
-      // High-accuracy fallback matching official ECA records
-      const lower = query.toLowerCase();
-      let botResponse = '';
-
-      if (lower.includes('class') || lower.includes('where') || lower.includes('room') || lower.includes('lecture')) {
-        botResponse =
-          "📍 Your next class is Advanced Physics Lab (PHYS 302) in Barliya Block, Room 402 at 10:00 AM with Dr. Marcus Brody. Machine Learning (CS 450) meets in NB-103 at 2:00 PM.";
-      } else if (lower.includes('library') || lower.includes('open') || lower.includes('close') || lower.includes('timing')) {
-        botResponse =
-          '📚 The Central Library is open today until 10:00 PM. Digital Library on the 2nd floor has 50 terminals with IEEE Xplore access. Study Pod B is reserved for peer review.';
-      } else if (lower.includes('exam') || lower.includes('mid-term') || lower.includes('midterm') || lower.includes('btu')) {
-        botResponse =
-          '📅 BTU mid-terms for Semester 7 begin Nov 12 with Database Systems (CS 401) at 10:00 AM in Exam Hall A, followed by Machine Learning (CS 450) on Nov 15 at 2:00 PM in Hall C.';
-      } else if (lower.includes('technotsav') || lower.includes('register') || lower.includes('fest') || lower.includes('hackathon')) {
-        botResponse =
-          '🎉 Technotsav 2026 runs Nov 15–17 at ECA Campus. Registrations are open for the 24-hr Hackathon, Robowar Arena in the Amphitheater, and SIH 2026 screening.';
-      } else if (lower.includes('attendance') || lower.includes('rule') || lower.includes('75')) {
-        botResponse =
-          '📋 BTU Regulations require a minimum of 75% attendance in theory and lab sessions to appear in semester examinations.';
-      } else if (lower.includes('hod') || lower.includes('principal') || lower.includes('faculty') || lower.includes('proctor')) {
-        botResponse =
-          '🏛️ ECA Directory: Principal is Dr. Rekha Mehra; HOD Computer Engineering is Dr. Rakesh Rathi; Chief Proctor Office is located in Admin Block Room 104.';
-      } else if (lower.includes('fee') || lower.includes('tfws') || lower.includes('gas') || lower.includes('sfs')) {
-        botResponse =
-          '💳 BTU Semester VII exam fee is ₹1,800 (Due Nov 10). ECA offers GAS (Govt Aided), SFS, and TFWS (100% tuition waiver for eligible state rank holders).';
-      } else {
-        botResponse = `Campus AI Copilot: Verified against BTU syllabus and ECA academic schedule for "${query}". Your course standing and attendance records are fully verified.`;
-      }
-
-      setMessages((prev) => [...prev, { role: 'assistant', text: botResponse }]);
+      console.warn('Live API response fallback to intelligent synthesizer:', err);
+      const answer = generateLocalAIResponse(query);
+      setMessages((prev) => [...prev, { role: 'assistant', text: answer }]);
     } finally {
       setIsThinking(false);
     }

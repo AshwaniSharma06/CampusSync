@@ -158,10 +158,14 @@ export const apiService = {
   },
 
   // AI RAG Chatbot
-  chatWithAI: async (query) => {
+  chatWithAI: async (query, history = [], studentProfile = null) => {
     return apiClient('/rag/chat', {
       method: 'POST',
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({
+        query,
+        history,
+        student_profile: studentProfile,
+      }),
     });
   },
 };
