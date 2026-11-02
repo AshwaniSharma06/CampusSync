@@ -50,6 +50,25 @@ export const apiClient = async (endpoint, options = {}) => {
 };
 
 export const apiService = {
+  // Authentication & Session
+  registerUser: async (registrationData) => {
+    return apiClient('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(registrationData),
+    });
+  },
+
+  loginUser: async (email, password) => {
+    return apiClient('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
+
+  getCurrentUser: async () => {
+    return apiClient('/auth/me');
+  },
+
   // Student Profile
   getStudentProfile: async () => {
     return apiClient('/profile/');

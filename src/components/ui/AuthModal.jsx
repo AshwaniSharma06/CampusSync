@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/apiService';
+import { accountStore } from '../../services/accountStore';
 
 // Official Academic Departments & Branches from ecajmer.ac.in
 const ECA_BRANCHES = [
@@ -89,14 +90,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
     setLoading(true);
     setError('');
 
-    // Validation for Signup
+    const cleanEmail = (formData.email || '').trim().toLowerCase();
+
+    // 1. SIGNUP WORKFLOW
     if (mode === 'signup') {
       if (!formData.fullName.trim()) {
         setError('Please enter your full legal name.');
         setLoading(false);
         return;
       }
-      if (!formData.email.trim()) {
+      if (!cleanEmail) {
         setError('Please provide a valid email address.');
         setLoading(false);
         return;
@@ -116,75 +119,133 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         setLoading(false);
         return;
       }
+
+      // Check if this email is already registered locally
+      const existing = accountStore.findByEmail(cleanEmail);
+      if (existing && existing.password) {
+        setError('An account with this email already exists. Please switch to Sign In.');
+        setLoading(false);
+        return;
+      }
+
+      const newStudentPayload = {
+        name: formData.fullName.trim(),
+        email: cleanEmail,
+        password: formData.password,
+        studentId: formData.studentId.trim(),
+        program: formData.program,
+        department: formData.department,
+        admissionCategory: formData.admissionCategory,
+        semester: Number(formData.semester) || 7,
+        session: formData.session,
+        enrollment_year: parseInt(formData.session.slice(0, 4), 10) || 2022,
+      };
+
+      try {
+        let backendToken = null;
+        // Attempt backend registration
+        try {
+          const res = await apiService.registerUser({
+            email: cleanEmail,
+            password: formData.password,
+            full_name: newStudentPayload.name,
+            student_id: newStudentPayload.studentId,
+            department: newStudentPayload.department,
+            semester: newStudentPayload.semester,
+            session: newStudentPayload.session,
+            program: newStudentPayload.program,
+            admission_category: newStudentPayload.admissionCategory,
+          });
+          if (res?.access_token) {
+            backendToken = res.access_token;
+          }
+        } catch (apiErr) {
+          console.warn('Backend API registration offline or skipped:', apiErr);
+          // If backend actively reported duplicate user
+          if (apiErr.message && apiErr.message.includes('already exists')) {
+            setError('An account with this email already exists. Please switch to Sign In.');
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Firebase signup attempt if available
+        try {
+          await signup(cleanEmail, formData.password);
+        } catch (_) {}
+
+        // Persist account in permanent users registry & set active session
+        const savedAccount = accountStore.saveUser(newStudentPayload);
+        accountStore.setActiveSession(savedAccount, backendToken);
+
+        onAuthSuccess?.(savedAccount);
+      } catch (err) {
+        setError(err.message || 'Registration failed. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+      return;
     }
 
-    const studentProfilePayload = {
-      name: formData.fullName || (formData.email ? formData.email.split('@')[0] : 'Ashwani Sharma'),
-      email: formData.email,
-      studentId: formData.studentId || '22ECA8941',
-      program: formData.program,
-      department: formData.department,
-      admissionCategory: formData.admissionCategory,
-      semester: Number(formData.semester) || 7,
-      session: formData.session,
-      enrollment_year: parseInt(formData.session.slice(0, 4), 10) || 2022,
-    };
+    // 2. SIGN IN / LOGIN WORKFLOW
+    if (mode === 'login') {
+      if (!cleanEmail) {
+        setError('Please enter your registered email address.');
+        setLoading(false);
+        return;
+      }
+      if (!formData.password) {
+        setError('Please enter your password.');
+        setLoading(false);
+        return;
+      }
 
-    try {
-      if (mode === 'login') {
-        await login(formData.email, formData.password);
-      } else {
-        await signup(formData.email, formData.password);
-        // Persist profile to backend if possible
+      try {
+        let authenticatedProfile = null;
+        let backendToken = null;
+
+        // Step A: Attempt authentication via FastAPI backend
         try {
-          await apiService.updateStudentProfile({
-            full_name: studentProfilePayload.name,
-            student_id: studentProfilePayload.studentId,
-            department: studentProfilePayload.department,
-            semester: studentProfilePayload.semester,
-            enrollment_year: studentProfilePayload.enrollment_year,
-          });
-        } catch (_) {
-          // Backend offline or local fallback handled gracefully
+          const res = await apiService.loginUser(cleanEmail, formData.password);
+          if (res?.user) {
+            authenticatedProfile = res.user;
+            backendToken = res.access_token;
+          }
+        } catch (backendErr) {
+          console.warn('Backend login fallback to local account registry:', backendErr);
+          if (backendErr.message && backendErr.message.includes('Incorrect password')) {
+            setError('Incorrect password. Please verify your credentials and try again.');
+            setLoading(false);
+            return;
+          }
         }
-      }
 
-      // Save locally for reliable presentation persistence
-      localStorage.setItem('campussync_student_profile', JSON.stringify(studentProfilePayload));
-      localStorage.setItem('campussync_demo_user', 'true');
+        // Step B: Verify credentials against permanent local account store
+        if (!authenticatedProfile) {
+          const check = accountStore.verifyCredentials(cleanEmail, formData.password);
+          if (!check.success) {
+            setError(check.message);
+            setLoading(false);
+            return;
+          }
+          authenticatedProfile = check.user;
+        }
 
-      onAuthSuccess?.(studentProfilePayload);
-    } catch (err) {
-      console.warn('Auth handler fallback triggered:', err);
-      const code = (err?.code || '').toLowerCase();
-      const msg = (err?.message || '').toLowerCase();
+        // Firebase login attempt if available
+        try {
+          await login(cleanEmail, formData.password);
+        } catch (_) {}
 
-      // Gracefully handle unconfigured/invalid Firebase API keys, offline, or network errors
-      if (
-        code.includes('api-key') ||
-        code.includes('invalid-api-key') ||
-        code.includes('api-key-not-valid') ||
-        code.includes('network-request-failed') ||
-        code.includes('app-not-authorized') ||
-        msg.includes('api-key') ||
-        msg.includes('api key') ||
-        msg.includes('offline') ||
-        msg.includes('network')
-      ) {
-        localStorage.setItem('campussync_student_profile', JSON.stringify(studentProfilePayload));
-        localStorage.setItem('campussync_demo_user', 'true');
-        onAuthSuccess?.(studentProfilePayload);
-      } else if (code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists. Please switch to Sign In.');
-      } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-        setError('Incorrect password or credentials. Please try again.');
-      } else if (code === 'auth/user-not-found') {
-        setError('No account found for this email. Please sign up first.');
-      } else {
+        // Set as active session (preserving the exact user profile, never overwriting with defaults)
+        const finalProfile = accountStore.saveUser(authenticatedProfile);
+        accountStore.setActiveSession(finalProfile, backendToken);
+
+        onAuthSuccess?.(finalProfile);
+      } catch (err) {
         setError(err.message || 'Authentication error. Please check your credentials.');
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -200,8 +261,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
       session: '2022 – 2026 (Final Year Batch)',
       enrollment_year: 2022,
     };
-    localStorage.setItem('campussync_student_profile', JSON.stringify(demoPayload));
-    localStorage.setItem('campussync_demo_user', 'true');
+    accountStore.saveUser(demoPayload);
+    accountStore.setActiveSession(demoPayload);
     onAuthSuccess?.(demoPayload);
   };
 

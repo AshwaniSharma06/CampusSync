@@ -12,6 +12,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import { useAuth } from './context/AuthContext';
 import { apiService } from './services/apiService';
+import { accountStore } from './services/accountStore';
 
 export default function App() {
   const [toastMessage, setToastMessage] = useState('');
@@ -19,7 +20,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('login');
   const { currentUser, logout, jwtToken } = useAuth();
-  const [userProfile, setUserProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState(() => accountStore.getActiveSession());
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,12 +32,9 @@ export default function App() {
 
   // Restore cached profile on first mount if signed in
   useEffect(() => {
-    const cachedProfile = localStorage.getItem('campussync_student_profile');
+    const cachedProfile = accountStore.getActiveSession();
     if (cachedProfile) {
-      try {
-        const parsed = JSON.parse(cachedProfile);
-        setUserProfile(parsed);
-      } catch (_) {}
+      setUserProfile(cachedProfile);
     }
   }, []);
 
@@ -53,7 +51,7 @@ export default function App() {
           session: profile.enrollment_year ? `${profile.enrollment_year} – ${profile.enrollment_year + 4}` : '2022 – 2026'
         };
         setUserProfile(updated);
-        localStorage.setItem('campussync_student_profile', JSON.stringify(updated));
+        accountStore.setActiveSession(updated);
       }).catch(err => console.error("Failed to fetch profile", err));
     }
   }, [jwtToken, currentUser]);
@@ -67,7 +65,7 @@ export default function App() {
     setIsAuthModalOpen(false);
     if (profileData) {
       setUserProfile(profileData);
-      localStorage.setItem('campussync_student_profile', JSON.stringify(profileData));
+      accountStore.setActiveSession(profileData);
     }
     const displayName = profileData?.name || profileData?.fullName || 'Student';
     showToast(`Welcome ${displayName}! Accessing your student portal...`);
@@ -78,9 +76,7 @@ export default function App() {
     try {
       await logout();
     } catch (_) {}
-    localStorage.removeItem('campussync_demo_user');
-    localStorage.removeItem('campussync_student_profile');
-    localStorage.removeItem('campussync_token');
+    accountStore.clearActiveSession();
     setUserProfile(null);
     showToast('Signed out of Student Portal.');
     navigate('/');
@@ -88,10 +84,9 @@ export default function App() {
 
   // Guard: Check if student has signed in or completed registration
   const isStudentAuthenticated = Boolean(
-    currentUser || 
     userProfile || 
-    localStorage.getItem('campussync_student_profile') || 
-    localStorage.getItem('campussync_demo_user')
+    currentUser || 
+    accountStore.getActiveSession()
   );
 
   // When clicking dashboard without login, open auth popup modal
@@ -104,8 +99,8 @@ export default function App() {
     }
   };
 
-  const effectiveUser = userProfile || (currentUser ? {
-    name: currentUser?.displayName || (currentUser?.email ? currentUser.email.split('@')[0] : 'Student'),
+  const effectiveUser = userProfile || accountStore.getActiveSession() || (currentUser ? {
+    name: currentUser?.displayName || 'Student',
     email: currentUser?.email || 'student@example.com',
     department: 'Computer Engineering (CSE)',
     studentId: '22ECA8941',
