@@ -66,7 +66,7 @@ export default function CampusAiSection() {
             <div className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 px-3.5 py-1.5 rounded-full w-fit">
               <span className="material-symbols-outlined text-teal-400 text-sm">smart_toy</span>
               <span className="font-bold text-teal-400 uppercase tracking-wider text-xs">
-                ECA CampusSync AI Copilot
+                ECA CampusSync AI
               </span>
             </div>
 
@@ -128,7 +128,7 @@ export default function CampusAiSection() {
                     >
                       <div className="flex items-center gap-1.5 text-teal-400 font-bold text-[11px] mb-1">
                         <span className="material-symbols-outlined text-xs">smart_toy</span>
-                        <span>Campus AI Copilot</span>
+                        <span>CampusSync AI</span>
                       </div>
                       <p className="text-slate-100 font-normal">{m.text}</p>
                     </div>

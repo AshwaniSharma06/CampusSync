@@ -15,7 +15,7 @@ export const generateLocalAIResponse = (query, studentProfile = null) => {
   // 1. GREETINGS & INTRODUCTIONS
   if (/^(hi|hello|hey|hola|greetings|good\s+(morning|afternoon|evening|day))[\s!.]*$/i.test(qLower)) {
     return (
-      `Hey ${firstName}! 👋 I'm **Campus AI Copilot**, your student assistant at Engineering College Ajmer.\n\n` +
+      `Hey ${firstName}! 👋 I'm **CampusSync AI**, your student assistant at Engineering College Ajmer.\n\n` +
       "I can help you with:\n" +
       "• **Academic Concepts**: DBMS normalization, Operating Systems, Data Structures, OOP, Machine Learning.\n" +
       "• **Exam Preparation**: Generating practice MCQs, chapter summaries, and revision strategies.\n" +
@@ -27,7 +27,7 @@ export const generateLocalAIResponse = (query, studentProfile = null) => {
 
   if (qLower.includes('who are you') || qLower.includes('what are you') || qLower.includes('your name')) {
     return (
-      "I am **Campus AI Copilot**, your intelligent student assistant integrated into CampusSync. " +
+      "I am **CampusSync AI**, your intelligent student assistant integrated into CampusSync. " +
       "I'm engineered to help students at Engineering College Ajmer understand complex engineering subjects, " +
       "prepare for BTU mid-terms & finals, and stay updated with verified campus announcements."
     );
@@ -186,8 +186,9 @@ export const generateLocalAIResponse = (query, studentProfile = null) => {
   // 8. GENERAL SMART FALLBACK
   return (
     `I understand your query regarding **"${qClean}"**. ` +
-    "As your Campus AI Copilot, I can provide detailed educational breakdowns on engineering topics, " +
+    "As CampusSync AI, I can provide detailed educational breakdowns on engineering topics, " +
     "exam revision strategies, or verified policies from the ECA / BTU handbook. " +
     "Could you specify if you would like a conceptual explanation, practice questions, or timetable planning?"
   );
 };
+

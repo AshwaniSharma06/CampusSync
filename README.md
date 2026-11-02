@@ -7,14 +7,14 @@
 [![LLM](https://img.shields.io/badge/AI-Google%20Gemini%20Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-**CampusSync** is an intelligent, unified campus command center engineered for university students. Featuring an editorial **"Cinematic Academic"** visual design, CampusSync brings together official university notices, department circulars, upcoming assignment deadlines, student club communities, and a context-grounded **Gemini RAG Copilot**.
+**CampusSync** is an intelligent, unified campus command center engineered for university students. Featuring an editorial **"Cinematic Academic"** visual design, CampusSync brings together official university notices, department circulars, upcoming assignment deadlines, student club communities, and context-grounded **CampusSync AI**.
 
 ---
 
 ## 🌟 Key Features
 
 * 🏛️ **Student Command Center**: Real-time overview of semester progress, cumulative attendance, pending assignments, and enrolled courses.
-* 🤖 **CampusSync AI Copilot (RAG)**: Grounded question answering powered by ChromaDB vector search and Google Gemini Flash with verified citations.
+* 🤖 **CampusSync AI (RAG Assistant)**: Grounded question answering powered by ChromaDB vector search and Google Gemini with verified citations.
 * 🎯 **Rule-Based Personalization**: Dynamic "Curated for You" engine recommending department-specific circulars, workshops, and hackathons based on branch, semester, and interests.
 * 📢 **Verified Notice Ingestion**: Web scrapers (BeautifulSoup & Playwright) and PDF text extraction pipelines collecting real BTU & college updates.
 * 💬 **Interactive Student Feed**: Sanitized peer discussions, technical questions, and club events with XSS protection and like reactions.

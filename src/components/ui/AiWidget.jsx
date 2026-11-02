@@ -19,7 +19,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: "Hey! 👋 I'm **Campus AI Copilot**. I can help you with academic concepts, exam preparation, study timetables, and verified BTU/ECA college schedules. What would you like to explore today?",
+      text: "Hi! I'm CampusSync AI, your intelligent academic assistant. How can I help you today?",
     },
   ]);
   const [inputVal, setInputVal] = useState('');
@@ -72,7 +72,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
               </div>
               <div>
                 <h4 className="font-bold text-white text-xs sm:text-sm flex items-center gap-1.5 leading-tight">
-                  Campus AI Copilot
+                  CampusSync AI
                 </h4>
                 <span className="text-[10px] text-teal-400 font-medium">
                   ECA Knowledge Base 2026
@@ -124,7 +124,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
             {isThinking && (
               <div className="bg-teal-950/60 text-teal-300 rounded-2xl rounded-tl-xs p-2.5 max-w-[65%] self-start border border-teal-500/30 text-[11px] flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-ping"></span>
-                <span>Copilot is checking ECA notices...</span>
+                <span>CampusSync AI is analyzing...</span>
               </div>
             )}
           </div>
@@ -141,7 +141,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
               type="text"
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
-              placeholder="Ask Campus AI..."
+              placeholder="Ask CampusSync AI..."
               className="w-full bg-slate-900 rounded-xl py-2 px-3.5 pr-10 text-xs text-white placeholder:text-slate-500 border border-slate-700 focus:outline-none focus:border-teal-500/60 transition-colors"
             />
             <button
@@ -158,7 +158,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="group relative flex items-center justify-center w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-teal-600 text-white shadow-[0_0_20px_rgba(20,184,166,0.4)] hover:bg-teal-500 hover:scale-105 active:scale-95 transition-all duration-200 z-50"
-        title="Open Campus AI Copilot"
+        title="Open CampusSync AI"
       >
         <span className="material-symbols-outlined text-2xl">
           {isOpen ? 'close' : 'smart_toy'}

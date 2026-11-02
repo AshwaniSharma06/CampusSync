@@ -98,6 +98,7 @@ If you prefer Railway:
 1. **Zero-Configuration Mode:** If the backend is ever sleeping on Render's free tier during your viva presentation, CampusSync's frontend automatically uses its built-in local ECA mock engine, allowing full access to:
    - 1-Click Student Login (`Ashwani Sharma • 22ECA8941`)
    - Personalized Student Dashboard
-   - ECA Copilot AI Assistant with verified BTU 2026 data
+   - ECA CampusSync AI Assistant with verified BTU 2026 data
    - Notices, Timetables, and Events
 2. **Local Fallback:** Always have `npm run dev` and `python -m uvicorn backend.main:app` running in your local terminal as an immediate offline backup if the auditorium Wi-Fi fluctuates.
+

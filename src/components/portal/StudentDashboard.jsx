@@ -156,7 +156,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 {activeTab === 'clubs' && 'Joined Clubs & SAC'}
                 {activeTab === 'events' && 'Upcoming Events'}
                 {activeTab === 'resources' && 'Saved Resources'}
-                {activeTab === 'ai' && 'Campus AI Copilot'}
+                {activeTab === 'ai' && 'CampusSync AI'}
               </h1>
               <p className="text-[14px] text-slate-500 font-medium hidden sm:block">
                 Engineering College Ajmer • BTU Affiliated
@@ -1226,7 +1226,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   <span className="material-symbols-outlined text-2xl">smart_toy</span>
                 </div>
                 <div>
-                  <h3 className="text-[24px] font-bold text-slate-900 tracking-tight">Campus AI Copilot Workspace</h3>
+                  <h3 className="text-[24px] font-bold text-slate-900 tracking-tight">CampusSync AI Workspace</h3>
                   <p className="text-[14px] text-teal-700 font-bold">24/7 Context-Aware Assistant for ECA &amp; BTU Students</p>
                 </div>
               </div>
@@ -1291,7 +1291,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   <div className="p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-md animate-in fade-in">
                     <div className="flex items-center gap-2 text-teal-400 font-bold text-[14px] mb-2">
                       <span className="material-symbols-outlined text-base">smart_toy</span>
-                      <span>Copilot Analysis:</span>
+                      <span>CampusSync AI Analysis:</span>
                     </div>
                     <p className="text-[15px] text-slate-100 font-normal leading-relaxed whitespace-pre-wrap">
                       {aiResponse}

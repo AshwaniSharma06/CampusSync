@@ -11,7 +11,7 @@ flowchart TD
     subgraph Client ["Client Layer (Browser)"]
         UI["React 18 + Vite (Tailwind CSS v3)"]
         ThreeCanvas["Three.js Community Sphere"]
-        CopilotWidget["AI Copilot Widget"]
+        AIWidget["CampusSync AI Widget"]
         Dashboard["Student Command Center"]
     end
 
@@ -35,7 +35,7 @@ flowchart TD
     UI -->|JWT Bearer Token| APILayer
     UI <--> Firebase
     Dashboard --> Router
-    CopilotWidget --> RAGModule
+    AIWidget --> RAGModule
     Router --> Deps
     Deps --> PostgreSQL
     RecEngine --> PostgreSQL
@@ -66,7 +66,7 @@ flowchart TD
 sequenceDiagram
     autonumber
     actor Student
-    participant UI as Copilot Interface
+    participant UI as CampusSync AI Interface
     participant FastAPIRouter as /api/v1/rag/chat
     participant VectorDB as ChromaDB (Notices & Syllabus)
     participant LLM as Google Gemini Flash
@@ -111,5 +111,5 @@ sequenceDiagram
 - `POST /api/v1/saved/` — Bookmark or remove saved item.
 
 ### AI & Data Pipeline
-- `POST /api/v1/rag/chat` — Context-grounded campus AI copilot query.
+- `POST /api/v1/rag/chat` — Context-grounded CampusSync AI query.
 - `POST /api/v1/scraper/run` — Trigger automated college portal scraping run.
