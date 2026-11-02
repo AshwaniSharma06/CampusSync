@@ -95,7 +95,7 @@ class StudentContext:
         self.student_id = student_id
         self.department_code = department_code
         self.semester = semester
-        self.academic_year = academic_year or "2026-27"
+        self.academic_year = academic_year
 
 def get_current_student_context(
     current_user: User = Depends(get_current_user)
@@ -118,11 +118,16 @@ def get_current_student_context(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unrecognized department specified in student academic profile."
         )
+
+    # Derive academic year only from verified enrollment year; do not guess
+    academic_year = None
+    if profile.enrollment_year:
+        academic_year = f"{profile.enrollment_year} – {profile.enrollment_year + 4}"
         
     return StudentContext(
         user=current_user,
         student_id=profile.student_id or f"ECA-{current_user.id}",
         department_code=dept_code,
         semester=int(profile.semester),
-        academic_year="2026-27"
+        academic_year=academic_year
     )

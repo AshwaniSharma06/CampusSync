@@ -1,76 +1,51 @@
-import requests
-from bs4 import BeautifulSoup
+"""
+Official Scraper Service for CampusSync.
+Coordinates automated ingestion runs across verified college and university sources.
+Enforces deduplication, evidence-based classification, and UNVERIFIED status.
+"""
+
+from typing import List, Dict, Any
 from sqlalchemy.orm import Session
-from datetime import datetime
 
-from backend.models.academic import Notice, NoticeType
-from backend.services.rag_service import index_document
+from backend.services.source_registry import get_all_active_sources
+from backend.services.ingestion_service import IngestionPipeline
 
-# Mock source URLs for demonstration purposes
-SOURCES = [
-    "https://example.com/btu-notices",
-    "https://example.com/eca-announcements"
-]
-
-def scrape_btu_notices(db: Session):
+def scrape_btu_notices(db: Session, max_items_per_source: int = 15) -> Dict[str, Any]:
     """
-    Scrapes official BTU/college pages for notices.
-    This is a demonstration script simulating scraping with BeautifulSoup.
+    Executes a structured ingestion run across all registered official college sources.
+    Each source is executed independently; a failure in one does not halt the others.
     """
-    scraped_count = 0
-    
-    # In a real scenario, we would iterate over SOURCES and parse actual HTML.
-    # Here, we mock the scraped data array that would come from BeautifulSoup.
-    mock_scraped_data = [
-        {
-            "title": "Semester 7 Practical Examination Dates",
-            "content": "The practical examinations for Semester 7 will commence from next Monday.",
-            "source_url": "https://example.com/btu-notices/practical-exams-sem7",
-            "notice_type": NoticeType.official,
-            "published_date": datetime.utcnow()
-        },
-        {
-            "title": "Hackathon Registrations Open",
-            "content": "Register your team for the upcoming college hackathon.",
-            "source_url": "https://example.com/eca-announcements/hackathon-2026",
-            "notice_type": NoticeType.events,
-            "published_date": datetime.utcnow()
-        },
-        {
-            "title": "Department Faculty Meeting Minutes",
-            "content": "Summary of the latest faculty meeting regarding the curriculum.",
-            "source_url": "https://example.com/eca-announcements/faculty-meeting",
-            "notice_type": NoticeType.department,
-            "published_date": datetime.utcnow()
-        }
-    ]
-    
-    for item in mock_scraped_data:
-        # Check for duplicates based on source_url
-        existing_notice = db.query(Notice).filter(Notice.source_url == item["source_url"]).first()
-        
-        if not existing_notice:
-            # If not duplicate, add to db
-            new_notice = Notice(
-                title=item["title"],
-                content=item["content"],
-                source_url=item["source_url"],
-                notice_type=item["notice_type"],
-                published_date=item["published_date"]
-            )
-            db.add(new_notice)
-            
-            # Index into RAG vector database
-            index_document(
-                doc_id=item["source_url"],
-                title=item["title"],
-                text=item["content"],
-                source_url=item["source_url"]
-            )
-            
-            scraped_count += 1
-            
-    if scraped_count > 0:
-        db.commit()
-        
-    return scraped_count
+    active_sources = get_all_active_sources()
+    total_found = 0
+    total_extracted = 0
+    total_unclassified = 0
+    jobs_summary = []
+
+    for source in active_sources:
+        job = IngestionPipeline.run_ingestion_for_source(
+            source=source,
+            db=db,
+            max_items=max_items_per_source
+        )
+        total_found += job.items_found
+        total_extracted += job.items_classified + job.items_unclassified
+        total_unclassified += job.items_unclassified
+
+        jobs_summary.append({
+            "source_id": source.source_id,
+            "source_name": source.name,
+            "status": job.status,
+            "items_found": job.items_found,
+            "items_classified": job.items_classified,
+            "items_unclassified": job.items_unclassified,
+            "error": job.error_message
+        })
+
+    return {
+        "status": "COMPLETED",
+        "sources_scraped": len(active_sources),
+        "total_documents_found": total_found,
+        "total_documents_extracted": total_extracted,
+        "total_unclassified": total_unclassified,
+        "jobs": jobs_summary
+    }
