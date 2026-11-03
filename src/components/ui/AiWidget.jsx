@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { apiService } from '../../services/apiService';
-import { generateLocalAIResponse } from '../../services/aiSynthesizer';
 
 const SAMPLE_PROMPTS = [
   'Explain DBMS normalization',
@@ -46,11 +45,16 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal }) {
         setMessages((prev) => [...prev, { role: 'assistant', text: response.answer }]);
         return;
       }
-      throw new Error('No answer in response');
+      throw new Error('No answer received from CampusSync AI service');
     } catch (err) {
-      console.warn('Live API response fallback to intelligent synthesizer:', err);
-      const answer = generateLocalAIResponse(query);
-      setMessages((prev) => [...prev, { role: 'assistant', text: answer }]);
+      console.error('CampusSync AI communication error:', err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: `⚠️ **Connection Error**: Unable to reach CampusSync AI (${err.message || 'Network failure'}). Please ensure the backend server is running.`
+        }
+      ]);
     } finally {
       setIsThinking(false);
     }

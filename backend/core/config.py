@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest")
     GEMINI_TIMEOUT_SECONDS: float = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "30.0"))
 
+    # Vector Database (ChromaDB Persistence)
+    CHROMA_PERSIST_DIRECTORY: str = os.getenv(
+        "CHROMA_PERSIST_DIRECTORY",
+        str(BASE_DIR / "data" / "chromadb")
+    )
+    CHROMA_COLLECTION_NAME: str = "campussync_rag"
+
     class Config:
         case_sensitive = True
 

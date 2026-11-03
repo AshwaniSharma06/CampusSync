@@ -146,3 +146,4 @@ class DocumentExtractor:
             lines.append(clean_line)
 
         return "\n".join(lines).strip()
+

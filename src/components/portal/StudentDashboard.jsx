@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../../services/apiService';
-import { generateLocalAIResponse } from '../../services/aiSynthesizer';
 import EditProfileModal from './EditProfileModal';
 
 export default function StudentDashboard({ user, onSignOut, onActionNotification, onReturnHome }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
   const [studentProfile, setStudentProfile] = useState(user);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -28,47 +28,84 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     return 'Good evening';
   };
 
-  const displayName = studentProfile?.name || user?.name || 'Ashwani';
-  const firstName = displayName.split(' ')[0] || 'Ashwani';
+  const displayName = studentProfile?.name || user?.name || 'Student';
+  const firstName = displayName.split(' ')[0] || 'Student';
 
   const [dashboardData, setDashboardData] = useState(null);
   const [courses, setCourses] = useState([]);
   const [notices, setNotices] = useState([]);
+  const [examinations, setExaminations] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [notificationsData, setNotificationsData] = useState([]);
+
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setApiError(null);
+    try {
+      const [summaryRes, coursesRes, noticesRes, examsRes, assignsRes, notifsRes] = await Promise.allSettled([
+        apiService.getDashboardSummary(),
+        apiService.getEnrolledCourses(),
+        apiService.getNotices(),
+        apiService.getExaminations(),
+        apiService.getAssignments(),
+        apiService.getNotifications()
+      ]);
+
+      let hadError = false;
+
+      if (summaryRes.status === 'fulfilled' && summaryRes.value) {
+        setDashboardData(summaryRes.value);
+      } else if (summaryRes.status === 'rejected') {
+        hadError = true;
+      }
+
+      if (coursesRes.status === 'fulfilled') {
+        setCourses(Array.isArray(coursesRes.value) ? coursesRes.value : []);
+      } else {
+        setCourses([]);
+        hadError = true;
+      }
+
+      if (noticesRes.status === 'fulfilled') {
+        setNotices(Array.isArray(noticesRes.value) ? noticesRes.value : []);
+      } else {
+        setNotices([]);
+        hadError = true;
+      }
+
+      if (examsRes.status === 'fulfilled') {
+        setExaminations(Array.isArray(examsRes.value) ? examsRes.value : []);
+      } else {
+        setExaminations([]);
+        hadError = true;
+      }
+
+      if (assignsRes.status === 'fulfilled') {
+        setAssignments(Array.isArray(assignsRes.value) ? assignsRes.value : []);
+      } else {
+        setAssignments([]);
+      }
+
+      if (notifsRes.status === 'fulfilled') {
+        setNotificationsData(Array.isArray(notifsRes.value) ? notifsRes.value : []);
+      } else {
+        setNotificationsData([]);
+      }
+
+      if (hadError) {
+        setApiError('Unable to sync latest academic records from college server. Showing cached session.');
+      }
+    } catch (err) {
+      setApiError('Network connection error. Please verify backend availability.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     setStudentProfile(user);
-  }, [user]);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function loadData() {
-      try {
-        const [summary, coursesData, noticesData, notifs] = await Promise.all([
-          apiService.getDashboardSummary().catch(() => null),
-          apiService.getEnrolledCourses().catch(() => []),
-          apiService.getNotices().catch(() => []),
-          apiService.getNotifications().catch(() => [])
-        ]);
-        if (isMounted) {
-          setDashboardData(summary);
-          setCourses(coursesData && coursesData.length > 0 ? coursesData : DEFAULT_COURSES);
-          setNotices(noticesData && noticesData.length > 0 ? noticesData : DEFAULT_NOTICES);
-          setNotificationsData(notifs && notifs.length > 0 ? notifs : DEFAULT_NOTIFICATIONS);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setCourses(DEFAULT_COURSES);
-          setNotices(DEFAULT_NOTICES);
-          setNotificationsData(DEFAULT_NOTIFICATIONS);
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    }
     loadData();
-    return () => { isMounted = false; };
-  }, []);
+  }, [user, loadData]);
 
   const handleAiPromptClick = async (promptText) => {
     if (!promptText || !promptText.trim()) return;
@@ -84,11 +121,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         setAiResponse(response.answer);
         return;
       }
-      throw new Error('No direct answer');
+      throw new Error('No answer received from CampusSync AI service');
     } catch (err) {
-      console.warn('Live API response fallback to intelligent synthesizer:', err);
-      const answer = generateLocalAIResponse(query, studentProfile);
-      setAiResponse(answer);
+      console.error('CampusSync AI communication error:', err);
+      setAiResponse(`⚠️ **Connection Error**: Unable to reach CampusSync AI (${err.message || 'Network failure'}). Please check your connection and verify the backend service is running.`);
     } finally {
       setAiLoading(false);
     }
@@ -108,7 +144,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   // Overview, Academics, Community, Clubs, Events, Resources, and Campus AI.
   const sidebarNavItems = [
     { id: 'overview', label: 'Overview', icon: 'dashboard', badge: null },
-    { id: 'academics', label: 'Academics', icon: 'school', badge: '4 Courses' },
+    { id: 'academics', label: 'Academics', icon: 'school', badge: `${courses.length} Courses` },
     { id: 'community', label: 'Community', icon: 'forum', badge: 'Active' },
     { id: 'clubs', label: 'Clubs', icon: 'groups', badge: '3 Joined' },
     { id: 'events', label: 'Events', icon: 'event', badge: 'Nov 5' },
@@ -323,10 +359,29 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
         {/* 3. Main Content Container */}
         <main className="flex-1 w-full min-w-0 flex flex-col gap-6">
+          {/* API Error / Network Retry Banner */}
+          {apiError && (
+            <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 flex items-center justify-between gap-4 text-amber-900 shadow-xs animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-amber-600 text-xl shrink-0">warning</span>
+                <span className="text-[14px] font-medium">{apiError}</span>
+              </div>
+              <button
+                onClick={() => {
+                  setApiError(null);
+                  loadData();
+                }}
+                className="bg-amber-600 hover:bg-amber-700 text-white text-[12px] font-bold px-3 py-1.5 rounded-xl uppercase tracking-wider transition-colors shrink-0"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
           {/* TAB: OVERVIEW (The Substantial Restructuring requested) */}
           {activeTab === 'overview' && (
             <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-              {/* Personal Welcome: “Good morning, Ashwani” with next important action */}
+              {/* Personal Welcome */}
               <div className="bg-white rounded-2xl p-6 md:p-7 border border-slate-200/90 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-teal-500 via-indigo-500 to-amber-500"></div>
 
@@ -334,47 +389,105 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   <div>
                     <div className="inline-flex items-center gap-1.5 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full text-[12px] font-bold text-teal-700 uppercase tracking-wider mb-2">
                       <span className="w-2 h-2 rounded-full bg-teal-600 animate-ping"></span>
-                      Academic Command Center • Semester {studentProfile?.semester || 'VII'} • {studentProfile?.department || 'Computer Science & Engineering'}
+                      Academic Command Center • Semester {studentProfile?.semester || ''} • {studentProfile?.department || 'Engineering'}
                     </div>
                     <h2 className="text-[28px] sm:text-[32px] font-extrabold text-slate-900 tracking-tight leading-tight">
                       {getGreeting()}, <span className="text-teal-600">{firstName}</span>!
                     </h2>
                     <p className="text-[16px] text-slate-600 mt-1 font-medium leading-relaxed">
-                      You have 3 lectures scheduled today and 2 upcoming assignment submissions.
+                      You have {courses.length} courses registered and {examinations.length + assignments.length} upcoming academic milestones.
                     </p>
                   </div>
 
                   {/* Highlight: Next Important Action Card */}
-                  <div className="w-full lg:w-auto bg-gradient-to-br from-teal-50/80 to-slate-50 rounded-2xl p-4 md:p-5 border border-teal-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-xl bg-teal-600 text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
-                        <span className="text-[11px] font-bold uppercase leading-none">Next</span>
-                        <span className="text-sm font-extrabold mt-0.5">10:00</span>
+                  {examinations.length > 0 ? (
+                    <div className="w-full lg:w-auto bg-gradient-to-br from-teal-50/80 to-slate-50 rounded-2xl p-4 md:p-5 border border-teal-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-xl bg-teal-600 text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
+                          <span className="text-[10px] font-bold uppercase leading-none">Exam</span>
+                          <span className="text-xs font-extrabold mt-0.5">{examinations[0].start_time ? examinations[0].start_time.slice(0, 5) : 'Scheduled'}</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-teal-600 text-white">
+                              {examinations[0].exam_type || 'Examination'}
+                            </span>
+                            <span className="text-[12px] text-slate-500 font-semibold">{examinations[0].exam_date}</span>
+                          </div>
+                          <h4 className="text-[16px] font-bold text-slate-900 mt-0.5">
+                            {examinations[0].course_code ? `${examinations[0].course_code}: ` : ''}{examinations[0].course_name}
+                          </h4>
+                          <p className="text-[14px] text-slate-600 font-medium">
+                            Hall {examinations[0].hall_number || 'TBA'} • Max Marks: {examinations[0].max_marks || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          if (examinations[0].document_url) {
+                            window.open(examinations[0].document_url, '_blank', 'noopener,noreferrer');
+                          } else {
+                            onActionNotification?.(`Exam details: ${examinations[0].course_name} on ${examinations[0].exam_date}`);
+                          }
+                        }}
+                        className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[14px] uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 self-stretch sm:self-auto justify-center shrink-0"
+                      >
+                        <span>{examinations[0].document_url ? 'View Schedule PDF' : 'View Schedule'}</span>
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                      </button>
+                    </div>
+                  ) : assignments.length > 0 ? (
+                    <div className="w-full lg:w-auto bg-gradient-to-br from-teal-50/80 to-slate-50 rounded-2xl p-4 md:p-5 border border-teal-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-xl bg-teal-600 text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
+                          <span className="text-[10px] font-bold uppercase leading-none">Task</span>
+                          <span className="text-xs font-extrabold mt-0.5">Due</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-teal-600 text-white">
+                              Assignment
+                            </span>
+                            <span className="text-[12px] text-slate-500 font-semibold">
+                              {assignments[0].due_date ? new Date(assignments[0].due_date).toLocaleDateString() : 'Pending'}
+                            </span>
+                          </div>
+                          <h4 className="text-[16px] font-bold text-slate-900 mt-0.5">
+                            {assignments[0].title}
+                          </h4>
+                          <p className="text-[14px] text-slate-600 font-medium">
+                            Max Score: {assignments[0].max_score || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => onActionNotification?.(`Opening submission for: ${assignments[0].title}`)}
+                        className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[14px] uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 self-stretch sm:self-auto justify-center shrink-0"
+                      >
+                        <span>Submit</span>
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-full lg:w-auto bg-gradient-to-br from-teal-50/80 to-slate-50 rounded-2xl p-4 md:p-5 border border-teal-200 shadow-2xs flex items-center gap-3.5 shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-2xl">event_available</span>
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-teal-600 text-white animate-pulse">
-                            Action Required
-                          </span>
-                          <span className="text-[12px] text-slate-500 font-semibold">Starts in 25 mins</span>
-                        </div>
+                        <span className="text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-teal-100 text-teal-800">
+                          Schedule Clear
+                        </span>
                         <h4 className="text-[16px] font-bold text-slate-900 mt-0.5">
-                          Advanced Physics Lab (PHYS 302)
+                          No Immediate Academic Deadlines
                         </h4>
                         <p className="text-[14px] text-slate-600 font-medium">
-                          Barliya Block Room 402 • Dr. Marcus Brody
+                          Semester {studentProfile?.semester || ''} • {studentProfile?.department || ''}
                         </p>
                       </div>
                     </div>
-
-                    <button
-                      onClick={() => onActionNotification?.('Joining Physics Virtual Lab Pod...')}
-                      className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[14px] uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 self-stretch sm:self-auto justify-center shrink-0"
-                    >
-                      <span>Join Lab Pod</span>
-                      <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                    </button>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -382,190 +495,177 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 {/* MAIN COLUMN (Schedule & Deadlines with Clear Actions) - 7 cols */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
-                  {/* Today's Schedule Card */}
+                  {/* Today's Schedule / Registered Courses Card */}
                   <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm">
                     <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
                       <div>
                         <h3 className="text-[20px] md:text-[22px] font-bold text-slate-900 tracking-tight">
-                          Today's Academic Schedule
+                          Enrolled Courses &amp; Curriculum
                         </h3>
                         <p className="text-[14px] text-slate-500 font-medium mt-0.5">
-                          Barliya Academic Block &amp; Central Labs
+                          {studentProfile?.department || 'Department'} • Semester {studentProfile?.semester || ''}
                         </p>
                       </div>
                       <span className="text-[12px] bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-                        3 Classes
+                        {courses.length} Courses
                       </span>
                     </div>
 
-                    {/* Schedule Items with clear action buttons */}
-                    <div className="space-y-4">
-                      {/* Class 1: Next Up */}
-                      <div className="p-4 rounded-xl bg-teal-50/60 border border-teal-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-                        <div className="flex items-start sm:items-center gap-3.5">
-                          <div className="w-11 h-11 rounded-xl bg-teal-100 border border-teal-200 flex flex-col items-center justify-center shrink-0">
-                            <span className="text-[12px] font-bold text-teal-800 leading-none">10:00</span>
-                            <span className="text-[10px] text-teal-600 font-semibold uppercase">AM</span>
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-[16px] font-bold text-slate-900">Advanced Physics Lab (PHYS 302)</h4>
-                              <span className="bg-teal-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Next</span>
+                    {/* Courses List or Informative Empty State */}
+                    {courses.length === 0 ? (
+                      <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-200">
+                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">menu_book</span>
+                        <h4 className="text-[15px] font-bold text-slate-700">No courses registered yet</h4>
+                        <p className="text-[13px] text-slate-500 mt-1 max-w-sm mx-auto">
+                          Official course curriculum for Semester {studentProfile?.semester || ''} will appear here once published by the academic department.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3.5">
+                        {courses.map((course) => (
+                          <div
+                            key={course.id || course.code}
+                            className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 hover:border-teal-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                          >
+                            <div className="flex items-start sm:items-center gap-3.5">
+                              <div className="w-11 h-11 rounded-xl bg-teal-100 border border-teal-200 flex flex-col items-center justify-center shrink-0">
+                                <span className="text-[11px] font-bold text-teal-800 leading-none">{course.code ? course.code.slice(0, 4) : 'CRS'}</span>
+                                <span className="text-[9px] text-teal-600 font-semibold uppercase">{course.credits ? `${course.credits}cr` : 'B.Tech'}</span>
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h4 className="text-[16px] font-bold text-slate-900">{course.title}</h4>
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-teal-100 text-teal-800">
+                                    {course.code}
+                                  </span>
+                                  {course.data_origin === 'VERIFIED_OFFICIAL' && (
+                                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                                      <span className="material-symbols-outlined text-[12px]">verified</span>
+                                      Official
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[14px] text-slate-600 font-medium mt-0.5 flex items-center gap-2">
+                                  <span>{course.instructor || 'Department Faculty'}</span>
+                                  <span>•</span>
+                                  <span>{course.department || studentProfile?.department}</span>
+                                </p>
+                              </div>
                             </div>
-                            <p className="text-[14px] text-slate-600 font-medium mt-0.5 flex items-center gap-2">
-                              <span>Barliya Block • Room 402</span>
-                              <span>•</span>
-                              <span>Dr. Marcus Brody</span>
-                            </p>
+                            <button
+                              onClick={() => {
+                                setActiveTab('academics');
+                                onActionNotification?.(`Viewing course syllabus: ${course.title}`);
+                              }}
+                              className="border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-[12px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto"
+                            >
+                              Syllabus
+                            </button>
                           </div>
-                        </div>
-                        <button
-                          onClick={() => onActionNotification?.('Opening Physics Lab Workbench...')}
-                          className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[12px] uppercase tracking-wider px-4 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto shadow-2xs"
-                        >
-                          Join Lab
-                        </button>
+                        ))}
                       </div>
-
-                      {/* Class 2: Peer Study */}
-                      <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 hover:border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
-                        <div className="flex items-start sm:items-center gap-3.5">
-                          <div className="w-11 h-11 rounded-xl bg-indigo-50 border border-indigo-200 flex flex-col items-center justify-center shrink-0">
-                            <span className="text-[12px] font-bold text-indigo-700 leading-none">02:00</span>
-                            <span className="text-[10px] text-indigo-500 font-semibold uppercase">PM</span>
-                          </div>
-                          <div>
-                            <h4 className="text-[16px] font-bold text-slate-900">Calculus III Peer Study Group</h4>
-                            <p className="text-[14px] text-slate-600 font-medium mt-0.5 flex items-center gap-2">
-                              <span>Central Library • Study Pod B</span>
-                              <span>•</span>
-                              <span>Maths Society</span>
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => onActionNotification?.('Viewing Central Library Pod B Map...')}
-                          className="border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-[12px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto"
-                        >
-                          View Room
-                        </button>
-                      </div>
-
-                      {/* Class 3: Machine Learning */}
-                      <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 hover:border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
-                        <div className="flex items-start sm:items-center gap-3.5">
-                          <div className="w-11 h-11 rounded-xl bg-amber-50 border border-amber-200 flex flex-col items-center justify-center shrink-0">
-                            <span className="text-[12px] font-bold text-amber-700 leading-none">04:00</span>
-                            <span className="text-[10px] text-amber-600 font-semibold uppercase">PM</span>
-                          </div>
-                          <div>
-                            <h4 className="text-[16px] font-bold text-slate-900">Machine Learning Fundamentals (CS 450)</h4>
-                            <p className="text-[14px] text-slate-600 font-medium mt-0.5 flex items-center gap-2">
-                              <span>Turing Hall • Room 101</span>
-                              <span>•</span>
-                              <span>Prof. Elena Rostova</span>
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => onActionNotification?.('Opening ML Lecture Slides & Syllabus...')}
-                          className="border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-[12px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto"
-                        >
-                          Notes
-                        </button>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
-                  {/* Upcoming Deadlines (Urgency Highlighted with Amber and Red) */}
+                  {/* Upcoming Deadlines (Dynamic Examinations & Assignments) */}
                   <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm">
                     <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
                       <div>
                         <h3 className="text-[20px] md:text-[22px] font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                          <span>Upcoming Deadlines</span>
+                          <span>Upcoming Milestones &amp; Examinations</span>
                         </h3>
                         <p className="text-[14px] text-slate-500 font-medium mt-0.5">
-                          Submission portals and examination milestones
+                          Midterms, finals, and assignment deadlines for Semester {studentProfile?.semester || ''}
                         </p>
                       </div>
-                      <span className="text-[12px] bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-                        2 Urgent
+                      <span className="text-[12px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                        {examinations.length + assignments.length} Milestones
                       </span>
                     </div>
 
-                    <div className="space-y-3.5">
-                      {/* Deadline 1: Red Urgency */}
-                      <div className="p-4 rounded-xl bg-red-50/50 border border-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[12px] font-extrabold text-red-700 bg-red-100 border border-red-300 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                              Due in 2 days
-                            </span>
-                            <span className="text-[12px] text-slate-500 font-medium">Friday, 11:59 PM</span>
-                          </div>
-                          <h4 className="text-[16px] font-bold text-slate-900 mt-1">
-                            B.Tech Project-1 Phase 2 Lab Report (CS 401)
-                          </h4>
-                          <p className="text-[14px] text-slate-600 font-medium mt-0.5">
-                            Dr. Robert Vance • SQL Query Optimization &amp; Indexing
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => onActionNotification?.('Opening Assignment Submission Dropzone...')}
-                          className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[12px] uppercase tracking-wider px-4 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto shadow-2xs"
-                        >
-                          Submit Report
-                        </button>
+                    {examinations.length === 0 && assignments.length === 0 ? (
+                      <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-200">
+                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">event_available</span>
+                        <h4 className="text-[15px] font-bold text-slate-700">No upcoming examination or assignment milestones</h4>
+                        <p className="text-[13px] text-slate-500 mt-1 max-w-sm mx-auto">
+                          Official examination dates and assignment submission portals will appear here once scheduled.
+                        </p>
                       </div>
+                    ) : (
+                      <div className="space-y-3.5">
+                        {examinations.map((exam) => (
+                          <div
+                            key={`exam-${exam.id}`}
+                            className="p-4 rounded-xl bg-amber-50/50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                          >
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[11px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                  {exam.exam_type || 'Examination'}
+                                </span>
+                                <span className="text-[12px] text-slate-600 font-bold">
+                                  {exam.exam_date} {exam.start_time ? `• ${exam.start_time}` : ''}
+                                </span>
+                                {exam.data_origin === 'VERIFIED_OFFICIAL' && (
+                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                                    <span className="material-symbols-outlined text-[12px]">verified</span>
+                                    Official
+                                  </span>
+                                )}
+                              </div>
+                              <h4 className="text-[16px] font-bold text-slate-900 mt-1">
+                                {exam.course_code ? `${exam.course_code}: ` : ''}{exam.course_name}
+                              </h4>
+                              <p className="text-[14px] text-slate-600 font-medium mt-0.5">
+                                Hall: {exam.hall_number || 'TBA'} • Max Marks: {exam.max_marks || 'N/A'} • {exam.department}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => {
+                                if (exam.document_url) {
+                                  window.open(exam.document_url, '_blank', 'noopener,noreferrer');
+                                } else {
+                                  onActionNotification?.(`Exam details: ${exam.course_name} on ${exam.exam_date}`);
+                                }
+                              }}
+                              className="border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-[12px] uppercase tracking-wider px-4 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto"
+                            >
+                              {exam.document_url ? 'View Schedule PDF' : 'Details'}
+                            </button>
+                          </div>
+                        ))}
 
-                      {/* Deadline 2: Amber Urgency */}
-                      <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[12px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                              Due in 3 days
-                            </span>
-                            <span className="text-[12px] text-slate-500 font-medium">Saturday, 5:00 PM</span>
+                        {assignments.map((assign) => (
+                          <div
+                            key={`assign-${assign.id}`}
+                            className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                          >
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] font-extrabold text-teal-800 bg-teal-100 border border-teal-300 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                  Assignment
+                                </span>
+                                <span className="text-[12px] text-slate-500 font-medium">
+                                  {assign.due_date ? `Due: ${new Date(assign.due_date).toLocaleDateString()}` : 'No deadline'}
+                                </span>
+                              </div>
+                              <h4 className="text-[16px] font-bold text-slate-900 mt-1">
+                                {assign.title}
+                              </h4>
+                              <p className="text-[14px] text-slate-600 font-medium mt-0.5">
+                                {assign.description || 'Assignment details and submission requirements.'}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => onActionNotification?.(`Opening submission portal for ${assign.title}`)}
+                              className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[12px] uppercase tracking-wider px-4 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto shadow-2xs"
+                            >
+                              Submit
+                            </button>
                           </div>
-                          <h4 className="text-[16px] font-bold text-slate-900 mt-1">
-                            Machine Learning Assignment 3: Neural Networks
-                          </h4>
-                          <p className="text-[14px] text-slate-600 font-medium mt-0.5">
-                            Prof. Elena Rostova • PyTorch Model Training Notebook
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => onActionNotification?.('Opening Assignment Submission Dropzone...')}
-                          className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[12px] uppercase tracking-wider px-4 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto shadow-2xs"
-                        >
-                          Submit Notebook
-                        </button>
+                        ))}
                       </div>
-
-                      {/* Deadline 3: Amber Urgency */}
-                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[12px] font-extrabold text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                              In 5 days
-                            </span>
-                            <span className="text-[12px] text-slate-500 font-medium">BTU Portal</span>
-                          </div>
-                          <h4 className="text-[16px] font-bold text-slate-900 mt-1">
-                            BTU Semester VII Examination Fee &amp; Subject Registration
-                          </h4>
-                          <p className="text-[14px] text-slate-600 font-medium mt-0.5">
-                            Main &amp; Back Paper Verification Schedule
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => onActionNotification?.('Opening BTU Exam Registration Portal...')}
-                          className="border border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-[12px] uppercase tracking-wider px-4 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto"
-                        >
-                          Register
-                        </button>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
@@ -590,7 +690,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
                     {/* Filter Pills */}
                     <div className="flex gap-1.5 mb-4 overflow-x-auto hide-scrollbar pb-1">
-                      {['All', 'Official', 'Department', 'Events'].map(f => (
+                      {['All', 'Official', 'Department', 'Semester'].map(f => (
                         <button
                           key={f}
                           onClick={() => setNoticeFilter(f)}
@@ -605,40 +705,66 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       ))}
                     </div>
 
-                    <div className="space-y-3">
-                      {notices
-                        .filter(n => noticeFilter === 'All' || n.notice_type === noticeFilter || n.type === noticeFilter)
-                        .slice(0, 3)
-                        .map(n => (
-                          <div
-                            key={n.id}
-                            className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 hover:border-teal-300 transition-all flex items-start justify-between gap-3 group"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-100 text-teal-800 uppercase">
-                                  {n.notice_type || 'Official'}
-                                </span>
-                                <span className="text-[12px] text-slate-400 font-medium">
-                                  {n.date || 'Today'}
-                                </span>
+                    {notices.length === 0 ? (
+                      <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-200">
+                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">notifications_off</span>
+                        <h4 className="text-[15px] font-bold text-slate-700">No notices published</h4>
+                        <p className="text-[13px] text-slate-500 mt-1 max-w-xs mx-auto">
+                          There are currently no active official notices for Semester {studentProfile?.semester || ''}.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {notices
+                          .filter(n => {
+                            if (noticeFilter === 'All') return true;
+                            if (noticeFilter === 'Official') return n.data_origin === 'VERIFIED_OFFICIAL' || n.notice_type === 'Official';
+                            if (noticeFilter === 'Department') return n.classification_scope === 'DEPARTMENT_SPECIFIC' || n.notice_type === 'Department';
+                            if (noticeFilter === 'Semester') return n.classification_scope === 'SEMESTER_SPECIFIC' || n.semester != null;
+                            return true;
+                          })
+                          .slice(0, 5)
+                          .map(n => (
+                            <div
+                              key={n.id}
+                              className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 hover:border-teal-300 transition-all flex items-start justify-between gap-3 group"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-100 text-teal-800 uppercase">
+                                    {n.classification_scope ? n.classification_scope.replace('_SPECIFIC', '') : (n.notice_type || 'Official')}
+                                  </span>
+                                  {n.data_origin === 'VERIFIED_OFFICIAL' && (
+                                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                                      <span className="material-symbols-outlined text-[12px]">verified</span>
+                                      Official
+                                    </span>
+                                  )}
+                                  <span className="text-[12px] text-slate-400 font-medium">
+                                    {n.date || (n.published_at ? new Date(n.published_at).toLocaleDateString() : 'Active')}
+                                  </span>
+                                </div>
+                                <h4 className="text-[14px] font-bold text-slate-900 group-hover:text-teal-700 transition-colors leading-snug">
+                                  {n.title}
+                                </h4>
                               </div>
-                              <h4 className="text-[14px] font-bold text-slate-900 group-hover:text-teal-700 transition-colors leading-snug">
-                                {n.title}
-                              </h4>
+                              <div className="flex items-center gap-1 shrink-0">
+                                {(n.document_url || n.source_url) && (
+                                  <a
+                                    href={n.document_url || n.source_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1.5 text-slate-400 hover:text-teal-700 rounded-lg hover:bg-white transition-colors"
+                                    title="Open Official Notice Link"
+                                  >
+                                    <span className="material-symbols-outlined text-base">open_in_new</span>
+                                  </a>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1 shrink-0">
-                              <button
-                                onClick={() => onActionNotification?.(`Downloaded document: ${n.title}`)}
-                                className="p-1.5 text-slate-400 hover:text-teal-700 rounded-lg hover:bg-white transition-colors"
-                                title="Download Notice PDF"
-                              >
-                                <span className="material-symbols-outlined text-base">download</span>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Quick Access to Saved Resources */}
@@ -662,31 +788,31 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       {[
                         {
                           id: 'res-1',
-                          title: 'BTU CSE VII Sem Complete Syllabus & Rubric',
-                          format: 'PDF • 4.2 MB',
+                          title: `BTU ${studentProfile?.department || 'CSE'} Sem ${studentProfile?.semester || ''} Curriculum & Syllabus`,
+                          format: 'Official Document',
                           icon: 'description',
                           badge: 'Curriculum'
                         },
                         {
                           id: 'res-2',
-                          title: 'Solved BTU Midterm Exam Question Bank (2023-2025)',
-                          format: 'Archive • 18 MB',
+                          title: `BTU Sem ${studentProfile?.semester || ''} Midterm Examination Pattern`,
+                          format: 'Academic Guide',
                           icon: 'folder_zip',
                           badge: 'Exam Prep'
                         },
                         {
                           id: 'res-3',
                           title: 'ECA Barliya Academic Block & Lab Navigation Map',
-                          format: 'Interactive Map',
+                          format: 'Campus Map',
                           icon: 'map',
                           badge: 'Campus'
                         },
                         {
                           id: 'res-4',
-                          title: 'PyTorch ML Lab Jupyter Notebook Starter Pack',
-                          format: 'IPYNB Notebooks',
-                          icon: 'code',
-                          badge: 'Code Lab'
+                          title: 'Department Academic Regulations & Code of Conduct',
+                          format: 'Official PDF',
+                          icon: 'menu_book',
+                          badge: 'Policy'
                         },
                       ].map(res => {
                         const isSaved = savedResourceIds.includes(res.id);
@@ -928,50 +1054,65 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 <div>
                   <h3 className="text-[24px] font-bold text-slate-900 tracking-tight">Academic Curriculum &amp; Courses</h3>
                   <p className="text-[14px] text-slate-500 font-medium mt-0.5">
-                    BTU B.Tech Semester {studentProfile?.semester || 7} • {studentProfile?.department || 'Computer Science & Engineering'}
+                    BTU B.Tech Semester {studentProfile?.semester || ''} • {studentProfile?.department || 'Engineering'}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="px-3.5 py-1.5 rounded-xl bg-teal-50 border border-teal-200 text-teal-800 text-[14px] font-bold">
-                    CGPA: 8.65 / 10.0
+                    {courses.length} Registered Courses
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {courses.map((c) => (
-                  <div key={c.id || c.code} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-teal-400 transition-all shadow-2xs">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <span className="text-[12px] font-bold px-2.5 py-0.5 rounded bg-teal-100 text-teal-800">
-                          {c.code}
-                        </span>
-                        <h4 className="text-[18px] font-bold text-slate-900 mt-1.5">{c.title}</h4>
-                        <p className="text-[14px] text-slate-500 font-medium">{c.instructor} • {c.department}</p>
+              {courses.length === 0 ? (
+                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-200">
+                  <span className="material-symbols-outlined text-5xl text-slate-300 mb-3">menu_book</span>
+                  <h4 className="text-[16px] font-bold text-slate-800">No courses listed for Semester {studentProfile?.semester || ''}</h4>
+                  <p className="text-[14px] text-slate-500 mt-1 max-w-md mx-auto">
+                    Course curriculum and syllabus data for your department ({studentProfile?.department}) are currently being synchronized from the academic department.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {courses.map((c) => (
+                    <div key={c.id || c.code} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-teal-400 transition-all shadow-2xs">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[12px] font-bold px-2.5 py-0.5 rounded bg-teal-100 text-teal-800">
+                              {c.code}
+                            </span>
+                            {c.data_origin === 'VERIFIED_OFFICIAL' && (
+                              <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                                <span className="material-symbols-outlined text-[12px]">verified</span>
+                                Official
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="text-[18px] font-bold text-slate-900 mt-1.5">{c.title}</h4>
+                          <p className="text-[14px] text-slate-500 font-medium">{c.instructor || 'Department Faculty'} • {c.department || studentProfile?.department}</p>
+                        </div>
+                        {c.credits && (
+                          <span className="text-[13px] font-bold text-teal-800 bg-teal-100 px-2.5 py-1 rounded-lg">
+                            {c.credits} Credits
+                          </span>
+                        )}
                       </div>
-                      <span className="text-[14px] font-bold text-amber-800 bg-amber-100 px-2.5 py-1 rounded-lg">
-                        Grade {c.grade || 'A'}
-                      </span>
-                    </div>
 
-                    <div className="space-y-1.5 text-[14px] text-slate-600 font-medium mb-4">
-                      <p className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm text-teal-600">schedule</span>
-                        {c.nextClass}
-                      </p>
-                      <p className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm text-indigo-600">folder</span>
-                        12 Lecture Notes • 4 Lab Exercises • 1 Term Paper
-                      </p>
-                    </div>
+                      {c.description && (
+                        <p className="text-[14px] text-slate-600 font-medium mb-4 line-clamp-3">
+                          {c.description}
+                        </p>
+                      )}
 
-                    <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
-                      <span className="text-[12px] text-slate-500 font-medium">Syllabus Progress</span>
-                      <span className="text-[14px] font-bold text-teal-700">{c.progress || '65%'}</span>
+                      <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+                        <span className="text-[12px] text-slate-500 font-medium">Semester {c.semester || studentProfile?.semester}</span>
+                        <span className="text-[12px] font-bold text-teal-700">Verified Curriculum</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -1315,86 +1456,3 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     </div>
   );
 }
-
-// Fallback Mock Data Constants
-const DEFAULT_COURSES = [
-  {
-    id: 1,
-    code: 'PHYS 302',
-    title: 'Advanced Physics Lab',
-    instructor: 'Dr. Marcus Brody',
-    department: 'Dept of Applied Physics',
-    grade: 'A',
-    nextClass: 'Today at 10:00 AM • Room 402',
-    progress: '75%'
-  },
-  {
-    id: 2,
-    code: 'CS 401',
-    title: 'Database Systems Phase 2',
-    instructor: 'Dr. Robert Vance',
-    department: 'Dept of Computer Science',
-    grade: 'A+',
-    nextClass: 'Wednesday at 10:00 AM • Barliya Lab 2',
-    progress: '80%'
-  },
-  {
-    id: 3,
-    code: 'CS 450',
-    title: 'Machine Learning Fundamentals',
-    instructor: 'Prof. Elena Rostova',
-    department: 'Dept of Computer Science',
-    grade: 'A',
-    nextClass: 'Today at 04:00 PM • Turing Hall 101',
-    progress: '65%'
-  },
-  {
-    id: 4,
-    code: 'MATH 301',
-    title: 'Calculus III & Numerical Analysis',
-    instructor: 'Dr. S. K. Mehta',
-    department: 'Dept of Mathematics',
-    grade: 'B+',
-    nextClass: 'Friday at 02:00 PM • Library Pod B',
-    progress: '60%'
-  }
-];
-
-const DEFAULT_NOTICES = [
-  {
-    id: 1,
-    title: 'BTU Semester 7 Mid-Term Exam Time Table Released for CS/IT/AI/ECE/EE/ME/CE',
-    notice_type: 'Official',
-    date: 'Nov 1, 2026'
-  },
-  {
-    id: 2,
-    title: 'LEEP 2026-27 Diploma Lateral Entry & 1st Year Branch Sliding Portal Live',
-    notice_type: 'Department',
-    date: 'Oct 30, 2026'
-  },
-  {
-    id: 3,
-    title: 'Central Library Extended Night Reading Hours for Upcoming Midterms',
-    notice_type: 'Events',
-    date: 'Oct 28, 2026'
-  }
-];
-
-const DEFAULT_NOTIFICATIONS = [
-  {
-    id: 1,
-    title: 'Database Systems Phase 2 Lab Report due in 2 days (Friday, 11:59 PM)',
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 2,
-    title: 'BTU Exam Registration Form available for Semester 3, 5, 7 students',
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 3,
-    title: 'Technotsav 2026: Team registration pass confirmed for Robowar & Hackathon',
-    created_at: new Date().toISOString()
-  }
-];

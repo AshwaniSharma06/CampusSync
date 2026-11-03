@@ -113,6 +113,11 @@ export const apiService = {
     return apiClient('/courses/');
   },
 
+  // Examinations
+  getExaminations: async () => {
+    return apiClient('/examinations/');
+  },
+
   // Events
   getEvents: async () => {
     return apiClient('/events/');

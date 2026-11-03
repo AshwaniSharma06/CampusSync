@@ -74,3 +74,4 @@ def get_source(source_id: str) -> Optional[OfficialSource]:
 
 def get_all_active_sources() -> List[OfficialSource]:
     return [s for s in OFFICIAL_SOURCES.values() if s.enabled]
+

@@ -21,6 +21,7 @@ from backend.models.academic import (
     DataOrigin,
     VerificationStatus
 )
+from backend.services.vector_service import index_document, delete_document_chunks
 
 router = APIRouter()
 
@@ -119,6 +120,26 @@ def approve_document(
 
     doc.verification_status = VerificationStatus.VERIFIED.value
 
+    # Index approved document into persistent ChromaDB
+    try:
+        index_document(
+            doc_id=f"doc_{doc.id}",
+            title=doc.title,
+            text=doc.cleaned_text or doc.raw_text or doc.title,
+            source_url=doc.source_url or "",
+            document_url=doc.file_url or "",
+            scope=doc.scope or "GLOBAL",
+            department_code=doc.department_code,
+            target_semester=doc.target_semester,
+            academic_year=doc.academic_year or "2026-27",
+            document_type=doc.document_type or "DOCUMENT",
+            verification_status="VERIFIED",
+            data_origin=doc.data_origin or "SCRAPED",
+            published_date=datetime.utcnow().isoformat()
+        )
+    except Exception as e:
+        print(f"[AdminReview] Chroma indexing error for doc {doc_id}: {e}")
+
     # Publish into student-facing Notice table if requested
     if req.publish_as_notice:
         new_notice = Notice(
@@ -139,9 +160,32 @@ def approve_document(
             is_active=True
         )
         db.add(new_notice)
+        db.commit()
+        db.refresh(new_notice)
 
-    db.commit()
-    return {"status": "success", "message": f"Document #{doc_id} verified and published."}
+        # Index published notice into ChromaDB
+        try:
+            index_document(
+                doc_id=f"notice_{new_notice.id}",
+                title=new_notice.title,
+                text=f"{new_notice.title}. {new_notice.content}",
+                source_url=new_notice.source_url or "",
+                document_url=new_notice.document_url or "",
+                scope=new_notice.scope or "GLOBAL",
+                department_code=new_notice.department_code,
+                target_semester=new_notice.target_semester,
+                academic_year=new_notice.academic_year or "2026-27",
+                document_type="NOTICE",
+                verification_status="VERIFIED",
+                data_origin=new_notice.data_origin or "SCRAPED",
+                published_date=datetime.utcnow().isoformat()
+            )
+        except Exception as e:
+            print(f"[AdminReview] Chroma indexing error for notice {new_notice.id}: {e}")
+    else:
+        db.commit()
+
+    return {"status": "success", "message": f"Document #{doc_id} verified, indexed, and published."}
 
 @router.post("/documents/{doc_id}/flag")
 def flag_document(
@@ -158,6 +202,13 @@ def flag_document(
     doc.verification_status = VerificationStatus.FLAGGED.value
     doc.scope = ClassificationScope.UNCLASSIFIED.value
     db.commit()
+
+    # Remove flagged document from ChromaDB vector search
+    try:
+        delete_document_chunks(f"doc_{doc_id}")
+    except Exception as e:
+        print(f"[AdminReview] Chroma chunk delete error for doc {doc_id}: {e}")
+
     return {"status": "success", "message": f"Document #{doc_id} flagged: {req.reason}"}
 
 @router.get("/scraping/jobs")
@@ -183,3 +234,4 @@ def list_scraping_jobs(
         }
         for j in jobs
     ]
+
