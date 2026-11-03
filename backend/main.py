@@ -24,40 +24,40 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configure CORS: strict explicit allowlist in production; localhost enabled in development
-cors_origins = []
+# Configure CORS: support both production Vercel domains and local development
+cors_origins = [
+    "https://campus-sync-coral.vercel.app",
+    "https://campussync.vercel.app",
+]
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
 if allowed_origins_env:
-    cors_origins.extend([o.strip().rstrip("/") for o in allowed_origins_env.split(",") if o.strip()])
+    for o in allowed_origins_env.split(","):
+        clean_o = o.strip().rstrip("/")
+        if clean_o and clean_o not in cors_origins:
+            cors_origins.append(clean_o)
 
 frontend_url = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
 if frontend_url and frontend_url not in cors_origins:
     cors_origins.append(frontend_url)
 
-is_production = settings.APP_ENV == "production"
-
-if not is_production:
-    dev_origins = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:4173",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-        "http://127.0.0.1:4173",
-    ]
-    for o in dev_origins:
-        if o not in cors_origins:
-            cors_origins.append(o)
-else:
-    if not cors_origins:
-        cors_origins.append("https://campussync.vercel.app")
+dev_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:4173",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "http://127.0.0.1:4173",
+]
+for o in dev_origins:
+    if o not in cors_origins:
+        cors_origins.append(o)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$" if not is_production else None,
+    allow_origin_regex=r"^https://.*\.vercel\.app$|^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
