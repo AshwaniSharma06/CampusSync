@@ -39,5 +39,6 @@ def chat_with_ai(
     
     return {
         "answer": response["answer"],
-        "sources": response["sources"]
+        "sources": response["sources"],
+        "rewritten_query": response.get("rewritten_query", "")
     }

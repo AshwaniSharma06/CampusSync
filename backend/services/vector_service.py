@@ -226,10 +226,11 @@ def retrieve_relevant_chunks(
         distances = results.get("distances", [[]])[0] if results.get("distances") else []
 
         for idx, (doc, meta) in enumerate(zip(docs, metas)):
-            # If distance is provided and too high (cosine distance > 0.85), exclude as irrelevant
+            # If distance is provided and exceeds relevance threshold, exclude as noise
+            dist = None
             if distances and idx < len(distances):
                 dist = distances[idx]
-                if dist is not None and dist > 0.88:
+                if dist is not None and dist > settings.RAG_RELEVANCE_THRESHOLD:
                     continue
 
             # Student cohort verification guard
@@ -255,7 +256,8 @@ def retrieve_relevant_chunks(
                 "data_origin": meta.get("data_origin", "VERIFIED_OFFICIAL"),
                 "scope": meta.get("scope", "GLOBAL"),
                 "department_code": meta.get("department_code", ""),
-                "target_semester": meta.get("target_semester")
+                "target_semester": meta.get("target_semester"),
+                "distance": dist
             })
 
     return output_chunks
@@ -327,3 +329,4 @@ def sync_database_to_chroma(db: Session) -> Dict[str, int]:
         "verified_documents_indexed": docs_indexed,
         "total_chunks_stored": total_chunks
     }
+

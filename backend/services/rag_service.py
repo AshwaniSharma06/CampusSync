@@ -1,8 +1,8 @@
 """
 CampusSync AI RAG Service.
-Coordinates semantic retrieval from persistent ChromaDB and dynamic generation
-via Google Gemini (google-genai SDK).
-All responses are dynamically generated. Zero hardcoded question-answer fallbacks.
+Integrates Intelligent Retrieval (query rewriting, hybrid keyword scoring, deduplication)
+with Dynamic Generation via Google Gemini (official google-genai SDK).
+Follows strict Grounding & Scope Policies. Zero hardcoded canned fallbacks.
 """
 
 from typing import Optional, List, Dict, Any
@@ -10,7 +10,7 @@ from google import genai
 from google.genai import types, errors
 
 from backend.core.config import settings
-from backend.services.vector_service import retrieve_relevant_chunks
+from backend.services.retrieval_service import execute_intelligent_retrieval
 
 def _get_gemini_client() -> Optional[genai.Client]:
     """Instantiates Google GenAI Client with configured API key."""
@@ -29,63 +29,43 @@ def query_rag(
     """
     Main entry point for CampusSync AI:
     1. Validates input query.
-    2. Performs semantic retrieval from persistent ChromaDB with student cohort scoping.
-    3. Builds a grounded prompt with retrieved verified context.
-    4. Calls Google Gemini dynamically.
-    5. Returns dynamic answer and grounded source references.
+    2. Performs conversational query rewriting for follow-ups.
+    3. Retrieves grounded context from persistent ChromaDB with cohort filtering.
+    4. Applies hybrid scoring, deduplication, and relevance thresholding.
+    5. Calls Google Gemini dynamically with structured 6-case Answer Policies.
+    6. Returns fresh answer, rewritten query, and source citations.
     """
     q_clean = (question or "").strip()
     if not q_clean:
         return {
             "answer": "Please enter a question or topic so CampusSync AI can help you!",
-            "sources": []
+            "sources": [],
+            "rewritten_query": ""
         }
 
     if history is None:
         history = []
 
-    # 1. Retrieve verified documents from persistent ChromaDB
-    retrieved_records = retrieve_relevant_chunks(
+    client = _get_gemini_client()
+
+    # 1. Execute Intelligent Retrieval Pipeline (Rewriting + Hybrid Search + Deduplication)
+    retrieval_result = execute_intelligent_retrieval(
         query=q_clean,
-        n_results=5,
-        student_context=student_context
+        history=history,
+        student_context=student_context,
+        gemini_client=client
     )
 
-    # Build unique source citations
-    sources: List[Dict[str, Any]] = []
-    seen_urls = set()
-    for rec in retrieved_records:
-        url = rec.get("document_url") or rec.get("source_url") or ""
-        title = rec.get("title") or "Official College Notice"
-        key = f"{title}_{url}"
-        if key not in seen_urls:
-            seen_urls.add(key)
-            sources.append({
-                "title": title,
-                "url": url,
-                "published_date": rec.get("published_date") or "",
-                "scope": rec.get("scope") or "GLOBAL",
-                "verification_status": rec.get("verification_status") or "VERIFIED"
-            })
+    rewritten_query = retrieval_result["rewritten_query"]
+    context_text = retrieval_result["context_text"]
+    sources = retrieval_result["sources"]
+    has_verified_context = retrieval_result["has_verified_context"]
 
-    # Assemble verified document context
-    context_blocks = []
-    for rec in retrieved_records:
-        block = (
-            f"--- Document: {rec['title']} ---\n"
-            f"Type: {rec['document_type']} | Scope: {rec['scope']} | Date: {rec['published_date'] or 'Recent'}\n"
-            f"Source URL: {rec['source_url'] or rec['document_url'] or 'Official ECA Circular'}\n"
-            f"Content:\n{rec['chunk_text']}"
-        )
-        context_blocks.append(block)
-
-    context_text = "\n\n".join(context_blocks) if context_blocks else "NO_MATCHING_OFFICIAL_DOCUMENTS_FOUND"
-
-    # Assemble student profile context
+    # Assemble student profile context for personalization
     student_details = ""
     if student_context:
         student_details = (
-            f"Authenticated Student Profile:\n"
+            f"Active Student Profile:\n"
             f"- Name: {student_context.get('name', 'Student')}\n"
             f"- Department: {student_context.get('department', 'Engineering')}\n"
             f"- Semester: {student_context.get('semester', 'Current')}\n"
@@ -93,34 +73,55 @@ def query_rag(
         )
 
     # 2. Check for Gemini client
-    client = _get_gemini_client()
     if not client:
         return {
             "answer": (
-                "⚠️ **CampusSync AI Configuration Notice**: `GEMINI_API_KEY` is not configured or could not be loaded. "
-                "Please configure a valid Gemini API key in `backend/.env` to enable intelligent conversational responses."
+                "⚠️ **CampusSync AI Configuration Notice**: `GEMINI_API_KEY` is not configured in `backend/.env`. "
+                "Please provide a valid Gemini API key to enable intelligent conversational responses."
             ),
-            "sources": sources
+            "sources": sources,
+            "rewritten_query": rewritten_query
         }
 
-    # 3. Dynamic System Prompt
-    system_instruction = f"""You are CampusSync AI, the intelligent, conversational academic assistant for students at Engineering College Ajmer (ECA), affiliated with Bikaner Technical University (BTU).
+    # 3. Dynamic System Prompt adhering strictly to the 6 Answer Policies
+    system_instruction = f"""ROLE:
+You are CampusSync AI, an intelligent, conversational academic assistant for students at Engineering College Ajmer (ECA), affiliated with Bikaner Technical University (BTU).
 
 PRIMARY PURPOSE:
-Help students understand academic subjects, official university notices, examination schedules, timetables, syllabus requirements, and campus information.
+Help students understand information collected from their official college and university circulars, academic calendars, examination schedules, timetables, and engineering subjects.
 
-POLICIES:
-1. Always identify yourself as CampusSync AI.
-2. Ground all college-specific facts (dates, venues, circulars, fees, schedules) in the Verified College Context provided below.
-3. If college-specific information is NOT found in the verified documents:
-   - Honestly state: "I couldn't find verified official records regarding this in the currently collected college and university documents. Please check the official college website (ecajmer.ac.in) or contact the academic administration."
-   - NEVER fabricate exam dates, fees, circular numbers, or deadlines.
-4. For general academic and technical questions (e.g., DBMS normalization, Operating Systems, Java, Data Structures, Machine Learning):
-   - Provide comprehensive, clear, high-quality educational explanations with code examples, analogies, or practice questions as requested.
-   - Clearly distinguish general educational guidance from official college administrative notices.
-5. For personal attendance records:
-   - State that official biometric attendance records are maintained by course instructors and the Chief Proctor Office (Administrative Block Room 104). Never invent personal attendance percentages.
-6. Support natural, friendly multi-turn conversation and context-aware follow-ups.
+ANSWER POLICIES (STRICTLY ENFORCE):
+
+CASE 1: RELEVANT QUESTION WITH SUFFICIENT EVIDENCE
+- Generate a complete, natural-language answer based strictly on the retrieved information below.
+- Always cite the document title, publication date, and source link when available.
+
+CASE 2: RELEVANT QUESTION BUT INFORMATION NOT FOUND
+- If the question asks about official college dates, notices, exam routines, results, or rules, but the Verified College Context has NO_MATCHING_OFFICIAL_DOCUMENTS_FOUND:
+  Respond honestly:
+  "I couldn't find verified information about this in the currently collected college and university documents. Please check the official website (ecajmer.ac.in) or contact the college administration."
+- NEVER fabricate, invent, or guess examination dates, fees, circular numbers, or deadlines.
+
+CASE 3: UNRELATED QUESTION (e.g. sports, movies, politics, recipes)
+- Politely explain your scope:
+  "I'm CampusSync AI, an academic and college information assistant for Engineering College Ajmer. I can help with university notices, examinations, academic information, placements, and college announcements. This question is outside my primary scope."
+
+CASE 4: GENERAL ACADEMIC QUESTION (e.g., DBMS, Operating Systems, Java, Machine Learning, Data Structures)
+- Provide comprehensive, clear, high-quality educational explanations, code examples, or practice MCQs.
+- Clearly distinguish general educational guidance from official college administrative notices.
+
+CASE 5: CONFLICTING DOCUMENTS
+- If two retrieved documents contain conflicting dates or details:
+  Explain the conflict clearly, cite both source documents, note their respective publication/revision dates, and do not silently pick an unsupported answer.
+
+CASE 6: FOLLOW-UP QUESTION
+- Seamlessly use previous conversation messages to understand references and generate a contextual response. Do not force the student to repeat context already provided.
+
+PERSONAL STUDENT RECORDS:
+- Biometric attendance and grade cards are maintained by course instructors and the Chief Proctor Office (Administrative Block Room 104). Never fabricate attendance percentages.
+
+TONE:
+Friendly, intelligent, professional, student-friendly, concise, and natural.
 
 {student_details}Verified College Context:
 {context_text}"""
@@ -152,12 +153,14 @@ POLICIES:
         if response and response.text:
             return {
                 "answer": response.text.strip(),
-                "sources": sources
+                "sources": sources,
+                "rewritten_query": rewritten_query
             }
         else:
             return {
                 "answer": "⚠️ **CampusSync AI Notice**: Gemini returned an empty response. Please try rephrasing your question.",
-                "sources": sources
+                "sources": sources,
+                "rewritten_query": rewritten_query
             }
 
     except errors.APIError as api_err:
@@ -168,27 +171,32 @@ POLICIES:
         if code == 429 or "RESOURCE_EXHAUSTED" in msg or "quota" in msg.lower():
             return {
                 "answer": "⚠️ **CampusSync AI Notice**: Gemini API quota limit reached. Please wait a moment before sending another message.",
-                "sources": sources
+                "sources": sources,
+                "rewritten_query": rewritten_query
             }
         elif code in [400, 401, 403] or "API_KEY_INVALID" in msg or "PERMISSION_DENIED" in msg:
             return {
                 "answer": "⚠️ **CampusSync AI Notice**: The configured `GEMINI_API_KEY` is invalid or unauthorized. Please verify your Gemini API key in `backend/.env`.",
-                "sources": sources
+                "sources": sources,
+                "rewritten_query": rewritten_query
             }
         elif code == 503 or "UNAVAILABLE" in msg:
             return {
                 "answer": "⚠️ **CampusSync AI Notice**: Google Gemini service is temporarily overloaded (503). Please retry shortly.",
-                "sources": sources
+                "sources": sources,
+                "rewritten_query": rewritten_query
             }
         elif code == 404:
             return {
                 "answer": f"⚠️ **CampusSync AI Notice**: Configured Gemini model `{model_name}` was not found.",
-                "sources": sources
+                "sources": sources,
+                "rewritten_query": rewritten_query
             }
         else:
             return {
                 "answer": f"⚠️ **CampusSync AI Notice**: Gemini API error ({code or 'API'}): {msg}",
-                "sources": sources
+                "sources": sources,
+                "rewritten_query": rewritten_query
             }
 
     except Exception as e:
@@ -197,9 +205,11 @@ POLICIES:
         if "timeout" in err_msg.lower() or "timed out" in err_msg.lower():
             return {
                 "answer": f"⚠️ **CampusSync AI Notice**: Request to Gemini timed out after {settings.GEMINI_TIMEOUT_SECONDS}s. Please check your network connection.",
-                "sources": sources
+                "sources": sources,
+                "rewritten_query": rewritten_query
             }
         return {
             "answer": f"⚠️ **CampusSync AI Notice**: Network or server error communicating with Gemini ({err_msg}).",
-            "sources": sources
+            "sources": sources,
+            "rewritten_query": rewritten_query
         }

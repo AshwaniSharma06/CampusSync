@@ -31,6 +31,8 @@ class Settings(BaseSettings):
         str(BASE_DIR / "data" / "chromadb")
     )
     CHROMA_COLLECTION_NAME: str = "campussync_rag"
+    RAG_TOP_K: int = int(os.getenv("RAG_TOP_K", "6"))
+    RAG_RELEVANCE_THRESHOLD: float = float(os.getenv("RAG_RELEVANCE_THRESHOLD", "0.70"))
 
     class Config:
         case_sensitive = True
