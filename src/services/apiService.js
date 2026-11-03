@@ -22,6 +22,9 @@ export const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
   if (envUrl && envUrl.trim()) {
     let clean = envUrl.trim().replace(/\/+$/, '');
+    if (clean.startsWith('/')) {
+      return clean.endsWith('/v1') ? clean : (clean.endsWith('/api') ? `${clean}/v1` : clean);
+    }
     if (clean.includes('localhost:5000') || clean.includes('127.0.0.1:5000')) {
       clean = clean.replace(':5000', ':8000');
     }
@@ -30,12 +33,13 @@ export const getApiBaseUrl = () => {
     return `${clean}/api/v1`;
   }
 
-  // Auto-detect production deployment: if running on Vercel or any non-localhost host,
-  // use the live Railway backend automatically
+  // When deployed to Vercel or any non-localhost host, use relative '/api/v1'
+  // which is proxied server-to-server by Vercel rewrites to Railway.
+  // This completely eliminates cross-origin preflight/CORS issues in browsers.
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
     const host = window.location.hostname;
     if (host !== 'localhost' && host !== '127.0.0.1') {
-      return 'https://campussync-production-4593.up.railway.app/api/v1';
+      return '/api/v1';
     }
   }
 

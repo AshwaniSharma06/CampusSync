@@ -6,6 +6,18 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/v1/:path*",
+      "destination": "https://campussync-production-4593.up.railway.app/api/v1/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://campussync-production-4593.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://campussync-production-4593.up.railway.app/health"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
