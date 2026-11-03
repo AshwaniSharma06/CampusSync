@@ -19,6 +19,16 @@ export class ApiError extends Error {
 // and gracefully append /api/v1 if the user provides only the host (e.g. on Vercel/Render).
 // Also defensively re-map legacy :5000 to FastAPI's standard :8000.
 export const getApiBaseUrl = () => {
+  // 1. In browser production environments (e.g. Vercel or any non-localhost domain),
+  // ALWAYS use same-origin relative '/api/v1'. This is proxied server-to-server by
+  // Vercel rewrites to Railway, completely eliminating browser cross-origin CORS checks.
+  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return '/api/v1';
+    }
+  }
+
   const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
   if (envUrl && envUrl.trim()) {
     let clean = envUrl.trim().replace(/\/+$/, '');
@@ -31,16 +41,6 @@ export const getApiBaseUrl = () => {
     if (clean.endsWith('/api/v1')) return clean;
     if (clean.endsWith('/api')) return `${clean}/v1`;
     return `${clean}/api/v1`;
-  }
-
-  // When deployed to Vercel or any non-localhost host, use relative '/api/v1'
-  // which is proxied server-to-server by Vercel rewrites to Railway.
-  // This completely eliminates cross-origin preflight/CORS issues in browsers.
-  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
-    const host = window.location.hostname;
-    if (host !== 'localhost' && host !== '127.0.0.1') {
-      return '/api/v1';
-    }
   }
 
   return 'http://localhost:8000/api/v1';
