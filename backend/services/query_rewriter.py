@@ -131,3 +131,4 @@ def rewrite_query_for_retrieval(
             pass
 
     return _heuristic_rewrite(q_clean, history, student_context)
+

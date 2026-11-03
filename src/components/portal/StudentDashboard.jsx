@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../../services/apiService';
 import EditProfileModal from './EditProfileModal';
+import CampusAiWorkspace from '../chat/CampusAiWorkspace';
 
 export default function StudentDashboard({ user, onSignOut, onActionNotification, onReturnHome }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -1359,87 +1360,13 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             </div>
           )}
 
-          {/* TAB: CAMPUS AI */}
+          {/* TAB: CAMPUS AI (Persistent Conversational Workspace - Phases 7, 8 & 9) */}
           {activeTab === 'ai' && (
-            <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200/90 shadow-sm animate-in fade-in duration-200 space-y-6">
-              <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                <div className="w-12 h-12 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-xs">
-                  <span className="material-symbols-outlined text-2xl">smart_toy</span>
-                </div>
-                <div>
-                  <h3 className="text-[24px] font-bold text-slate-900 tracking-tight">CampusSync AI Workspace</h3>
-                  <p className="text-[14px] text-teal-700 font-bold">24/7 Context-Aware Assistant for ECA &amp; BTU Students</p>
-                </div>
-              </div>
-
-              {/* Quick Prompt Suggestions */}
-              <div>
-                <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
-                  Academic &amp; Campus Assistance Topics
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                  {[
-                    'Explain DBMS normalization with examples',
-                    'Give me 10 Java MCQs for exam preparation',
-                    'Create a 7-day semester exam study timetable',
-                    'Explain polymorphism with a real-world example',
-                    'Tell me the next BTU examination date',
-                    'What is my attendance status?'
-                  ].map((p, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleAiPromptClick(p)}
-                      className="text-left p-3 rounded-xl bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-[13px] font-semibold text-slate-800 transition-all flex items-center justify-between group"
-                    >
-                      <span className="line-clamp-1">"{p}"</span>
-                      <span className="material-symbols-outlined text-xs text-teal-600 group-hover:translate-x-0.5 transition-transform shrink-0 ml-1">arrow_forward</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* AI Query Box */}
-              <div className="space-y-4">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (aiQuery.trim()) {
-                      handleAiPromptClick(aiQuery);
-                    } else {
-                      handleAiPromptClick('Summarize my upcoming deadlines');
-                    }
-                  }}
-                  className="flex gap-2"
-                >
-                  <input
-                    type="text"
-                    value={aiQuery}
-                    onChange={(e) => setAiQuery(e.target.value)}
-                    placeholder="Ask Campus AI anything about your ECA timetable, syllabus, or grades..."
-                    className="flex-1 bg-slate-50 rounded-xl px-4 py-3 text-[14px] text-slate-900 border border-slate-200 focus:outline-none focus:border-teal-500 font-medium"
-                  />
-                  <button
-                    type="submit"
-                    disabled={aiLoading}
-                    className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-[14px] uppercase tracking-wider px-6 py-3 rounded-xl transition-all shadow-2xs shrink-0 cursor-pointer disabled:opacity-60"
-                  >
-                    {aiLoading ? 'Thinking...' : 'Ask AI'}
-                  </button>
-                </form>
-
-                {/* AI Answer Card */}
-                {aiResponse && (
-                  <div className="p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-md animate-in fade-in">
-                    <div className="flex items-center gap-2 text-teal-400 font-bold text-[14px] mb-2">
-                      <span className="material-symbols-outlined text-base">smart_toy</span>
-                      <span>CampusSync AI Analysis:</span>
-                    </div>
-                    <p className="text-[15px] text-slate-100 font-normal leading-relaxed whitespace-pre-wrap">
-                      {aiResponse}
-                    </p>
-                  </div>
-                )}
-              </div>
+            <div className="animate-in fade-in duration-200">
+              <CampusAiWorkspace
+                studentProfile={studentProfile}
+                onActionNotification={onActionNotification}
+              />
             </div>
           )}
         </main>

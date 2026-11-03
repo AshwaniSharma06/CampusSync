@@ -114,7 +114,10 @@ def execute_intelligent_retrieval(
             except Exception:
                 pass
 
-        total_score = 1.0 + kw_score + freshness_score
+        dist = chunk.get("distance")
+        vector_sim = max(0.0, 1.0 - (dist if dist is not None else 0.5))
+        # Hybrid formula: vector similarity is primary base; keyword overlap & recency provide controlled rerank adjustment
+        total_score = vector_sim + (kw_score * 0.35) + freshness_score
         chunk["rerank_score"] = total_score
         scored_chunks.append(chunk)
         seen_parents.add(parent_id)
@@ -168,3 +171,4 @@ def execute_intelligent_retrieval(
         "sources": sources,
         "has_verified_context": has_verified_context
     }
+

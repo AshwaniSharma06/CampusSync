@@ -162,12 +162,41 @@ export const apiService = {
     return apiClient('/notifications/');
   },
 
-  // AI RAG Chatbot
-  chatWithAI: async (query, history = [], studentProfile = null) => {
+  // AI RAG Chatbot & Persistent Sessions (Phases 7 & 8)
+  getChatSessions: async () => {
+    return apiClient('/rag/sessions');
+  },
+
+  createChatSession: async (title = 'New Conversation') => {
+    return apiClient('/rag/sessions', {
+      method: 'POST',
+      body: JSON.stringify({ title }),
+    });
+  },
+
+  getChatSession: async (sessionId) => {
+    return apiClient(`/rag/sessions/${sessionId}`);
+  },
+
+  renameChatSession: async (sessionId, title) => {
+    return apiClient(`/rag/sessions/${sessionId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ title }),
+    });
+  },
+
+  deleteChatSession: async (sessionId) => {
+    return apiClient(`/rag/sessions/${sessionId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  chatWithAI: async (query, history = [], studentProfile = null, sessionId = null) => {
     return apiClient('/rag/chat', {
       method: 'POST',
       body: JSON.stringify({
         query,
+        session_id: sessionId,
         history,
         student_profile: studentProfile,
       }),
