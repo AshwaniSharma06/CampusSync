@@ -110,6 +110,32 @@
   scrollbar-width: none;
 }
 
+.portal-card {
+  background: rgba(13, 27, 51, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portal-card:hover {
+  border-color: rgba(113, 216, 200, 0.3);
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.45);
+}
+
+.portal-card-interactive {
+  background: rgba(17, 32, 55, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: all 0.2s ease;
+}
+
+.portal-card-interactive:hover {
+  background: rgba(24, 40, 68, 0.95);
+  border-color: rgba(113, 216, 200, 0.35);
+  transform: translateY(-1px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

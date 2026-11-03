@@ -147,15 +147,17 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Student ID / Roll No.
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                <span>Student ID / Roll No.</span>
+                <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-0.5">
+                  <span className="material-symbols-outlined text-xs">lock</span> Official Record
+                </span>
               </label>
               <input
                 type="text"
                 value={formData.studentId}
-                onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                disabled={Boolean(currentProfile?.studentId || currentProfile?.student_id)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-slate-50 disabled:cursor-not-allowed"
                 placeholder="e.g. ECA2026-8941"
               />
             </div>
@@ -163,13 +165,16 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Department / Branch
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                <span>Department / Branch</span>
+                <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-0.5">
+                  <span className="material-symbols-outlined text-xs">lock</span> Locked
+                </span>
               </label>
               <select
                 value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 bg-white"
+                disabled={Boolean(currentProfile?.department)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-slate-50 disabled:cursor-not-allowed"
               >
                 {DEPARTMENTS.map((dept) => (
                   <option key={dept} value={dept}>{dept}</option>
@@ -178,13 +183,16 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Current Semester
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                <span>Current Semester</span>
+                <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-0.5">
+                  <span className="material-symbols-outlined text-xs">lock</span> Locked
+                </span>
               </label>
               <select
                 value={formData.semester}
-                onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 bg-white"
+                disabled={Boolean(currentProfile?.semester)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-slate-50 disabled:cursor-not-allowed"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
                   <option key={sem} value={sem}>Semester {sem}</option>

@@ -131,3 +131,19 @@ def get_current_student_context(
         semester=int(profile.semester),
         academic_year=academic_year
     )
+
+def require_admin_or_faculty(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    """
+    Restricts access strictly to verified faculty and administrator accounts.
+    Rejects student or unprivileged accounts with HTTP 403 Forbidden.
+    """
+    user_role = current_user.role.value if hasattr(current_user.role, "value") else str(current_user.role)
+    if user_role not in ["admin", "faculty"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Administrative or faculty privileges required. Access denied."
+        )
+    return current_user
+

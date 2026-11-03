@@ -76,11 +76,27 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal, userProfil
       throw new Error('No answer received from CampusSync AI service');
     } catch (err) {
       console.error('CampusSync AI communication error:', err);
+      let errorText = `⚠️ **Connection Error**: Unable to reach CampusSync AI (${err.message || 'Network failure'}).`;
+
+      if (err.status === 401) {
+        errorText = '🔒 **Authentication Required**: Please log in to continue chatting with CampusSync AI.';
+      } else if (err.status === 403) {
+        errorText = '⛔ **Access Restricted**: Access to academic records outside your cohort is restricted.';
+      } else if (err.status === 422) {
+        errorText = `⚠️ **Validation Error**: ${err.message}`;
+      } else if (err.status >= 500) {
+        errorText = `🔥 **Server Error (${err.status})**: ${err.message}`;
+      } else if (err.code === 'TIMEOUT') {
+        errorText = '⏱️ **Timeout**: Request timed out. Please try again.';
+      } else if (err.code === 'NETWORK_ERROR' || (err.message && err.message.includes('unreachable'))) {
+        errorText = '🔌 **Backend Offline**: Unable to connect to the API on port 8000. Please ensure the backend server is running: `uvicorn backend.main:app --port 8000`';
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          text: `⚠️ **Connection Error**: Unable to reach CampusSync AI (${err.message || 'Network failure'}). Please ensure the backend server is running.`,
+          text: errorText,
           sources: []
         }
       ]);
@@ -172,7 +188,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal, userProfil
                   {Array.isArray(m.sources) && m.sources.length > 0 && (
                     <div className="pt-1 border-t border-slate-700/80 space-y-1">
                       <span className="text-[10px] text-teal-400 font-bold uppercase tracking-wider block">
-                        Verified Sources ({m.sources.length}):
+                        Source Citations ({m.sources.length}):
                       </span>
                       <div className="space-y-1">
                         {m.sources.map((src, sIdx) => (
@@ -187,7 +203,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal, userProfil
                               {src.title}
                             </span>
                             <span className="text-[9px] text-slate-400">
-                              {src.scope || 'Official Circular'} • {src.published_date ? new Date(src.published_date).toLocaleDateString() : 'Recent'}
+                              {src.scope || 'Notice'} • {src.data_origin === 'VERIFIED_OFFICIAL' ? 'Official' : 'Pending Verification'} • {src.published_date ? new Date(src.published_date).toLocaleDateString() : 'Recent'}
                             </span>
                           </a>
                         ))}

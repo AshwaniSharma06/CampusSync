@@ -143,7 +143,8 @@ def execute_intelligent_retrieval(
                 "published_date": chunk.get("published_date") or "",
                 "scope": chunk.get("scope") or "GLOBAL",
                 "department": chunk.get("department_code") or "All",
-                "verification_status": chunk.get("verification_status") or "VERIFIED"
+                "data_origin": chunk.get("data_origin") or "DEMO_SEED",
+                "verification_status": chunk.get("verification_status") or "PENDING_VERIFICATION"
             })
 
     # 5. Assemble formatted context blocks for Gemini
@@ -153,6 +154,7 @@ def execute_intelligent_retrieval(
             block = (
                 f"[Document {idx}]: {chunk['title']}\n"
                 f"Type: {chunk.get('document_type', 'NOTICE')} | Scope: {chunk.get('scope', 'GLOBAL')}\n"
+                f"Data Origin: {chunk.get('data_origin', 'SCRAPED')} | Status: {chunk.get('verification_status', 'UNVERIFIED')}\n"
                 f"Date: {chunk.get('published_date') or 'Recent Official Notice'}\n"
                 f"Source Link: {chunk.get('source_url') or chunk.get('document_url') or 'ecajmer.ac.in'}\n"
                 f"Content:\n{chunk['chunk_text']}"

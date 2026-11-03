@@ -1,12 +1,19 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
+from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, false
 from typing import Any, Optional, List, Dict
+from pathlib import Path
+import os
+import glob
 
 from backend.api.deps import get_db, get_current_student_context, StudentContext
 from backend.models.academic import Notice, Course, ClassificationScope, VerificationStatus
+from backend.services.url_validator import resolve_notice_destination, is_trusted_url, DestinationType
 
 router = APIRouter()
+
+HOSTED_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "hosted_documents"
 
 @router.get("/")
 def get_notices(
@@ -77,7 +84,7 @@ def get_notices(
     query = db.query(Notice).filter(base_filter, scope_filter)
     
     # Optional search by keyword
-    if q and q.strip():
+    if q and isinstance(q, str) and q.strip():
         search_term = f"%{q.strip()}%"
         query = query.filter(
             or_(
@@ -87,26 +94,82 @@ def get_notices(
         )
         
     # Optional category filter
-    if category and category.lower() != "all":
+    if category and isinstance(category, str) and category.lower() != "all":
         query = query.filter(Notice.notice_type.ilike(category.strip()))
         
     notices = query.order_by(Notice.published_date.desc()).all()
     
-    return [
-        {
+    results = []
+    for n in notices:
+        dest_type, dest_url, dest_label = resolve_notice_destination(
+            download_url=getattr(n, "download_url", None),
+            document_url=getattr(n, "document_url", None),
+            source_url=getattr(n, "source_url", None),
+            official_page_url=getattr(n, "official_page_url", None)
+        )
+        results.append({
             "id": n.id,
             "title": n.title,
             "content": n.content,
             "notice_type": n.notice_type,
-            "source_url": n.source_url,
-            "document_url": n.document_url,
+            "source_url": n.source_url if is_trusted_url(n.source_url) else None,
+            "document_url": n.document_url if is_trusted_url(n.document_url) else None,
+            "download_url": getattr(n, "download_url", None) if is_trusted_url(getattr(n, "download_url", None)) else None,
+            "official_page_url": getattr(n, "official_page_url", None) if is_trusted_url(getattr(n, "official_page_url", None)) else None,
             "published_date": n.published_date.isoformat() if n.published_date else None,
             "scope": n.scope,
             "target_semester": n.target_semester,
             "department_code": n.department_code,
             "academic_year": n.academic_year,
             "data_origin": n.data_origin,
-            "verification_status": n.verification_status
-        }
-        for n in notices
-    ]
+            "verification_status": n.verification_status,
+            "destination_type": dest_type.value,
+            "action_url": dest_url,
+            "action_label": dest_label,
+            "is_actionable": dest_type != DestinationType.UNAVAILABLE
+        })
+
+    return results
+
+@router.get("/{notice_id}/download")
+def download_notice_document(
+    notice_id: int,
+    student_ctx: StudentContext = Depends(get_current_student_context),
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Downloads the official notice document hosted directly by CampusSync,
+    or safely redirects to the verified external document portal.
+    """
+    notice = db.query(Notice).filter(Notice.id == notice_id, Notice.is_active == True).first()
+    if not notice:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Notice #{notice_id} not found or inactive"
+        )
+
+    # 1. Check for locally hosted file
+    matching_files = list(HOSTED_DIR.glob(f"Notice_{notice_id}_*.pdf"))
+    if matching_files and matching_files[0].exists():
+        file_path = matching_files[0]
+        filename = f"Notice_{notice_id}_{notice.title[:30].replace(' ', '_')}.pdf"
+        return FileResponse(
+            path=file_path,
+            filename=filename,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        )
+
+    # 2. If external document URL is verified, redirect
+    if notice.document_url and is_trusted_url(notice.document_url):
+        return RedirectResponse(url=notice.document_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+    # 3. If only webpage exists, redirect to webpage
+    target_page = getattr(notice, "official_page_url", None) or notice.source_url
+    if target_page and is_trusted_url(target_page):
+        return RedirectResponse(url=target_page, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Official notice link is currently unavailable."
+    )

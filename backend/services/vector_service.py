@@ -69,7 +69,8 @@ def index_document(
     document_type: str = "NOTICE",
     verification_status: str = "VERIFIED",
     data_origin: str = "VERIFIED_OFFICIAL",
-    published_date: Optional[str] = None
+    published_date: Optional[str] = None,
+    target_user_id: Optional[int] = None
 ) -> int:
     """
     Chunks and indexes a document with comprehensive metadata into persistent ChromaDB.
@@ -107,6 +108,7 @@ def index_document(
             "scope": scope,
             "department_code": dept_str,
             "target_semester": sem_int,
+            "target_user_id": int(target_user_id) if target_user_id is not None else 0,
             "academic_year": academic_year or "2026-27",
             "document_type": document_type,
             "verification_status": verification_status,
@@ -182,16 +184,21 @@ def retrieve_relevant_chunks(
 
         student_sem = student_context.get("semester")
         sem_val = int(student_sem) if student_sem is not None else 0
+        user_id = student_context.get("user_id")
+        user_id_val = int(user_id) if user_id is not None else 0
 
         # Student is authorized for:
         # - GLOBAL notices
         # - DEPARTMENT_SPECIFIC notices for their department (or ALL)
         # - SEMESTER_SPECIFIC notices for their department AND semester
+        # - INDIVIDUAL notices if an authenticated user ID is present
         allowed_scopes = ["GLOBAL"]
         if canonical_dept:
             allowed_scopes.append("DEPARTMENT_SPECIFIC")
         if canonical_dept and sem_val > 0:
             allowed_scopes.append("SEMESTER_SPECIFIC")
+        if user_id_val > 0:
+            allowed_scopes.append("INDIVIDUAL")
 
         where_filter = {
             "$and": [
@@ -200,11 +207,12 @@ def retrieve_relevant_chunks(
             ]
         }
 
-    limit = min(n_results, total_docs)
+    # Query an adequately sized candidate pool so cohort filtering yields top relevant chunks
+    candidate_limit = min(max(n_results * 8, 30), total_docs)
     try:
         results = collection.query(
             query_texts=[q_clean],
-            n_results=limit,
+            n_results=candidate_limit,
             where=where_filter
         )
     except Exception as e:
@@ -212,7 +220,7 @@ def retrieve_relevant_chunks(
         try:
             results = collection.query(
                 query_texts=[q_clean],
-                n_results=limit,
+                n_results=candidate_limit,
                 where={"verification_status": "VERIFIED"}
             )
         except Exception as e2:
@@ -233,17 +241,28 @@ def retrieve_relevant_chunks(
                 if dist is not None and dist > settings.RAG_RELEVANCE_THRESHOLD:
                     continue
 
-            # Student cohort verification guard
+            # Student cohort & privacy verification guard
             if student_context:
                 target_dept = meta.get("department_code")
                 target_sem = meta.get("target_semester")
                 scope = meta.get("scope")
+                target_uid = meta.get("target_user_id", 0)
+
+                # Strict individual privacy protection
+                if scope == "INDIVIDUAL":
+                    if user_id_val <= 0 or target_uid != user_id_val:
+                        continue
 
                 if scope == "DEPARTMENT_SPECIFIC" and target_dept not in ["ALL", canonical_dept]:
                     continue
                 if scope == "SEMESTER_SPECIFIC":
                     if target_dept not in ["ALL", canonical_dept] or (target_sem != 0 and target_sem != sem_val):
                         continue
+            else:
+                # Unauthenticated or context-free requests can only access GLOBAL documents
+                scope = meta.get("scope")
+                if scope in ["INDIVIDUAL", "DEPARTMENT_SPECIFIC", "SEMESTER_SPECIFIC", "UNCLASSIFIED"]:
+                    continue
 
             output_chunks.append({
                 "chunk_text": doc,
@@ -259,10 +278,12 @@ def retrieve_relevant_chunks(
                 "target_semester": meta.get("target_semester"),
                 "distance": dist
             })
+            if len(output_chunks) >= n_results:
+                break
 
     return output_chunks
 
-def sync_database_to_chroma(db: Session) -> Dict[str, int]:
+def sync_database_to_chroma(db: Session, max_items: Optional[int] = None) -> Dict[str, int]:
     """
     Synchronizes all VERIFIED notices and verified academic documents from SQLite into persistent ChromaDB.
     Strictly skips UNVERIFIED or FLAGGED documents.
@@ -274,10 +295,13 @@ def sync_database_to_chroma(db: Session) -> Dict[str, int]:
     total_chunks = 0
 
     # 1. Sync verified Notices
-    verified_notices = db.query(Notice).filter(
+    notice_query = db.query(Notice).filter(
         Notice.verification_status == VerificationStatus.VERIFIED.value,
         Notice.is_active == True
-    ).all()
+    )
+    if max_items:
+        notice_query = notice_query.limit(max_items)
+    verified_notices = notice_query.all()
 
     for notice in verified_notices:
         body = f"{notice.title}. {notice.content}"
@@ -290,6 +314,7 @@ def sync_database_to_chroma(db: Session) -> Dict[str, int]:
             scope=notice.scope or "GLOBAL",
             department_code=notice.department_code,
             target_semester=notice.target_semester,
+            target_user_id=getattr(notice, "target_user_id", None),
             academic_year=notice.academic_year or "2026-27",
             document_type="NOTICE",
             verification_status="VERIFIED",
@@ -300,9 +325,12 @@ def sync_database_to_chroma(db: Session) -> Dict[str, int]:
         total_chunks += chunks
 
     # 2. Sync verified AcademicDocuments
-    verified_docs = db.query(AcademicDocument).filter(
+    doc_query = db.query(AcademicDocument).filter(
         AcademicDocument.verification_status == VerificationStatus.VERIFIED.value
-    ).all()
+    )
+    if max_items:
+        doc_query = doc_query.limit(max_items)
+    verified_docs = doc_query.all()
 
     for doc in verified_docs:
         body = doc.cleaned_text or doc.raw_text or doc.title
@@ -329,4 +357,28 @@ def sync_database_to_chroma(db: Session) -> Dict[str, int]:
         "verified_documents_indexed": docs_indexed,
         "total_chunks_stored": total_chunks
     }
+
+def ensure_chroma_initialized(db: Session, max_sync: Optional[int] = None) -> Dict[str, Any]:
+    """
+    Safe startup check:
+    Inspects whether the persistent ChromaDB collection exists and holds indexed chunks.
+    If empty (0 chunks), automatically synchronizes verified content from SQLite.
+    If already populated, preserves existing chunks without duplication or reset.
+    """
+    try:
+        collection = get_rag_collection()
+        count = collection.count()
+        if count > 0:
+            print(f"[ChromaDB Startup] Collection '{settings.CHROMA_COLLECTION_NAME}' active with {count} chunks. Skipping re-initialization.")
+            return {"status": "ALREADY_POPULATED", "chunks_count": count}
+
+        print(f"[ChromaDB Startup] Collection '{settings.CHROMA_COLLECTION_NAME}' is empty (0 chunks). Synchronizing verified content from database...")
+        sync_stats = sync_database_to_chroma(db, max_items=max_sync)
+        new_count = collection.count()
+        print(f"[ChromaDB Startup] Synchronization complete: {new_count} chunks indexed ({sync_stats.get('verified_notices_indexed')} notices, {sync_stats.get('verified_documents_indexed')} docs).")
+        return {"status": "INITIALIZED", "chunks_count": new_count, "stats": sync_stats}
+    except Exception as e:
+        print(f"[ChromaDB Startup] Error during ChromaDB initialization check: {e}")
+        return {"status": "ERROR", "error": str(e)}
+
 

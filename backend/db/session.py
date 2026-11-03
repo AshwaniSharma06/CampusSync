@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, declarative_base
 from backend.core.config import settings
 import logging
@@ -33,7 +33,7 @@ def get_engine():
                     logger.warning(f"Local PostgreSQL connection failed ({e}). Falling back to SQLite.")
             else:
                 logger.info("Local PostgreSQL offline on port 5432. Using fail-safe SQLite.")
-            return create_engine("sqlite:///./campussync.db", connect_args={"check_same_thread": False})
+            return create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False})
         else:
             # Managed remote cloud database (e.g. Supabase, Render PostgreSQL, Neon)
             try:
@@ -43,9 +43,14 @@ def get_engine():
                 return eng
             except Exception as e:
                 logger.warning(f"Remote PostgreSQL connection failed ({e}). Falling back to SQLite.")
-                return create_engine("sqlite:///./campussync.db", connect_args={"check_same_thread": False})
+                return create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False})
 
     elif "sqlite" in db_url:
+        # If relative SQLite URL, resolve relative to project root so it never splits
+        if "sqlite:///./" in db_url or db_url == "sqlite:///campussync.db":
+            from backend.core.config import ROOT_DIR
+            canonical_db = (ROOT_DIR / "campussync.db").resolve()
+            db_url = f"sqlite:///{canonical_db.as_posix()}"
         return create_engine(
             db_url,
             connect_args={"check_same_thread": False}
@@ -53,6 +58,30 @@ def get_engine():
     return create_engine(db_url)
 
 engine = get_engine()
+
+# Configure SQLite concurrency, WAL journal mode, and busy timeout for multi-client & scraping safety
+if engine.dialect.name == "sqlite":
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        try:
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA busy_timeout=5000")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA foreign_keys=ON")
+        except Exception as err:
+            logger.warning(f"Failed to set SQLite PRAGMA: {err}")
+        finally:
+            cursor.close()
+
+    # Apply immediately to ensure the database file enables WAL journal mode on startup
+    try:
+        with engine.connect() as conn:
+            mode = conn.exec_driver_sql("PRAGMA journal_mode=WAL;").scalar()
+            logger.info(f"SQLite PRAGMA journal_mode set to: {mode}")
+    except Exception as err:
+        logger.warning(f"Could not initialize SQLite WAL journal mode: {err}")
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Auto-create tables for seamless development & demo execution

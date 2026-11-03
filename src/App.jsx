@@ -1,18 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Toast from './components/ui/Toast';
 import AiWidget from './components/ui/AiWidget';
 import AuthModal from './components/ui/AuthModal';
-import StudentDashboard from './components/portal/StudentDashboard';
-import LandingPage from './pages/LandingPage';
-import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import { useAuth } from './context/AuthContext';
 import { apiService } from './services/apiService';
 import { accountStore } from './services/accountStore';
+
+// Code-splitting & dynamic imports for major routes (Phase 7 Performance Optimization)
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const StudentDashboard = lazy(() => import('./components/portal/StudentDashboard'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+function PageLoadingFallback() {
+  return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
+      <div className="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center shadow-lg animate-pulse mb-3">
+        <span className="material-symbols-outlined text-2xl">school</span>
+      </div>
+      <p className="text-slate-600 font-semibold text-sm">Loading CampusSync...</p>
+    </div>
+  );
+}
 
 export default function App() {
   const [toastMessage, setToastMessage] = useState('');
@@ -122,32 +135,34 @@ export default function App() {
         />
       )}
 
-      <Routes>
-        <Route 
-          path="/" 
-          element={
-            <LandingPage 
-              currentUser={isStudentAuthenticated ? (currentUser || userProfile) : null} 
-              showToast={showToast} 
-              onOpenAuth={handleOpenAuth} 
-            />
-          } 
-        />
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute user={isStudentAuthenticated ? effectiveUser : null} redirectPath="/">
-              <StudentDashboard
-                user={effectiveUser}
-                onSignOut={handleSignOut}
-                onActionNotification={showToast}
-                onReturnHome={() => navigate('/')}
+      <Suspense fallback={<PageLoadingFallback />}>
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <LandingPage 
+                currentUser={isStudentAuthenticated ? (currentUser || userProfile) : null} 
+                showToast={showToast} 
+                onOpenAuth={handleOpenAuth} 
               />
-            </ProtectedRoute>
-          } 
-        />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+            } 
+          />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute user={isStudentAuthenticated ? effectiveUser : null} redirectPath="/">
+                <StudentDashboard
+                  user={effectiveUser}
+                  onSignOut={handleSignOut}
+                  onActionNotification={showToast}
+                  onReturnHome={() => navigate('/')}
+                />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
 
       {!isDashboard && <Footer onActionNotification={showToast} />}
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />

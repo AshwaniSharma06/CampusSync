@@ -1,0 +1,30 @@
+# Ignore dependencies and build artifacts
+node_modules/
+dist/
+dist-ssr/
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Ignore Python cache, environments, and local backups
+__pycache__/
+*.py[cod]
+*$py.class
+backend/venv/
+.venv/
+backups/
+*.bak
+*.log
+
+# Ignore local environment files with live credentials
+.env
+.env.*
+*.env
+backend/.env
+
+# Ignore temp files
+.pytest_cache/
+*.swp
+*.swo
+

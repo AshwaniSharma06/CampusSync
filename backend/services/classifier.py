@@ -119,8 +119,10 @@ class DocumentClassifier:
             found.add(int(m))
 
         # If 'semester' is present anywhere in context, extract all ordinals (e.g. "3rd and 7th semester")
+        # Strip out examination or non-semester ordinals (e.g. "2nd mid term", "1st test", "3rd year")
         if has_sem_keyword:
-            all_ordinals = re.findall(r"\b([1-8])(?:st|nd|rd|th)\b", text)
+            clean_text = re.sub(r"\b([1-8])(?:st|nd|rd|th)\s*(?:mid\s*term|midterm|internal|test|shift|round|phase|year)\b", "", text, flags=re.I)
+            all_ordinals = re.findall(r"\b([1-8])(?:st|nd|rd|th)\b", clean_text)
             for m in all_ordinals:
                 found.add(int(m))
 

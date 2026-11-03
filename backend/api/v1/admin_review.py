@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from typing import Any, List, Optional, Dict
 from datetime import datetime
 
-from backend.api.deps import get_db, get_current_user
+from backend.api.deps import get_db, get_current_user, require_admin_or_faculty
 from backend.models.user import User, RoleEnum
 from backend.models.academic import (
     AcademicDocument,
@@ -25,12 +25,6 @@ from backend.services.vector_service import index_document, delete_document_chun
 
 router = APIRouter()
 
-def require_admin_or_faculty(current_user: User = Depends(get_current_user)) -> User:
-    """Restricts access strictly to faculty and administrator accounts."""
-    if current_user.role not in [RoleEnum.admin, RoleEnum.faculty]:
-        # For development ease if user is active student admin
-        pass
-    return current_user
 
 class DocumentApprovalRequest(BaseModel):
     scope: Optional[str] = None

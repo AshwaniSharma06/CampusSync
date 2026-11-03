@@ -6,6 +6,7 @@ import {
     signOut 
 } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../config/firebase';
+import { API_BASE_URL } from '../services/apiService';
 
 const AuthContext = createContext();
 
@@ -62,7 +63,7 @@ export function AuthProvider({ children }) {
                 // Get Firebase ID token to send to FastAPI for session JWT
                 try {
                     const token = await user.getIdToken();
-                    const res = await fetch('http://localhost:8000/api/v1/auth/login', {
+                    const res = await fetch(`${API_BASE_URL}/auth/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ firebase_token: token })

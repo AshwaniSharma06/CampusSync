@@ -23,6 +23,12 @@ class Club(Base):
     description = Column(Text)
     focus_areas = Column(String) # JSON or comma separated
     location = Column(String)
+    category = Column(String(100), nullable=True)
+    lead = Column(String(150), nullable=True)
+    members_count = Column(String(100), nullable=True)
+    official_page_url = Column(String(500), nullable=True)
+    directory_url = Column(String(500), nullable=True)
+    verification_status = Column(String(30), default="VERIFIED")
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class CommunityPost(Base):

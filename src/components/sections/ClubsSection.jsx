@@ -1,4 +1,5 @@
 import React from 'react';
+import { openOfficialLink } from '../../services/apiService';
 
 const ECA_CLUBS = [
   {
@@ -18,6 +19,8 @@ const ECA_CLUBS = [
     keyEvents: 'Technotsav, Robowar, SIH Innovation Challenge',
     location: 'Central Computer Center & Robotics Lab',
     membersCount: '240+ Active Coders',
+    officialPageUrl: 'https://www.ecajmer.ac.in/events/technotsav-2026',
+    directoryUrl: 'https://www.ecajmer.ac.in/facilities/sac',
   },
   {
     id: 'creative-art',
@@ -36,6 +39,8 @@ const ECA_CLUBS = [
     keyEvents: 'Tarangini Cultural Fest, Open Mic Night, Art Exhibition',
     location: 'ECA Open Air Theatre (OAT)',
     membersCount: '310+ Active Artists',
+    officialPageUrl: null, // CAS uses the official SAC directory fallback
+    directoryUrl: 'https://www.ecajmer.ac.in/facilities/sac',
   },
   {
     id: 'ai-ml-cse',
@@ -54,6 +59,8 @@ const ECA_CLUBS = [
     keyEvents: 'AI Paper Reviews, ML Model Showcase, Kaggle Sprints',
     location: 'Barliya CSE Block • AI Lab 204',
     membersCount: '180+ ML Enthusiasts',
+    officialPageUrl: 'https://www.ecajmer.ac.in/departments/cse',
+    directoryUrl: 'https://www.ecajmer.ac.in/facilities/sac',
   },
 ];
 
@@ -75,7 +82,13 @@ export default function ClubsSection({ onActionNotification }) {
             </p>
           </div>
           <button
-            onClick={() => onActionNotification?.('Opening ECA Student Activity Center Charter & Directory...')}
+            onClick={() =>
+              openOfficialLink(
+                'https://www.ecajmer.ac.in/facilities/sac',
+                onActionNotification,
+                'ECA Student Activity Center directory is currently unavailable.'
+              )
+            }
             className="border border-slate-700/80 text-on-surface hover:text-white hover:border-teal-400/50 px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-surface-container/60 hover:bg-surface-bright transition-all whitespace-nowrap shadow-sm"
           >
             SAC Directory
@@ -156,13 +169,28 @@ export default function ClubsSection({ onActionNotification }) {
                   </div>
                 </div>
 
-                {/* Action button */}
+                {/* Action button: Opens official verified page or SAC directory fallback */}
                 <button
-                  onClick={() => onActionNotification?.(`Opening ${club.name} registration portal...`)}
+                  onClick={() =>
+                    openOfficialLink(
+                      club.officialPageUrl || club.directoryUrl,
+                      onActionNotification,
+                      'Official club link is currently unavailable.'
+                    )
+                  }
                   className="mt-5 w-full bg-teal-500/10 hover:bg-teal-500 text-teal-300 hover:text-slate-950 border border-teal-500/30 hover:border-teal-400 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  title={
+                    club.officialPageUrl
+                      ? `Open official ${club.name} portal`
+                      : club.directoryUrl
+                      ? `View official Student Activity Center (SAC) directory for ${club.name}`
+                      : 'Official club link is currently unavailable'
+                  }
                 >
-                  <span>Explore Chapter</span>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  <span>{club.officialPageUrl ? 'Explore Chapter' : 'SAC Directory'}</span>
+                  <span className="material-symbols-outlined text-sm">
+                    {club.officialPageUrl ? 'arrow_forward' : 'folder_open'}
+                  </span>
                 </button>
               </div>
             </div>

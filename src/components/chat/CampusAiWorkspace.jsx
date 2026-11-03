@@ -129,12 +129,28 @@ export default function CampusAiWorkspace({ studentProfile, onActionNotification
       }
     } catch (err) {
       console.error('Chat generation error:', err);
+      let errorBubbleText = `⚠️ **Error**: ${err.message || 'Unable to complete your request.'}`;
+
+      if (err.status === 401) {
+        errorBubbleText = '🔒 **Authentication Required**: Your session has expired or is invalid. Please log in again to continue.';
+      } else if (err.status === 403) {
+        errorBubbleText = '⛔ **Access Restricted**: You do not have permission to access academic data outside your registered department or semester.';
+      } else if (err.status === 422) {
+        errorBubbleText = `⚠️ **Validation Error**: ${err.message}`;
+      } else if (err.status >= 500) {
+        errorBubbleText = `🔥 **Backend Server Error (${err.status})**: ${err.message}`;
+      } else if (err.code === 'TIMEOUT') {
+        errorBubbleText = '⏱️ **Request Timeout**: The AI generation timed out. Please retry with a concise question.';
+      } else if (err.code === 'NETWORK_ERROR' || (err.message && err.message.includes('unreachable'))) {
+        errorBubbleText = `🔌 **Backend Offline / Connection Refused**: Unable to connect to the backend server.\n\n*Please ensure the FastAPI backend is running:* \`uvicorn backend.main:app --reload --port 8000\``;
+      }
+
       setErrorMsg(err.message || 'Network error communicating with CampusSync AI');
       setMessages(prev => [
         ...prev,
         {
           role: 'assistant',
-          content: `⚠️ **Connection Error**: Unable to complete your request (${err.message || 'Server unavailable'}). Please verify the backend connection.`,
+          content: errorBubbleText,
           sources: [],
           created_at: new Date().toISOString()
         }
@@ -369,8 +385,8 @@ export default function CampusAiWorkspace({ studentProfile, onActionNotification
                   {!isUser && Array.isArray(msg.sources) && msg.sources.length > 0 && (
                     <div className="space-y-1.5 pt-1">
                       <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        <span className="material-symbols-outlined text-xs text-teal-600">verified</span>
-                        <span>Verified Citations ({msg.sources.length})</span>
+                        <span className="material-symbols-outlined text-xs text-teal-600">bookmark</span>
+                        <span>Source Citations ({msg.sources.length})</span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -381,13 +397,23 @@ export default function CampusAiWorkspace({ studentProfile, onActionNotification
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-teal-400 hover:bg-teal-50/40 transition-all flex items-start justify-between gap-2 group shadow-2xs text-left"
-                            title="Open Official Notice"
+                            title="Open Source Link"
                           >
                             <div className="min-w-0">
-                              <div className="flex items-center gap-1.5 mb-0.5">
+                              <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                                 <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-teal-100 text-teal-800 uppercase">
-                                  {src.scope || 'Official'}
+                                  {src.scope || 'Notice'}
                                 </span>
+                                {src.data_origin === 'VERIFIED_OFFICIAL' ? (
+                                  <span className="text-[9px] font-bold px-1 py-0.2 rounded bg-emerald-100 text-emerald-800 flex items-center gap-0.5">
+                                    <span className="material-symbols-outlined text-[10px]">verified</span>
+                                    Official
+                                  </span>
+                                ) : (src.data_origin === 'DEMO_SEED' || src.verification_status === 'PENDING_VERIFICATION') ? (
+                                  <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                                    Pending Verification
+                                  </span>
+                                ) : null}
                                 {src.published_date && (
                                   <span className="text-[10px] text-slate-400">
                                     {new Date(src.published_date).toLocaleDateString()}
@@ -496,3 +522,4 @@ export default function CampusAiWorkspace({ studentProfile, onActionNotification
     </div>
   );
 }
+

@@ -1,104 +1,121 @@
-# 🚀 CampusSync — Production Deployment Guide
+# 🚀 CampusSync — Complete Production Deployment Guide
 
-This guide provides step-by-step instructions for deploying CampusSync for the final project submission and live demonstration on **November 4, 2026**.
-
----
-
-## 🏗️ Architecture Overview
-
-| Component | Technology | Recommended Host | Free Tier |
-| :--- | :--- | :--- | :--- |
-| **Frontend** | React 18 + Vite + Tailwind CSS | **Vercel** | Yes |
-| **Backend** | FastAPI + SQLAlchemy + ChromaDB | **Render** / **Railway** | Yes |
-| **Database** | PostgreSQL / SQLite fallback | **Render Postgres** or **Neon / Supabase** | Yes |
-| **Auth** | Firebase Auth + Local Fail-Safe | Firebase / Self-contained | Yes |
+This guide provides tested, step-by-step instructions to deploy CampusSync with full database persistence, ChromaDB vector search, background scraping scheduler, and zero "Backend Offline" errors.
 
 ---
 
-## Part 1: Deploy Backend on Render (10 Minutes)
+## 🔍 Why You Saw "Backend Offline" & "Unable to synchronize" Previously
 
-### Step 1: Push Repository to GitHub
-Ensure all latest code is committed and pushed to `https://github.com/AshwaniSharma06/CampusSync.git` on branch `main`.
+1. **Missing `VITE_API_URL` on Vercel:**  
+   If you deploy the frontend to Vercel without setting `VITE_API_URL`, the deployed website falls back to `http://localhost:8000`. Because visitors' browsers cannot connect to `localhost:8000`, every API request fails, triggering the amber banner in the dashboard and the *"Backend Offline"* message in AI chat.
+2. **Hardcoded `localhost:8000` in AuthContext:**  
+   `src/context/AuthContext.jsx` previously had `http://localhost:8000` hardcoded. **(Fixed in Phase 9.3A).**
+3. **Render Free Tier Sleeping:**  
+   Free web services on Render shut down after 15 minutes of inactivity and have **ephemeral disks** (wiping SQLite updates). During cold-starts (50s delay), the frontend displays the offline warning banner.
 
-### Step 2: Create a Web Service on Render
-1. Go to [Render Dashboard](https://dashboard.render.com/) and click **New +** → **Web Service**.
-2. Connect your GitHub account and select repository `AshwaniSharma06/CampusSync`.
-3. Fill in the deployment settings:
-   - **Name:** `campussync-backend`
-   - **Region:** Singapore / Frankfurt / Oregon (any)
-   - **Branch:** `main`
-   - **Root Directory:** *(leave blank — repository root)*
-   - **Runtime:** `Python 3`
-   - **Build Command:**
-     ```bash
-     pip install -r backend/requirements.txt
-     ```
-   - **Start Command:**
-     ```bash
-     python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
-     ```
-   - **Instance Type:** `Free`
+---
 
-### Step 3: Add Environment Variables in Render
-In the **Environment Variables** tab, add:
-| Key | Value | Notes |
+## 🏗️ Recommended Deployment Stack
+
+| Component | Platform | Plan | Cost | Reason |
+| :--- | :--- | :--- | :--- | :--- |
+| **Frontend** | **Vercel** | Hobby | Free ($0) | Instant global CDN, automatic SSL, SPA rewrite handling. |
+| **Backend & Database** | **Railway** (or Render) | Hobby / Trial | ~$5/mo (Free with credits) | **Persistent Volume** support (`/data`), **never sleeps**, 24/7 background scheduler. |
+| **CampusSync AI** | **Google Gemini** | Free Tier | Free ($0) | Fast RAG conversational answers via `gemini-flash-lite-latest`. |
+
+---
+
+## STEP 1: Push Code to GitHub
+
+Open PowerShell in `c:\Users\sharm\CampusSync-Frontend` and push your latest code to GitHub:
+
+```powershell
+git add .
+git commit -m "CampusSync Phase 9 Production Readiness & Deployment Assets"
+git push origin main
+```
+
+---
+
+## STEP 2: Deploy Backend on Railway (Recommended — 5 Minutes)
+
+Railway natively supports Dockerfiles, persistent volumes, and continuous 24/7 background tasks.
+
+1. Go to [Railway.app](https://railway.app/) and sign in with GitHub.
+2. Click **New Project** → **Deploy from GitHub repo** → Select `CampusSync` (or your repo).
+3. Once the service is created, click on it and go to **Settings**:
+   - **Networking:** Click **Generate Domain** (e.g. `campussync-production.up.railway.app`).
+4. Go to the **Volumes** tab:
+   - Click **Add Volume**.
+   - Set **Mount Path:** `/data`
+   - Size: `5 GB` (persists SQLite database, ChromaDB vectors, and scraping logs).
+5. Go to the **Variables** tab and add the following:
+
+| Variable Name | Recommended Value | Description |
 | :--- | :--- | :--- |
-| `PYTHON_VERSION` | `3.11.9` | Ensures clean package resolution |
-| `SECRET_KEY` | *(Click "Generate")* | Random JWT secret key |
-| `DATABASE_URL` | `sqlite:///./campussync.db` | *(Or your PostgreSQL connection string)* |
-| `GEMINI_API_KEY` | *(Your Gemini API key)* | Optional; RAG uses built-in ECA fallback if blank |
+| `APP_ENV` | `production` | Enforces production security checks |
+| `SECRET_KEY` | *(Generate a 32+ character random string)* | Secure JWT token signing secret |
+| `DATABASE_URL` | `sqlite:////data/campussync.db` | Persistent SQLite path on volume |
+| `CHROMA_PERSIST_DIRECTORY` | `/data/chromadb` | Persistent ChromaDB vector index |
+| `GEMINI_API_KEY` | *(Your Gemini API Key from Google AI Studio)* | Powers CampusSync AI Copilot |
+| `FRONTEND_URL` | `https://<your-project>.vercel.app` | Whitelists frontend origin for CORS |
+| `SCRAPER_ENABLED` | `true` | Automated 180-min scraping scheduler |
 
-### Step 4: Deploy & Verify
-Click **Create Web Service**. Once deployed:
-- Test the health endpoint: `https://<your-render-app>.onrender.com/health` → should return `{"status": "ok"}`
-- Test the interactive API docs: `https://<your-render-app>.onrender.com/docs`
-- Copy your Render backend URL (e.g. `https://campussync-backend.onrender.com`).
+6. Railway will automatically build using your `Dockerfile` and run `./docker-entrypoint.sh`.
+7. Once deployed, test your backend health in your browser:
+   `https://<your-railway-url>.up.railway.app/health`
+   You should see: `{"status": "ok", "message": "CampusSync FastAPI backend is operational.", "version": "1.0.0"}`
 
 ---
 
-## Part 2: Deploy Frontend on Vercel (5 Minutes)
+## STEP 3: Deploy Frontend on Vercel (3 Minutes)
 
-### Step 1: Import Project to Vercel
 1. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **Add New...** → **Project**.
-2. Import repository `AshwaniSharma06/CampusSync`.
-
-### Step 2: Configure Project Settings
-- **Framework Preset:** `Vite` *(auto-detected)*
-- **Root Directory:** `./` *(default)*
-- **Build Command:** `npm run build`
-- **Output Directory:** `dist`
-
-### Step 3: Set Environment Variables on Vercel
-Under **Environment Variables**, add:
-| Variable Name | Value |
-| :--- | :--- |
-| `VITE_API_URL` | `https://<your-backend-app>.onrender.com/api/v1` *(replace with your backend URL)* |
-
-> **Note on SPA Routing:** A [`vercel.json`](file:///c:/Users/sharm/CampusSync-Frontend/vercel.json) rewrite file is already included in the repository root, so refreshing on `/dashboard` or deep links will work smoothly without 404 errors.
-
-### Step 4: Deploy
-Click **Deploy**. Within 60 seconds, your live production website will be accessible at:
-`https://<your-project>.vercel.app`
+2. Select your `CampusSync` repository.
+3. Configure Project Settings:
+   - **Framework Preset:** `Vite` *(auto-detected)*
+   - **Root Directory:** `./`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+4. **CRUCIAL STEP — Set Environment Variable:**
+   Under **Environment Variables**, add:
+   - **Key:** `VITE_API_URL`
+   - **Value:** `https://<your-railway-url>.up.railway.app/api/v1` *(Replace with your actual Railway URL + `/api/v1`)*
+5. Click **Deploy**.
+6. Within 60 seconds, your site will be live at `https://<your-project>.vercel.app`!
 
 ---
 
-## Part 3: Deploy via Railway (Alternative)
+## STEP 4: Alternative Backend Deployment on Render
 
-If you prefer Railway:
-1. Go to [Railway.app](https://railway.app/) → **New Project** → **Deploy from GitHub repo**.
-2. Select `CampusSync`.
-3. Railway automatically detects `Procfile` and `requirements.txt`.
-4. Add environment variables `SECRET_KEY` and `DATABASE_URL`.
-5. Under Settings → Networking → Generate Domain.
+If you prefer Render instead of Railway:
+
+1. Go to [Render Dashboard](https://dashboard.render.com/) → **New +** → **Web Service**.
+2. Select your repository.
+3. Settings:
+   - **Runtime:** `Python 3` or `Docker`
+   - **Instance Type:** `Free` (or `Starter` if adding a persistent disk)
+   - **Build Command:** `pip install -r backend/requirements.txt`
+   - **Start Command:** `python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+4. Add Environment Variables:
+   - `SECRET_KEY`: *(Generate a 32+ char key)*
+   - `DATABASE_URL`: `sqlite:///campussync.db`
+   - `GEMINI_API_KEY`: *(Your Gemini API key)*
+   - `FRONTEND_URL`: `https://<your-project>.vercel.app`
+5. **Prevent Sleep Mode on Render Free:**
+   Because Render Free spins down after 15 minutes of inactivity, set up a free monitor at [UptimeRobot](https://uptimerobot.com/) or [Cron-job.org](https://cron-job.org/) to ping `https://<your-render-url>.onrender.com/health` every 10 minutes. This prevents the server from sleeping!
 
 ---
 
-## Part 4: Fail-Safe & Viva Demo Strategy
+## STEP 5: Verification & Demonstration Checklist
 
-1. **Zero-Configuration Mode:** If the backend is ever sleeping on Render's free tier during your viva presentation, CampusSync's frontend automatically uses its built-in local ECA mock engine, allowing full access to:
-   - 1-Click Student Login (`Ashwani Sharma • 22ECA8941`)
-   - Personalized Student Dashboard
-   - ECA CampusSync AI Assistant with verified BTU 2026 data
-   - Notices, Timetables, and Events
-2. **Local Fallback:** Always have `npm run dev` and `python -m uvicorn backend.main:app` running in your local terminal as an immediate offline backup if the auditorium Wi-Fi fluctuates.
-
+Once both Frontend and Backend are live:
+1. Open your Vercel URL (`https://<your-project>.vercel.app`).
+2. Log in with:
+   - **Email:** `student@ecajmer.ac.in`
+   - **Password:** `password123`
+3. Notice:
+   - **Zero Amber Warning Banner:** The dashboard immediately connects to the live backend and loads courses, verified notices, and upcoming exams.
+   - **CampusSync AI:** Open the copilot in the dashboard or click the bottom-right AI bubble and ask:
+     *"When are the 7th semester mid-term exams?"*
+     CampusSync AI responds dynamically with official grounded citations.

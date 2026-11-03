@@ -74,10 +74,12 @@ venv\Scripts\activate
 source venv/bin/activate
 
 # Install Python dependencies
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 
-# Start FastAPI application
-uvicorn main:app --reload --port 8000
+# Start FastAPI application (from project root)
+uvicorn backend.main:app --reload --port 8000
+# Or alternatively, if inside the backend/ directory:
+# cd backend && uvicorn main:app --reload --port 8000
 ```
 Interactive Swagger documentation will be available at `http://localhost:8000/docs`.
 
