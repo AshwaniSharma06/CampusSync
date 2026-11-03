@@ -467,26 +467,6 @@ export default function CampusAiWorkspace({ studentProfile, onActionNotification
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Suggestion Pills (if thread is short) */}
-        {messages.length <= 2 && (
-          <div className="px-6 py-2 flex flex-wrap gap-2 shrink-0">
-            {[
-              'Explain DBMS normalization with examples',
-              'What are the Central Library hours?',
-              'Give me 10 Java MCQs for midterm revision',
-              'When is the Semester 7 Major Project evaluation?'
-            ].map((p, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSendMessage(p)}
-                className="text-[12px] bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-700 px-3 py-1.5 rounded-xl font-medium transition-all shadow-2xs"
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* Multiline Input Bar (Phase 9) */}
         <div className="p-4 bg-white border-t border-slate-200/90 shrink-0">
           <form

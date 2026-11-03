@@ -19,21 +19,27 @@ export class ApiError extends Error {
 // and gracefully append /api/v1 if the user provides only the host (e.g. on Vercel/Render).
 // Also defensively re-map legacy :5000 to FastAPI's standard :8000.
 export const getApiBaseUrl = () => {
-  const raw = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
-  let clean = raw.trim().replace(/\/+$/, '');
-
-  // Auto-correct any legacy port 5000 to port 8000
-  if (clean.includes('localhost:5000') || clean.includes('127.0.0.1:5000')) {
-    clean = clean.replace(':5000', ':8000');
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && envUrl.trim()) {
+    let clean = envUrl.trim().replace(/\/+$/, '');
+    if (clean.includes('localhost:5000') || clean.includes('127.0.0.1:5000')) {
+      clean = clean.replace(':5000', ':8000');
+    }
+    if (clean.endsWith('/api/v1')) return clean;
+    if (clean.endsWith('/api')) return `${clean}/v1`;
+    return `${clean}/api/v1`;
   }
 
-  if (clean.endsWith('/api/v1')) {
-    return clean;
+  // Auto-detect production deployment: if running on Vercel or any non-localhost host,
+  // use the live Railway backend automatically
+  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://campussync-production-4593.up.railway.app/api/v1';
+    }
   }
-  if (clean.endsWith('/api')) {
-    return `${clean}/v1`;
-  }
-  return `${clean}/api/v1`;
+
+  return 'http://localhost:8000/api/v1';
 };
 
 export const API_BASE_URL = getApiBaseUrl();

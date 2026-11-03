@@ -1,14 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
 
-const SAMPLE_PROMPTS = [
-  'Explain DBMS normalization',
-  'Give me 10 Java MCQs',
-  'What are the Central Library hours?',
-  'Explain polymorphism with examples',
-  'When is the Semester 7 Major Project evaluation?'
-];
-
 export default function AiWidget({ isOpenExternal, setIsOpenExternal, userProfile }) {
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const isOpen = isOpenExternal !== undefined ? isOpenExternal : isOpenInternal;
@@ -89,7 +81,7 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal, userProfil
       } else if (err.code === 'TIMEOUT') {
         errorText = '⏱️ **Timeout**: Request timed out. Please try again.';
       } else if (err.code === 'NETWORK_ERROR' || (err.message && err.message.includes('unreachable'))) {
-        errorText = '🔌 **Backend Offline**: Unable to connect to the API on port 8000. Please ensure the backend server is running: `uvicorn backend.main:app --port 8000`';
+        errorText = '🔌 **Connection Issue**: Unable to connect to CampusSync backend API. Please verify the backend is running and allows CORS.';
       }
 
       setMessages((prev) => [
@@ -152,19 +144,6 @@ export default function AiWidget({ isOpenExternal, setIsOpenExternal, userProfil
                 <span className="material-symbols-outlined text-sm">close</span>
               </button>
             </div>
-          </div>
-
-          {/* Quick Prompts */}
-          <div className="p-2 bg-[#081528] border-b border-slate-800 flex flex-wrap gap-1 max-h-20 overflow-y-auto hide-scrollbar shrink-0">
-            {SAMPLE_PROMPTS.map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSend(prompt)}
-                className="text-[10px] bg-slate-800/80 hover:bg-teal-500/20 text-slate-300 hover:text-teal-300 px-2 py-0.5 rounded-lg border border-slate-700 transition-colors text-left font-medium"
-              >
-                {prompt}
-              </button>
-            ))}
           </div>
 
           {/* Messages Body */}
