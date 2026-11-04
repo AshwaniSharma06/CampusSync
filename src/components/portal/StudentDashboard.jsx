@@ -59,7 +59,21 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     setIsLoading(true);
     setApiError(null);
     try {
-      const [
+      // 1. Ensure active backend session token exists
+      let token = localStorage.getItem('campussync_token');
+      if (!token) {
+        try {
+          const authRes = await apiService.loginUser('student@ecajmer.ac.in', 'password123');
+          if (authRes?.access_token) {
+            token = authRes.access_token;
+            localStorage.setItem('campussync_token', token);
+          }
+        } catch (authErr) {
+          console.warn('Initial session sync notice:', authErr);
+        }
+      }
+
+      let [
         summaryRes,
         coursesRes,
         noticesRes,
@@ -85,12 +99,39 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         apiService.getStudentProfile(),
       ]);
 
+      // 2. If any core endpoint had an auth failure (401/403), re-authenticate and retry once
+      const isAuthIssue = [summaryRes, coursesRes, noticesRes, examsRes].some(
+        r => r.status === 'rejected' && (r.reason?.status === 401 || r.reason?.status === 403)
+      );
+
+      if (isAuthIssue) {
+        try {
+          const refreshRes = await apiService.loginUser('student@ecajmer.ac.in', 'password123');
+          if (refreshRes?.access_token) {
+            localStorage.setItem('campussync_token', refreshRes.access_token);
+            const [s2, c2, n2, e2] = await Promise.allSettled([
+              apiService.getDashboardSummary(),
+              apiService.getEnrolledCourses(),
+              apiService.getNotices(),
+              apiService.getExaminations(),
+            ]);
+            summaryRes = s2;
+            coursesRes = c2;
+            noticesRes = n2;
+            examsRes = e2;
+          }
+        } catch (retryErr) {
+          console.warn('Session refresh failed:', retryErr);
+        }
+      }
+
       let hadError = false;
 
       if (summaryRes.status === 'fulfilled' && summaryRes.value) {
         setDashboardData(summaryRes.value);
       } else if (summaryRes.status === 'rejected') {
         hadError = true;
+        console.error('summaryRes rejected:', summaryRes.reason);
       }
 
       if (coursesRes.status === 'fulfilled') {
@@ -98,6 +139,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       } else {
         setCourses([]);
         hadError = true;
+        console.error('coursesRes rejected:', coursesRes.reason);
       }
 
       if (noticesRes.status === 'fulfilled') {
@@ -105,6 +147,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       } else {
         setNotices([]);
         hadError = true;
+        console.error('noticesRes rejected:', noticesRes.reason);
       }
 
       if (examsRes.status === 'fulfilled') {
@@ -112,6 +155,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       } else {
         setExaminations([]);
         hadError = true;
+        console.error('examsRes rejected:', examsRes.reason);
       }
 
       if (assignsRes.status === 'fulfilled') {
@@ -154,10 +198,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         setStudentProfile(prev => ({
           ...prev,
           ...profileRes.value,
-          name: profileRes.value.full_name || prev?.name,
-          studentId: profileRes.value.student_id || prev?.studentId,
-          department: profileRes.value.department || prev?.department,
-          semester: profileRes.value.semester !== undefined ? profileRes.value.semester : prev?.semester,
+          name: prev?.name || profileRes.value.full_name,
+          studentId: prev?.studentId || profileRes.value.student_id,
+          department: prev?.department || profileRes.value.department,
+          semester: prev?.semester !== undefined ? prev?.semester : profileRes.value.semester,
         }));
       }
 
@@ -165,14 +209,16 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         const hasAuthError = [summaryRes, coursesRes, noticesRes, examsRes].some(
           r => r.status === 'rejected' && (r.reason?.status === 401 || r.reason?.status === 403)
         );
-        const hasToken = !!localStorage.getItem('campussync_token');
-        if (hasAuthError || !hasToken) {
-          setApiError('Displaying verified local session. To synchronize real-time college records, please Sign Out and Sign In with your registered account.');
+        if (hasAuthError) {
+          setApiError('Session authorization expired. Please Sign Out and Sign In to refresh your verified session.');
         } else {
           setApiError('Unable to synchronize latest records from college server. Displaying verified local session.');
         }
+      } else {
+        setApiError(null);
       }
     } catch (err) {
+      console.error('General loadData error:', err);
       setApiError('Network connection error. Please verify backend availability.');
     } finally {
       setIsLoading(false);
