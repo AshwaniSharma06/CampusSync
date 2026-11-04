@@ -6,12 +6,16 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/api/v1/:path*",
-      "destination": "https://campussync-production-4593.up.railway.app/api/v1/:path*"
+      "source": "/api/v1/(.*)",
+      "destination": "https://campussync-production-4593.up.railway.app/api/v1/$1"
     },
     {
-      "source": "/api/:path*",
-      "destination": "https://campussync-production-4593.up.railway.app/api/:path*"
+      "source": "/api/v1",
+      "destination": "https://campussync-production-4593.up.railway.app/api/v1"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "https://campussync-production-4593.up.railway.app/api/$1"
     },
     {
       "source": "/health",

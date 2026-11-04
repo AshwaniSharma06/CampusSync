@@ -14,7 +14,20 @@ def get_events(
     current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ) -> Any:
-    return db.query(Event).all()
+    events = db.query(Event).all()
+    return [
+        {
+            "id": e.id,
+            "title": e.title,
+            "description": e.description,
+            "category": e.category,
+            "event_date": e.event_date.isoformat() if e.event_date else None,
+            "location": e.location,
+            "image_url": e.image_url,
+            "created_at": e.created_at.isoformat() if e.created_at else None,
+        }
+        for e in events
+    ]
 
 @router.get("/clubs")
 def get_clubs(

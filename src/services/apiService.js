@@ -54,7 +54,20 @@ export const getAuthHeaders = () => {
 };
 
 export const apiClient = async (endpoint, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Defensive normalization: remove trailing slash before query string
+  // (e.g. '/notices/' -> '/notices', '/courses/' -> '/courses')
+  // This guarantees clean proxying across Vercel and production CDNs without HTML fallback.
+  let cleanEndpoint = endpoint;
+  const qIndex = cleanEndpoint.indexOf('?');
+  if (qIndex !== -1) {
+    const pathPart = cleanEndpoint.slice(0, qIndex).replace(/\/+$/, '');
+    const queryPart = cleanEndpoint.slice(qIndex);
+    cleanEndpoint = `${pathPart}${queryPart}`;
+  } else if (cleanEndpoint.length > 1) {
+    cleanEndpoint = cleanEndpoint.replace(/\/+$/, '');
+  }
+
+  const url = `${API_BASE_URL}${cleanEndpoint}`;
   const timeoutMs = options.timeout || 35000;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
