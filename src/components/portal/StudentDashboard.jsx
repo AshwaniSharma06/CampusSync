@@ -162,7 +162,15 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       }
 
       if (hadError) {
-        setApiError('Unable to synchronize latest records from college server. Displaying verified local session.');
+        const hasAuthError = [summaryRes, coursesRes, noticesRes, examsRes].some(
+          r => r.status === 'rejected' && (r.reason?.status === 401 || r.reason?.status === 403)
+        );
+        const hasToken = !!localStorage.getItem('campussync_token');
+        if (hasAuthError || !hasToken) {
+          setApiError('Displaying verified local session. To synchronize real-time college records, please Sign Out and Sign In with your registered account.');
+        } else {
+          setApiError('Unable to synchronize latest records from college server. Displaying verified local session.');
+        }
       }
     } catch (err) {
       setApiError('Network connection error. Please verify backend availability.');
