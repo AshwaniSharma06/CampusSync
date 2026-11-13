@@ -1,0 +1,196 @@
+const fs = require('fs');
+const path = require('path');
+
+const svgDefs = `
+    <!-- Brand Gradients (Option 2: Turquoise/Teal to Lavender) -->
+    <linearGradient id="csInfinityGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="25%" stop-color="#00c9cc" />
+      <stop offset="50%" stop-color="#4facfe" />
+      <stop offset="75%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c4b5fd" />
+    </linearGradient>
+
+    <linearGradient id="csCapFacetLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#67e8f9" />
+      <stop offset="50%" stop-color="#a5f3fc" />
+      <stop offset="100%" stop-color="#c4b5fd" />
+    </linearGradient>
+
+    <linearGradient id="csCapFacetRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c4b5fd" />
+      <stop offset="50%" stop-color="#a5b4fc" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+
+    <linearGradient id="csCapSkull" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <linearGradient id="csSyncTextDark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f0d4" />
+      <stop offset="100%" stop-color="#71d8c8" />
+    </linearGradient>
+
+    <linearGradient id="csSyncTextLight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00a89d" />
+      <stop offset="100%" stop-color="#0d9488" />
+    </linearGradient>
+
+    <linearGradient id="csDividerDark" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00f0d4" stop-opacity="0.05" />
+      <stop offset="50%" stop-color="#71d8c8" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#bac3ff" stop-opacity="0.05" />
+    </linearGradient>
+
+    <linearGradient id="csDividerLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#04132a" stop-opacity="0.05" />
+      <stop offset="50%" stop-color="#04132a" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#04132a" stop-opacity="0.05" />
+    </linearGradient>
+`;
+
+const markPaths = (darkBg = '#04132a') => `
+    <!-- Infinity Ribbon -->
+    <path d="M 52,50 C 60,39 70,32 80,32 C 91,32 98,40 98,50 C 98,60 91,68 80,68 C 70,68 60,61 52,50 C 44,39 34,32 24,32 C 13,32 6,40 6,50 C 6,60 13,68 24,68 C 34,68 44,61 52,50 Z"
+          fill="none"
+          stroke="url(#csInfinityGrad)"
+          stroke-width="12"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <!-- 3D Ribbon Overlap Crossing: dark background shadow mask & foreground segment -->
+    <path d="M 40,62 C 45,57 49,53 52,50 C 55,47 59,43 64,38"
+          fill="none"
+          stroke="${darkBg}"
+          stroke-width="15"
+          stroke-linecap="round" />
+
+    <path d="M 39,63 C 44,58 48,54 52,50 C 56,46 60,42 65,37"
+          fill="none"
+          stroke="url(#csInfinityGrad)"
+          stroke-width="12"
+          stroke-linecap="round" />
+
+    <!-- Graduation Cap Skull -->
+    <path d="M 38,24 C 38,32 44,37 52,37 C 60,37 66,32 66,24 Z"
+          fill="url(#csCapSkull)" />
+    <path d="M 38,24 C 38,32 44,37 52,37 C 60,37 66,32 66,24 Z"
+          fill="none"
+          stroke="rgba(255,255,255,0.25)"
+          stroke-width="0.8" />
+
+    <!-- Graduation Cap Diamond Rhombus (Mortarboard Top) -->
+    <!-- Left Facet -->
+    <path d="M 52,7 L 18,20 L 52,33 Z"
+          fill="url(#csCapFacetLeft)" />
+
+    <!-- Right Facet -->
+    <path d="M 52,7 L 86,20 L 52,33 Z"
+          fill="url(#csCapFacetRight)" />
+
+    <!-- Beveled Front Rim (3D Mortarboard Edge) -->
+    <path d="M 18,20 L 52,33 L 86,20 L 86,22.2 L 52,35.2 L 18,22.2 Z"
+          fill="#4338ca"
+          opacity="0.75" />
+
+    <!-- Center Apex Pin -->
+    <ellipse cx="52" cy="19.5" rx="2" ry="1.6" fill="#f8fafc" />
+
+    <!-- Tassel Cord -->
+    <path d="M 52,19.5 C 64,19.5 73,21.5 75,25 L 76.5,35"
+          fill="none"
+          stroke="#f1f5f9"
+          stroke-width="1.4"
+          stroke-linecap="round" />
+
+    <!-- Tassel Knot & Fringe -->
+    <circle cx="76.5" cy="35.5" r="1.4" fill="#e6c277" />
+    <path d="M 75,36.5 L 78,36.5 L 77.5,43 L 75.5,43 Z"
+          fill="#e6c277" />
+`;
+
+// 1. Icon Only
+const iconSvg = `<svg width="104" height="80" viewBox="0 0 104 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>${svgDefs}</defs>
+  <g>${markPaths('#04132a')}</g>
+</svg>`;
+
+// 2. Horizontal Dark
+const horizDarkSvg = `<svg width="360" height="84" viewBox="0 0 360 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>${svgDefs}</defs>
+  <g transform="translate(10, 5)">
+    ${markPaths('#04132a')}
+  </g>
+  <line x1="120" y1="18" x2="120" y2="70" stroke="url(#csDividerDark)" stroke-width="1.5" />
+  <g transform="translate(136, 0)">
+    <text x="0" y="46" font-family="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif" font-size="30" font-weight="700" letter-spacing="-0.025em">
+      <tspan fill="#FFFFFF">Campus</tspan>
+      <tspan fill="url(#csSyncTextDark)">Sync</tspan>
+    </text>
+    <text x="1" y="66" font-family="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif" font-size="10.5" font-weight="500" letter-spacing="0.22em" fill="#bac3ff" opacity="0.88">
+      CONNECT <tspan fill="#71d8c8" font-size="8" dy="-1.5">•</tspan><tspan dy="1.5"> </tspan>LEARN <tspan fill="#71d8c8" font-size="8" dy="-1.5">•</tspan><tspan dy="1.5"> </tspan>GROW
+    </text>
+  </g>
+</svg>`;
+
+// 3. Horizontal Light
+const horizLightSvg = `<svg width="360" height="84" viewBox="0 0 360 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>${svgDefs}</defs>
+  <g transform="translate(10, 5)">
+    ${markPaths('#ffffff')}
+  </g>
+  <line x1="120" y1="18" x2="120" y2="70" stroke="url(#csDividerLight)" stroke-width="1.5" />
+  <g transform="translate(136, 0)">
+    <text x="0" y="46" font-family="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif" font-size="30" font-weight="700" letter-spacing="-0.025em">
+      <tspan fill="#04132a">Campus</tspan>
+      <tspan fill="url(#csSyncTextLight)">Sync</tspan>
+    </text>
+    <text x="1" y="66" font-family="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif" font-size="10.5" font-weight="600" letter-spacing="0.22em" fill="#475569" opacity="0.95">
+      CONNECT <tspan fill="#0d9488" font-size="8" dy="-1.5">•</tspan><tspan dy="1.5"> </tspan>LEARN <tspan fill="#0d9488" font-size="8" dy="-1.5">•</tspan><tspan dy="1.5"> </tspan>GROW
+    </text>
+  </g>
+</svg>`;
+
+// 4. Compact Dark
+const compactDarkSvg = `<svg width="240" height="56" viewBox="0 0 240 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>${svgDefs}</defs>
+  <g transform="translate(2, 4) scale(0.6)">
+    ${markPaths('#04132a')}
+  </g>
+  <g transform="translate(74, 0)">
+    <text x="0" y="37" font-family="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif" font-size="26" font-weight="700" letter-spacing="-0.025em">
+      <tspan fill="#FFFFFF">Campus</tspan>
+      <tspan fill="url(#csSyncTextDark)">Sync</tspan>
+    </text>
+  </g>
+</svg>`;
+
+// 5. Compact Light
+const compactLightSvg = `<svg width="240" height="56" viewBox="0 0 240 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>${svgDefs}</defs>
+  <g transform="translate(2, 4) scale(0.6)">
+    ${markPaths('#ffffff')}
+  </g>
+  <g transform="translate(74, 0)">
+    <text x="0" y="37" font-family="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif" font-size="26" font-weight="700" letter-spacing="-0.025em">
+      <tspan fill="#04132a">Campus</tspan>
+      <tspan fill="url(#csSyncTextLight)">Sync</tspan>
+    </text>
+  </g>
+</svg>`;
+
+const outDir = path.resolve(__dirname, '../public/assets/logos');
+const pubDir = path.resolve(__dirname, '../public');
+
+fs.mkdirSync(outDir, { recursive: true });
+
+fs.writeFileSync(path.join(pubDir, 'favicon.svg'), iconSvg);
+fs.writeFileSync(path.join(outDir, 'campussync-icon.svg'), iconSvg);
+fs.writeFileSync(path.join(outDir, 'campussync-logo-horizontal-dark.svg'), horizDarkSvg);
+fs.writeFileSync(path.join(outDir, 'campussync-logo-horizontal-light.svg'), horizLightSvg);
+fs.writeFileSync(path.join(outDir, 'campussync-logo-compact-dark.svg'), compactDarkSvg);
+fs.writeFileSync(path.join(outDir, 'campussync-logo-compact-light.svg'), compactLightSvg);
+
+console.log('All 5 logo variations + favicon created successfully!');

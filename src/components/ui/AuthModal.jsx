@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/apiService';
 import { accountStore } from '../../services/accountStore';
+import CampusSyncLogo from './CampusSyncLogo';
 
 // Official Academic Departments & Branches from ecajmer.ac.in
 const ECA_BRANCHES = [
@@ -284,9 +285,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         {/* Scrollable Container */}
         <div className="overflow-y-auto p-5 sm:p-7 hide-scrollbar">
           {/* Header */}
-          <div className="text-center mb-5">
+          <div className="text-center mb-5 flex flex-col items-center">
+            <div className="mb-2">
+              <CampusSyncLogo variant="horizontal" theme="dark" size={42} className="h-10 w-auto" />
+            </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[11px] font-bold uppercase tracking-wider mb-2">
-              <span className="material-symbols-outlined text-xs">school</span>
               Engineering College Ajmer • BTU Affiliated
             </div>
             <h3 className="font-serif text-2xl sm:text-3xl text-white">

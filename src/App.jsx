@@ -10,6 +10,7 @@ import ErrorBoundary from './components/ui/ErrorBoundary';
 import { useAuth } from './context/AuthContext';
 import { apiService } from './services/apiService';
 import { accountStore } from './services/accountStore';
+import CampusSyncLogo from './components/ui/CampusSyncLogo';
 
 // Code-splitting & dynamic imports for major routes (Phase 7 Performance Optimization)
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -18,11 +19,9 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function PageLoadingFallback() {
   return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
-      <div className="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center shadow-lg animate-pulse mb-3">
-        <span className="material-symbols-outlined text-2xl">school</span>
-      </div>
-      <p className="text-slate-600 font-semibold text-sm">Loading CampusSync...</p>
+    <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 animate-pulse">
+      <CampusSyncLogo variant="stacked" theme="dark" size={64} className="h-16 w-auto mb-3" />
+      <p className="text-slate-400 font-semibold text-xs tracking-widest uppercase">Loading CampusSync...</p>
     </div>
   );
 }

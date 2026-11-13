@@ -1,4 +1,5 @@
 import React from 'react';
+import CampusSyncLogo from '../ui/CampusSyncLogo';
 
 export default function Footer({ onActionNotification }) {
   const handleLinkClick = (e, linkName) => {
@@ -10,7 +11,9 @@ export default function Footer({ onActionNotification }) {
     <footer className="bg-surface-container-lowest border-t border-outline-variant/10 w-full py-section-gap mt-8 md:mt-section-gap">
       <div className="grid grid-cols-1 md:grid-cols-4 px-margin-mobile md:px-margin-desktop gap-8 md:gap-gutter max-w-container-max mx-auto">
         <div className="col-span-1 md:col-span-1 flex flex-col gap-4">
-          <div className="font-serif text-3xl md:text-4xl text-primary font-brand">CampusSync</div>
+          <div className="mb-1">
+            <CampusSyncLogo variant="horizontal" theme="dark" size={42} className="h-10 md:h-11 w-auto" />
+          </div>
           <p className="font-sans text-on-surface-variant mt-2 text-sm leading-relaxed">
             Engineering College Ajmer (ECA)
             <br />

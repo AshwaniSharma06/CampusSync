@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiService, openOfficialLink } from '../../services/apiService';
 import EditProfileModal from './EditProfileModal';
 import CampusAiWorkspace from '../chat/CampusAiWorkspace';
+import CampusSyncLogo from '../ui/CampusSyncLogo';
 
 export default function StudentDashboard({ user, onSignOut, onActionNotification, onReturnHome }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -358,28 +359,26 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       <header className="bg-[#071733]/90 backdrop-blur-xl border-b border-slate-800/90 sticky top-0 z-40 px-4 md:px-8 py-3.5 shadow-md">
         <div className="max-w-[1440px] mx-auto flex items-center justify-between gap-4">
           {/* Left: Brand Crest & Portal Context */}
-          <div className="flex items-center gap-3.5 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={onReturnHome}
-              className="w-10 h-10 rounded-xl bg-[#0d1b33] border border-slate-700/70 text-[#71d8c8] hover:bg-[#71d8c8]/15 hover:border-[#71d8c8]/50 flex items-center justify-center transition-all shadow-sm group"
+              className="w-10 h-10 rounded-xl bg-[#0d1b33] border border-slate-700/70 text-[#71d8c8] hover:bg-[#71d8c8]/15 hover:border-[#71d8c8]/50 flex items-center justify-center transition-all shadow-sm group shrink-0"
               title="Return to Public CampusSync Website"
             >
               <span className="material-symbols-outlined text-lg group-hover:-translate-x-0.5 transition-transform">
                 arrow_back
               </span>
             </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
-                  <span>CampusSync</span>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#71d8c8]/15 text-[#71d8c8] border border-[#71d8c8]/30 uppercase tracking-wider hidden sm:inline">
-                    Live Portal
-                  </span>
-                </h1>
-              </div>
-              <p className="text-xs text-slate-400 font-medium hidden sm:block">
-                Govt. Engineering College Ajmer • BTU Affiliated
-              </p>
+            <div className="flex items-center gap-2.5">
+              <CampusSyncLogo
+                variant="horizontal"
+                theme="dark"
+                size={38}
+                className="h-9 md:h-10 w-auto"
+              />
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#71d8c8]/15 text-[#71d8c8] border border-[#71d8c8]/30 uppercase tracking-wider hidden lg:inline">
+                Live Portal
+              </span>
             </div>
           </div>
 

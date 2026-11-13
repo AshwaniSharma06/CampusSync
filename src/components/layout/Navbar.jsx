@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CampusSyncLogo from '../ui/CampusSyncLogo';
 
 export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, currentUser, onOpenPortalView }) {
   const [scrolled, setScrolled] = useState(false);
@@ -65,11 +66,18 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
       id="main-nav"
     >
       <div className="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-        <a href="#home" onClick={(e) => handleNavClick(e, 'home')} className="font-sans text-2xl md:text-3xl font-extrabold text-primary tracking-tight leading-none z-20 flex items-center gap-2">
-          <span className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center text-primary text-base">
-            <span className="material-symbols-outlined text-lg">school</span>
-          </span>
-          CampusSync
+        <a
+          href="#home"
+          onClick={(e) => handleNavClick(e, 'home')}
+          className="z-20 flex items-center transition-transform hover:scale-[1.02] focus:outline-none"
+          title="CampusSync — Connect • Learn • Grow"
+        >
+          <CampusSyncLogo
+            variant="horizontal"
+            theme="dark"
+            size={42}
+            className="h-10 md:h-11 w-auto"
+          />
         </a>
 
         {/* Desktop Menu */}

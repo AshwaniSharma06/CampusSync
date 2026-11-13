@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import CampusSyncLogo from '../components/ui/CampusSyncLogo';
 
 export default function NotFoundPage() {
   return (
@@ -9,6 +10,10 @@ export default function NotFoundPage() {
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#e6c277]/5 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="max-w-xl w-full bg-[#112037]/80 border border-white/10 rounded-3xl p-8 sm:p-12 shadow-2xl backdrop-blur-xl text-center relative z-10">
+        <div className="mb-6 flex justify-center">
+          <CampusSyncLogo variant="horizontal" theme="dark" size={42} className="h-10 w-auto" />
+        </div>
+
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-wider mb-6">
           <span className="material-symbols-outlined text-sm">error</span> HTTP 404 • Resource Not Found
         </div>
