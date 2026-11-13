@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, false
+from sqlalchemy import or_, and_, false, case
 from typing import Any, Optional, List, Dict
 from pathlib import Path
 import os
@@ -14,6 +14,138 @@ from backend.services.url_validator import resolve_notice_destination, is_truste
 router = APIRouter()
 
 HOSTED_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "hosted_documents"
+
+@router.get("/public")
+def get_public_notices(
+    limit: int = Query(6, ge=1, le=20, description="Maximum number of notices to return"),
+    exclude_ids: Optional[str] = Query(None, description="Comma-separated notice IDs to exclude for rotation/variety"),
+    category: Optional[str] = Query(None, description="Optional category filter"),
+    db: Session = Depends(get_db)
+) -> List[Dict[str, Any]]:
+    """
+    Publicly accessible endpoint for verified, scraped college announcements and notices.
+    Used for homepage showcase, floating notice cards, and unauthenticated visitors.
+    
+    Guarantees:
+    - Only active, verified, non-individual notices (GLOBAL, DEPARTMENT_SPECIFIC, SEMESTER_SPECIFIC).
+    - Intelligent prioritization: Exam announcements, Academic updates, Official circulars, Events.
+    - Variety across visits: supports exclude_ids to prevent showing duplicate cards.
+    - Verified direct URLs (PDFs and official college pages).
+    """
+    excluded_set = set()
+    if exclude_ids and isinstance(exclude_ids, str):
+        for part in exclude_ids.split(","):
+            part_str = part.strip()
+            if part_str.isdigit():
+                excluded_set.add(int(part_str))
+
+    base_filter = and_(
+        Notice.is_active == True,
+        Notice.verification_status == VerificationStatus.VERIFIED.value,
+        Notice.scope.in_([
+            ClassificationScope.GLOBAL.value,
+            ClassificationScope.DEPARTMENT_SPECIFIC.value,
+            ClassificationScope.SEMESTER_SPECIFIC.value
+        ]),
+        Notice.scope != ClassificationScope.UNCLASSIFIED.value,
+        Notice.scope != ClassificationScope.INDIVIDUAL.value
+    )
+
+    if category and isinstance(category, str) and category.lower() != "all":
+        base_filter = and_(base_filter, Notice.notice_type.ilike(f"%{category.strip()}%"))
+
+    priority_expr = case(
+        (Notice.notice_type.ilike("%exam%"), 1),
+        (Notice.title.ilike("%exam%"), 1),
+        (Notice.title.ilike("%schedule%"), 1),
+        (Notice.title.ilike("%registration%"), 1),
+        (Notice.notice_type.ilike("%academic%"), 2),
+        (Notice.notice_type.ilike("%official%"), 3),
+        (Notice.notice_type.ilike("%event%"), 4),
+        (Notice.title.ilike("%event%"), 4),
+        else_=5
+    )
+
+    candidates = (
+        db.query(Notice)
+        .filter(base_filter)
+        .order_by(priority_expr.asc(), Notice.published_date.desc(), Notice.id.desc())
+        .limit(60)
+        .all()
+    )
+
+    selected = []
+    seen_signatures = set()
+
+    # Pass 1: Select notices not in excluded_set
+    for n in candidates:
+        if n.id in excluded_set:
+            continue
+        title_sig = "".join(filter(str.isalnum, (n.title or "").lower()))[:30]
+        if title_sig in seen_signatures:
+            continue
+        seen_signatures.add(title_sig)
+        selected.append(n)
+        if len(selected) >= limit:
+            break
+
+    # Pass 2: If we couldn't fulfill limit, fill from remaining candidates
+    if len(selected) < limit:
+        for n in candidates:
+            if n.id in {s.id for s in selected}:
+                continue
+            title_sig = "".join(filter(str.isalnum, (n.title or "").lower()))[:30]
+            if title_sig in seen_signatures:
+                continue
+            seen_signatures.add(title_sig)
+            selected.append(n)
+            if len(selected) >= limit:
+                break
+
+    results = []
+    for n in selected:
+        dest_type, dest_url, dest_label = resolve_notice_destination(
+            download_url=getattr(n, "download_url", None),
+            document_url=getattr(n, "document_url", None),
+            source_url=getattr(n, "source_url", None),
+            official_page_url=getattr(n, "official_page_url", None)
+        )
+
+        t_lower = (n.title or "").lower()
+        type_lower = (n.notice_type or "").lower()
+        is_important = any(
+            w in t_lower or w in type_lower
+            for w in ["exam", "schedule", "urgent", "registration", "deadline", "admit card", "reschedule", "viva", "evaluat", "tender"]
+        )
+
+        content_clean = (n.content or "").strip()
+        summary = content_clean[:140] + ("..." if len(content_clean) > 140 else "") if content_clean else n.title
+
+        has_pdf = False
+        doc_url = getattr(n, "document_url", "") or ""
+        dl_url = getattr(n, "download_url", "") or ""
+        if ".pdf" in doc_url.lower() or ".pdf" in dl_url.lower():
+            has_pdf = True
+
+        results.append({
+            "id": n.id,
+            "title": n.title,
+            "summary": summary,
+            "content": n.content,
+            "notice_type": n.notice_type or "Official",
+            "scope": n.scope,
+            "published_date": n.published_date.isoformat() if n.published_date else None,
+            "formatted_date": n.published_date.strftime("%d %b %Y") if n.published_date else None,
+            "department_code": n.department_code,
+            "is_important": is_important,
+            "has_pdf": has_pdf,
+            "destination_type": dest_type.value,
+            "action_url": dest_url,
+            "action_label": dest_label,
+            "is_actionable": dest_type != DestinationType.UNAVAILABLE
+        })
+
+    return results
 
 @router.get("/")
 def get_notices(

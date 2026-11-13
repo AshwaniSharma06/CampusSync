@@ -232,6 +232,20 @@ export const apiService = {
     return apiClient(`/notices/${queryString}`);
   },
 
+  // Public Notices (for Homepage Dynamic Floating Cards & Showcase)
+  getPublicNotices: async ({ limit = 6, excludeIds = [], category = null } = {}) => {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (excludeIds && excludeIds.length > 0) {
+      params.append('exclude_ids', excludeIds.join(','));
+    }
+    if (category && category !== 'All') {
+      params.append('category', category);
+    }
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    return apiClient(`/notices/public${queryString}`);
+  },
+
   // Courses
   getEnrolledCourses: async () => {
     return apiClient('/courses/');
