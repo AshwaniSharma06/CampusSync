@@ -37,3 +37,4 @@ __pycache__/
 *.sqlite3
 backups/
 *.bak
+scratch/

@@ -46,7 +46,8 @@ export const getApiBaseUrl = () => {
   return 'http://localhost:8000/api/v1';
 };
 
-export const API_BASE_URL = getApiBaseUrl();
+export const LIVE_FALLBACK_URL = 'https://campussync-production-4593.up.railway.app/api/v1';
+export let API_BASE_URL = getApiBaseUrl();
 
 export const getAuthHeaders = () => {
   const token = localStorage.getItem('campussync_token');
@@ -67,7 +68,7 @@ export const apiClient = async (endpoint, options = {}) => {
     cleanEndpoint = cleanEndpoint.replace(/\/+$/, '');
   }
 
-  const url = `${API_BASE_URL}${cleanEndpoint}`;
+  let url = `${API_BASE_URL}${cleanEndpoint}`;
   const timeoutMs = options.timeout || 35000;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -88,18 +89,44 @@ export const apiClient = async (endpoint, options = {}) => {
   } catch (networkErr) {
     clearTimeout(timeoutId);
 
-    if (networkErr.name === 'AbortError') {
-      throw new ApiError(
-        `Request timed out after ${timeoutMs / 1000}s. The server is taking too long to respond.`,
-        { code: 'TIMEOUT', url }
-      );
+    // If local dev server is unreachable on localhost:8000, seamlessly fail over to live Railway API
+    if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
+      const fallbackUrl = `${LIVE_FALLBACK_URL}${cleanEndpoint}`;
+      try {
+        const fallbackCtrl = new AbortController();
+        const fallbackTimeout = setTimeout(() => fallbackCtrl.abort(), 20000);
+        const fallbackResponse = await fetch(fallbackUrl, {
+          ...options,
+          headers,
+          signal: fallbackCtrl.signal,
+        });
+        clearTimeout(fallbackTimeout);
+
+        if (fallbackResponse) {
+          // Switch active base URL so subsequent calls connect directly to live backend
+          API_BASE_URL = LIVE_FALLBACK_URL;
+          url = fallbackUrl;
+          response = fallbackResponse;
+        }
+      } catch (fallbackErr) {
+        // Fallback also failed, report structured error
+      }
     }
 
-    const currentOrigin = typeof window !== 'undefined' ? window.location?.origin : 'frontend';
-    throw new ApiError(
-      `Backend server unreachable at ${API_BASE_URL}. Ensure the FastAPI server is running on port 8000 (uvicorn backend.main:app --reload --port 8000) and allows CORS from ${currentOrigin}.`,
-      { code: 'NETWORK_ERROR', detail: networkErr.message, url }
-    );
+    if (!response) {
+      if (networkErr.name === 'AbortError') {
+        throw new ApiError(
+          `Request timed out after ${timeoutMs / 1000}s. The server is taking too long to respond.`,
+          { code: 'TIMEOUT', url }
+        );
+      }
+
+      const currentOrigin = typeof window !== 'undefined' ? window.location?.origin : 'frontend';
+      throw new ApiError(
+        `Backend server unreachable at ${API_BASE_URL}. Ensure the FastAPI server is running on port 8000 (uvicorn backend.main:app --reload --port 8000) or verify internet connection to ${LIVE_FALLBACK_URL}.`,
+        { code: 'NETWORK_ERROR', detail: networkErr.message, url }
+      );
+    }
   } finally {
     clearTimeout(timeoutId);
   }

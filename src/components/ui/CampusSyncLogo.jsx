@@ -239,13 +239,13 @@ export default function CampusSyncLogo({
               y="126"
               textAnchor="middle"
               fontFamily="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif"
-              fontSize="9.5"
-              fontWeight="600"
-              letterSpacing="0.22em"
+              fontSize="11"
+              fontWeight="500"
+              letterSpacing="0.1em"
               fill={taglineColor}
-              opacity="0.9"
+              opacity="0.92"
             >
-              CONNECT <tspan fill={bulletColor}>•</tspan> LEARN <tspan fill={bulletColor}>•</tspan> GROW
+              Connect <tspan fill={bulletColor} fontSize="9" dy="-1">•</tspan><tspan dy="1"> </tspan>Learn <tspan fill={bulletColor} fontSize="9" dy="-1">•</tspan><tspan dy="1"> </tspan>Grow
             </text>
           )}
         </g>
@@ -289,13 +289,13 @@ export default function CampusSyncLogo({
             x="1"
             y="66"
             fontFamily="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif"
-            fontSize="10.5"
-            fontWeight="600"
-            letterSpacing="0.22em"
+            fontSize="12"
+            fontWeight="500"
+            letterSpacing="0.1em"
             fill={taglineColor}
-            opacity="0.9"
+            opacity="0.92"
           >
-            CONNECT <tspan fill={bulletColor} fontSize="8" dy="-1.5">•</tspan><tspan dy="1.5"> </tspan>LEARN <tspan fill={bulletColor} fontSize="8" dy="-1.5">•</tspan><tspan dy="1.5"> </tspan>GROW
+            Connect <tspan fill={bulletColor} fontSize="9" dy="-1">•</tspan><tspan dy="1"> </tspan>Learn <tspan fill={bulletColor} fontSize="9" dy="-1">•</tspan><tspan dy="1"> </tspan>Grow
           </text>
         )}
       </g>
