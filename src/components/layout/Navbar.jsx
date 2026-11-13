@@ -70,7 +70,7 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
           href="#home"
           onClick={(e) => handleNavClick(e, 'home')}
           className="z-20 flex items-center transition-transform hover:scale-[1.02] focus:outline-none"
-          title="CampusSync — Connect • Learn • Grow"
+          title="CampusSync"
         >
           <CampusSyncLogo
             variant="horizontal"

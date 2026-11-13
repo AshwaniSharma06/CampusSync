@@ -3,42 +3,43 @@ import React from 'react';
 /**
  * CampusSync — Official Infinity Learning Identity Logo (Option 2)
  *
- * Symbol: Continuous Infinity Ribbon (Teal to Lavender) + Floating 3D Graduation Cap.
- * Wordmark: "Campus" (Navy/White) + "Sync" (Turquoise Gradient)
- * Tagline: "CONNECT • LEARN • GROW"
+ * Design:
+ *  - Symbol: Continuous Infinity Ribbon (Turquoise/Teal to Lavender) + Floating 3D Graduation Cap
+ *  - Wordmark: "Campus" (Navy/White) + "Sync" (Turquoise Gradient)
+ *  - Tagline: Completely removed as requested for a clean, bold brand presentation.
+ *  - Proportions: Wordmark visual height is enlarged to be approximately equal to the logo icon,
+ *    centered vertically with balanced spacing.
  *
  * Variants:
- *  - 'horizontal' : Full brand logo with symbol, hairline divider, wordmark, and tagline
- *  - 'compact'    : Streamlined single-line layout (Symbol + CampusSync) ideal for Navbars & Headers
+ *  - 'horizontal' : Primary clean logo (Icon on left + enlarged CampusSync wordmark on right)
+ *  - 'compact'    : Streamlined horizontal layout for mobile navigation and small screens
  *  - 'icon'       : Symbol mark only (Infinity + Graduation Cap)
- *  - 'stacked'    : Centered symbol above wordmark and tagline (Modals & Hero displays)
+ *  - 'stacked'    : Centered symbol above enlarged wordmark (Modals & Loading states)
  */
 export default function CampusSyncLogo({
   variant = 'horizontal',
   theme = 'dark',
   size = 'md',
-  showTagline = true,
-  showDivider = true,
+  showTagline = false,
+  showDivider = false,
   className = '',
   ariaLabel = 'CampusSync Logo',
   onClick,
 }) {
   // Sizing map for convenient responsive usage
   const heightMap = {
-    xs: variant === 'icon' ? 24 : 28,
-    sm: variant === 'icon' ? 32 : 36,
-    md: variant === 'icon' ? 44 : 48,
-    lg: variant === 'icon' ? 56 : 60,
-    xl: variant === 'icon' ? 72 : 76,
+    xs: variant === 'icon' ? 24 : 26,
+    sm: variant === 'icon' ? 32 : 34,
+    md: variant === 'icon' ? 44 : 42,
+    lg: variant === 'icon' ? 56 : 52,
+    xl: variant === 'icon' ? 72 : 68,
   };
 
-  const currentHeight = typeof size === 'number' ? size : (heightMap[size] || 48);
+  const currentHeight = typeof size === 'number' ? size : (heightMap[size] || 42);
 
   const isLight = theme === 'light';
   const campusTextColor = isLight ? '#04132a' : '#FFFFFF';
   const maskBg = isLight ? '#ffffff' : '#04132a';
-  const taglineColor = isLight ? '#475569' : '#bac3ff';
-  const bulletColor = isLight ? '#0d9488' : '#71d8c8';
 
   // Common Gradients Definition
   const Gradients = () => (
@@ -84,7 +85,7 @@ export default function CampusSyncLogo({
   // Symbol Graphic (Option 2: Continuous Infinity Ribbon + Graduation Cap)
   const SymbolMark = () => (
     <g>
-      {/* Base Infinity Ribbon (44px loop height, smooth cubic curves) */}
+      {/* Base Infinity Ribbon */}
       <path
         d="M 52,50 C 60,39 70,32 80,32 C 91,32 98,40 98,50 C 98,60 91,68 80,68 C 70,68 60,61 52,50 C 44,39 34,32 24,32 C 13,32 6,40 6,50 C 6,60 13,68 24,68 C 34,68 44,61 52,50 Z"
         fill="none"
@@ -169,45 +170,11 @@ export default function CampusSyncLogo({
     );
   }
 
-  // 2. COMPACT (Single Line: Icon + CampusSync, ideal for Navbars & Mobile headers)
-  if (variant === 'compact') {
-    return (
-      <svg
-        viewBox="0 0 240 56"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ height: currentHeight, width: 'auto' }}
-        className={`inline-block select-none ${className}`}
-        role="img"
-        aria-label={ariaLabel}
-        onClick={onClick}
-      >
-        <Gradients />
-        <g transform="translate(2, 4) scale(0.6)">
-          <SymbolMark />
-        </g>
-        <g transform="translate(74, 0)">
-          <text
-            x="0"
-            y="37"
-            fontFamily="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif"
-            fontSize="26"
-            fontWeight="700"
-            letterSpacing="-0.025em"
-          >
-            <tspan fill={campusTextColor}>Campus</tspan>
-            <tspan fill="url(#csSyncText)">Sync</tspan>
-          </text>
-        </g>
-      </svg>
-    );
-  }
-
-  // 3. STACKED (Centered Icon above Text, ideal for Modal headers & Hero)
+  // 2. STACKED (Centered Icon above Text, ideal for Modal headers & Hero)
   if (variant === 'stacked') {
     return (
       <svg
-        viewBox="0 0 220 140"
+        viewBox="0 0 240 130"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         style={{ height: currentHeight, width: 'auto' }}
@@ -217,46 +184,31 @@ export default function CampusSyncLogo({
         onClick={onClick}
       >
         <Gradients />
-        <g transform="translate(58, 4) scale(0.95)">
+        <g transform="translate(68, 4) scale(0.95)">
           <SymbolMark />
         </g>
-        <g transform="translate(110, 0)">
+        <g transform="translate(120, 0)">
           <text
             x="0"
-            y="108"
+            y="114"
             textAnchor="middle"
             fontFamily="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif"
-            fontSize="27"
+            fontSize="30"
             fontWeight="700"
-            letterSpacing="-0.025em"
+            letterSpacing="-0.03em"
           >
             <tspan fill={campusTextColor}>Campus</tspan>
             <tspan fill="url(#csSyncText)">Sync</tspan>
           </text>
-          {showTagline && (
-            <text
-              x="0"
-              y="126"
-              textAnchor="middle"
-              fontFamily="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif"
-              fontSize="11"
-              fontWeight="500"
-              letterSpacing="0.1em"
-              fill={taglineColor}
-              opacity="0.92"
-            >
-              Connect <tspan fill={bulletColor} fontSize="9" dy="-1">•</tspan><tspan dy="1"> </tspan>Learn <tspan fill={bulletColor} fontSize="9" dy="-1">•</tspan><tspan dy="1"> </tspan>Grow
-            </text>
-          )}
         </g>
       </svg>
     );
   }
 
-  // 4. HORIZONTAL (Primary Full Logo with Divider & Tagline)
+  // 3. HORIZONTAL & COMPACT (Clean: Infinity Icon on left + Enlarged Wordmark on right, vertically centered)
   return (
     <svg
-      viewBox="0 0 360 84"
+      viewBox="0 0 435 84"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{ height: currentHeight, width: 'auto' }}
@@ -266,38 +218,24 @@ export default function CampusSyncLogo({
       onClick={onClick}
     >
       <Gradients />
-      <g transform="translate(10, 5)">
+      <g transform="translate(4, 2)">
         <SymbolMark />
       </g>
       {showDivider && (
-        <line x1="120" y1="18" x2="120" y2="70" stroke="url(#csDivider)" strokeWidth="1.5" />
+        <line x1="116" y1="12" x2="116" y2="72" stroke="url(#csDivider)" strokeWidth="1.5" />
       )}
-      <g transform="translate(136, 0)">
+      <g transform="translate(126, 0)">
         <text
           x="0"
-          y="46"
+          y="56"
           fontFamily="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif"
-          fontSize="30"
+          fontSize="52"
           fontWeight="700"
-          letterSpacing="-0.025em"
+          letterSpacing="-0.03em"
         >
           <tspan fill={campusTextColor}>Campus</tspan>
           <tspan fill="url(#csSyncText)">Sync</tspan>
         </text>
-        {showTagline && (
-          <text
-            x="1"
-            y="66"
-            fontFamily="'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, sans-serif"
-            fontSize="12"
-            fontWeight="500"
-            letterSpacing="0.1em"
-            fill={taglineColor}
-            opacity="0.92"
-          >
-            Connect <tspan fill={bulletColor} fontSize="9" dy="-1">•</tspan><tspan dy="1"> </tspan>Learn <tspan fill={bulletColor} fontSize="9" dy="-1">•</tspan><tspan dy="1"> </tspan>Grow
-          </text>
-        )}
       </g>
     </svg>
   );
