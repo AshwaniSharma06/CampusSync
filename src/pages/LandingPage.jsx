@@ -1,7 +1,8 @@
 import React from 'react';
 import Hero from '../components/sections/Hero';
 import CommunityFeed from '../components/sections/CommunityFeed';
-import ClubsSection from '../components/sections/ClubsSection';
+// ClubsSection preserved for Semester 8 (Project Phase 2)
+// import ClubsSection from '../components/sections/ClubsSection';
 import EventsSection from '../components/sections/EventsSection';
 import CuratedForYou from '../components/sections/CuratedForYou';
 import CampusAiSection from '../components/sections/CampusAiSection';
@@ -15,14 +16,10 @@ export default function LandingPage({ currentUser, showToast, onOpenAuth }) {
           const el = document.getElementById('community');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }}
-        onExplore={() => {
-          const el = document.getElementById('clubs');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }}
         onSignUp={() => onOpenAuth?.('signup')}
       />
       <CommunityFeed currentUser={currentUser} onActionNotification={showToast} />
-      <ClubsSection onActionNotification={showToast} />
+      {/* ECA Clubs temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Project Phase 2) */}
       <EventsSection onActionNotification={showToast} />
       <CuratedForYou onActionNotification={showToast} />
       <CampusAiSection />

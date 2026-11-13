@@ -9,7 +9,6 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
   const navLinks = [
     { id: 'home', label: 'Home' },
     { id: 'community', label: 'Community' },
-    { id: 'clubs', label: 'Clubs' },
     { id: 'events', label: 'Events' },
     { id: 'curated', label: 'Curated' },
   ];
@@ -18,7 +17,7 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
 
-      const sectionIds = ['home', 'community', 'clubs', 'events', 'curated'];
+      const sectionIds = ['home', 'community', 'events', 'curated'];
       const scrollPosition = window.scrollY + 140;
 
       for (let i = sectionIds.length - 1; i >= 0; i--) {

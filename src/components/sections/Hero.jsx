@@ -52,7 +52,7 @@ const AUTHENTIC_FALLBACK_NOTICES = [
   }
 ];
 
-export default function Hero({ onEnter, onExplore }) {
+export default function Hero({ onEnter }) {
   const [notices, setNotices] = useState(AUTHENTIC_FALLBACK_NOTICES);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -163,15 +163,9 @@ export default function Hero({ onEnter, onExplore }) {
           <div className="flex flex-col sm:flex-row gap-4 mt-2 md:mt-4">
             <button
               onClick={onEnter}
-              className="bg-primary text-on-primary px-7 md:px-9 py-3.5 md:py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.12em] hover:bg-primary-fixed transition-all glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)] w-full sm:w-auto text-center"
+              className="bg-primary text-on-primary px-8 md:px-10 py-3.5 md:py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.12em] hover:bg-primary-fixed transition-all glow-hover shadow-[0_0_20px_rgba(113,216,200,0.2)] w-full sm:w-auto text-center"
             >
               Enter ECA CampusSync
-            </button>
-            <button
-              onClick={onExplore}
-              className="border border-outline/40 text-on-surface px-7 md:px-9 py-3.5 md:py-4 rounded-xl font-sans font-bold text-xs uppercase tracking-[0.12em] hover:bg-surface-variant/80 transition-all backdrop-blur-sm w-full sm:w-auto text-center"
-            >
-              Explore ECA Clubs
             </button>
           </div>
 

@@ -4,10 +4,10 @@ import CommunitySphereCanvas from '../three/CommunitySphereCanvas';
 const INITIAL_POSTS = [
   {
     id: 1,
-    author: 'Technotsav & PCC Club',
-    initials: 'PCC',
+    author: 'Technotsav Technical Society',
+    initials: 'TTS',
     avatarBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/40',
-    tag: 'Official Club',
+    tag: 'Official Committee',
     time: '2h ago',
     content:
       "Excited to announce our upcoming Advanced React & Machine Learning Workshop! 🚀 Join us this Saturday at Barliya Block Lab 204. We'll be building a full-stack AI application from scratch. Don't forget your laptops!",
@@ -127,7 +127,7 @@ export default function CommunityFeed({ currentUser, onActionNotification }) {
 
           {/* Quick Filter Pills */}
           <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-            {['All Campus', 'Comp Sci', 'Clubs', 'Official'].map((filter) => (
+            {['All Campus', 'Comp Sci', 'Official', 'Academics'].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
@@ -319,13 +319,13 @@ export default function CommunityFeed({ currentUser, onActionNotification }) {
               </div>
             </div>
 
-            {/* Quick SAC Notice Card */}
+            {/* Quick Community Guidelines Card */}
             <div className="bg-[#0d213b]/90 rounded-2xl p-5 border border-slate-700/70 shadow-md">
               <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">campaign</span> SAC Guidelines
+                <span className="material-symbols-outlined text-sm">campaign</span> Community Guidelines
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Posts representing student clubs must adhere to the ECA Student Activity Center code of conduct.
+                Posts and discussions must adhere to the official ECA student community code of conduct.
               </p>
             </div>
           </div>

@@ -46,7 +46,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   const [assignments, setAssignments] = useState([]);
   const [notificationsData, setNotificationsData] = useState([]);
   const [resources, setResources] = useState([]);
-  const [clubs, setClubs] = useState([]);
+  // Clubs state preserved for Semester 8 (Project Phase 2)
   const [events, setEvents] = useState([]);
   const [communityPosts, setCommunityPosts] = useState([]);
 
@@ -82,7 +82,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         assignsRes,
         notifsRes,
         resourcesRes,
-        clubsRes,
         eventsRes,
         communityRes,
         profileRes,
@@ -94,7 +93,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         apiService.getAssignments(),
         apiService.getNotifications(),
         apiService.getResources(),
-        apiService.getClubs(),
+        // apiService.getClubs() temporarily disabled for Semester 7 (Reintroduced in Sem 8)
         apiService.getEvents(),
         apiService.getCommunityPosts(),
         apiService.getStudentProfile(),
@@ -175,12 +174,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         setResources(Array.isArray(resourcesRes.value) ? resourcesRes.value : []);
       } else {
         setResources([]);
-      }
-
-      if (clubsRes.status === 'fulfilled') {
-        setClubs(Array.isArray(clubsRes.value) ? clubsRes.value : []);
-      } else {
-        setClubs([]);
       }
 
       if (eventsRes.status === 'fulfilled') {
@@ -322,7 +315,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     { id: 'academics', label: 'Academics', icon: 'school', category: 'Academic Core', badge: `${courses.length} Courses` },
     { id: 'resources', label: 'Study Resources', icon: 'folder_open', category: 'Academic Core', badge: `${resources.length} Docs` },
     { id: 'community', label: 'Community', icon: 'forum', category: 'Campus Life', badge: 'Active' },
-    { id: 'clubs', label: 'Clubs & SAC', icon: 'groups', category: 'Campus Life', badge: `${clubs.length} Joined` },
+    // Clubs & SAC temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Phase 2)
     { id: 'events', label: 'Events', icon: 'event', category: 'Campus Life', badge: `${events.length} Upcoming` },
     { id: 'ai', label: 'CampusSync AI', icon: 'smart_toy', category: 'Intelligence', badge: 'Verified RAG', badgeColor: 'bg-[#71d8c8]/20 text-[#71d8c8] border border-[#71d8c8]/40' },
   ];
@@ -1240,58 +1233,8 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 </div>
               </div>
 
-              {/* 4. Lower Highlights (Joined Clubs, Events, Community Discussions) */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Joined Clubs */}
-                <div className="bg-[#0d1b33]/90 rounded-2xl p-6 border border-slate-800 shadow-md flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-                      <div>
-                        <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[#71d8c8]">groups</span>
-                          <span>Joined Clubs</span>
-                        </h3>
-                        <p className="text-xs text-slate-400 font-medium">ECA Student Activity Center</p>
-                      </div>
-                      <span className="text-xs bg-[#71d8c8]/15 text-[#71d8c8] border border-[#71d8c8]/30 px-2 py-0.5 rounded-full font-bold">
-                        {clubs.length} Active
-                      </span>
-                    </div>
-
-                    {clubs.length === 0 ? (
-                      <div className="text-center py-6 px-3 rounded-xl border border-dashed border-slate-800">
-                        <span className="material-symbols-outlined text-3xl text-slate-600 mb-1">groups</span>
-                        <p className="text-xs font-semibold text-slate-400">No active club memberships</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Explore the SAC directory to join campus clubs.</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2.5">
-                        {clubs.slice(0, 3).map((club, idx) => (
-                          <div key={club.id || idx} className="p-3 rounded-xl bg-[#081528] border border-slate-800">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-bold text-white">{club.name}</h4>
-                              <span className="text-[10px] font-bold text-[#71d8c8] bg-[#71d8c8]/20 px-2 py-0.5 rounded">
-                                {club.role || club.category || 'Member'}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-400 font-medium mt-1">
-                              {club.lead ? `${club.lead} • ` : ''}{club.location || club.venue || 'ECA Campus'}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => setActiveTab('clubs')}
-                    className="mt-4 w-full bg-slate-800/80 hover:bg-slate-700/80 text-white font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-colors flex items-center justify-center gap-1"
-                  >
-                    <span>View SAC Directory</span>
-                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                  </button>
-                </div>
-
+              {/* 4. Lower Highlights (Upcoming Events & Community Discussions) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Upcoming Events */}
                 <div className="bg-[#0d1b33]/90 rounded-2xl p-6 border border-slate-800 shadow-md flex flex-col justify-between">
                   <div>
@@ -1531,66 +1474,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             </div>
           )}
 
-          {/* ============================================================== */}
-          {/* TAB: CLUBS & SAC                                               */}
-          {/* ============================================================== */}
-          {activeTab === 'clubs' && (
-            <div className="bg-[#0d1b33]/90 rounded-2xl p-6 md:p-8 border border-slate-800 shadow-xl animate-in fade-in duration-200 space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-800">
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">Student Activity Center (SAC) & Clubs</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Technical societies, cultural clubs, and student chapters
-                  </p>
-                </div>
-                <div className="px-3 py-1 rounded-xl bg-[#71d8c8]/15 border border-[#71d8c8]/30 text-[#71d8c8] text-xs font-bold">
-                  {clubs.length} Registered Clubs
-                </div>
-              </div>
-
-              {clubs.length === 0 ? (
-                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800">
-                  <span className="material-symbols-outlined text-5xl text-slate-600 mb-3">groups</span>
-                  <p className="text-sm font-semibold text-slate-400">No campus clubs available at this time.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {clubs.map((club, idx) => (
-                    <div key={club.id || idx} className="p-5 rounded-2xl bg-[#081528] border border-slate-800 hover:border-[#71d8c8]/40 transition-all flex flex-col justify-between shadow-xs">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-[#71d8c8] bg-[#71d8c8]/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                            {club.category || 'Technical'}
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
-                            {club.role || 'Active'}
-                          </span>
-                        </div>
-                        <h4 className="text-base font-bold text-white mt-1">{club.name}</h4>
-                        <p className="text-xs text-slate-400 font-medium mt-1">
-                          Lead: {club.lead || 'Faculty Coordinator'}
-                        </p>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">
-                          Venue: {club.location || club.venue || 'ECA Barliya Campus'}
-                        </p>
-                        {club.description && (
-                          <p className="text-xs text-slate-300 mt-2 line-clamp-2 leading-relaxed">
-                            {club.description}
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => onActionNotification?.(`Opened club portal: ${club.name}`)}
-                        className="mt-4 w-full bg-slate-800/80 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-colors"
-                      >
-                        Club Details
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {/* TAB: CLUBS & SAC temporarily disabled for Semester 7 (Preserved for Semester 8 - Project Phase 2) */}
 
           {/* ============================================================== */}
           {/* TAB: EVENTS                                                    */}
