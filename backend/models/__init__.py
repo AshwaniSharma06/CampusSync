@@ -13,5 +13,16 @@ from backend.models.academic import (
     ScrapingJob,
     AcademicDocument
 )
-from backend.models.social import Event, Club, CommunityPost, SavedItem
+from backend.models.social import (
+    Event, 
+    Club, 
+    CommunityPost, 
+    PostAttachment, 
+    PostComment, 
+    Poll, 
+    PollOption, 
+    PollVote, 
+    PostLike, 
+    SavedItem
+)
 from backend.models.system import Notification, ChatSession, ChatMessage, IngestedDocument

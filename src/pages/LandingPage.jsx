@@ -18,7 +18,11 @@ export default function LandingPage({ currentUser, showToast, onOpenAuth }) {
         }}
         onSignUp={() => onOpenAuth?.('signup')}
       />
-      <CommunityFeed currentUser={currentUser} onActionNotification={showToast} />
+      <CommunityFeed
+        currentUser={currentUser}
+        onActionNotification={showToast}
+        onRequireAuth={() => onOpenAuth?.('login')}
+      />
       {/* ECA Clubs temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Project Phase 2) */}
       <EventsSection onActionNotification={showToast} />
       <CuratedForYou onActionNotification={showToast} />

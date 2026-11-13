@@ -1,332 +1,263 @@
-import React, { useState } from 'react';
-import CommunitySphereCanvas from '../three/CommunitySphereCanvas';
+import React, { useState, useEffect, useCallback } from 'react';
+import { apiService } from '../../services/apiService';
+import CommunityPostComposer from '../community/CommunityPostComposer';
+import CommunityPostCard from '../community/CommunityPostCard';
 
-const INITIAL_POSTS = [
-  {
-    id: 1,
-    author: 'Technotsav Technical Society',
-    initials: 'TTS',
-    avatarBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/40',
-    tag: 'Official Committee',
-    time: '2h ago',
-    content:
-      "Excited to announce our upcoming Advanced React & Machine Learning Workshop! 🚀 Join us this Saturday at Barliya Block Lab 204. We'll be building a full-stack AI application from scratch. Don't forget your laptops!",
-    likes: 124,
-    comments: 32,
-    icon: 'code',
-    isLiked: false,
-  },
-  {
-    id: 2,
-    author: 'Priya Sharma',
-    initials: 'PS',
-    avatarBg: 'bg-amber-500/20 text-amber-300 border border-amber-500/40',
-    tag: 'CS Sem VII',
-    time: '5h ago',
-    content:
-      'Anyone want to form a study group for the upcoming BTU Machine Learning midterms? Looking for 2-3 people to review past papers in the central library this weekend. 📚🧠',
-    likes: 18,
-    comments: 8,
-    icon: null,
-    isLiked: false,
-  },
-  {
-    id: 3,
-    author: 'Rohan Verma',
-    initials: 'RV',
-    avatarBg: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40',
-    tag: 'ECE Sem V',
-    time: '8h ago',
-    content:
-      'Lost a black Dell laptop charger near Barliya CSE Block Room 402 around 2 PM today. If anyone found it, please hand it over to the SAC office or drop a message here!',
-    likes: 24,
-    comments: 12,
-    icon: null,
-    isLiked: false,
-  },
+const TOPIC_FILTERS = [
+  'All',
+  'DSA',
+  'Placements',
+  'BTUExams',
+  'WebDev',
+  'AI_ML',
+  'ProjectCollab',
+  'LostAndFound',
 ];
 
-export default function CommunityFeed({ currentUser, onActionNotification }) {
-  const [activeFilter, setActiveFilter] = useState('All Campus');
-  const [posts, setPosts] = useState(INITIAL_POSTS);
-  const [newPostText, setNewPostText] = useState('');
+export default function CommunityFeed({ currentUser, onActionNotification, onRequireAuth }) {
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState(null);
 
-  const postAuthorName = currentUser && currentUser.name ? currentUser.name : 'Ashwani Sharma';
-  const postAuthorInitials = currentUser && currentUser.name
-    ? currentUser.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .substring(0, 2)
-        .toUpperCase()
-    : 'AS';
-  const postAuthorTag = currentUser
-    ? currentUser.department
-      ? `${currentUser.department} Student`
-      : 'CSE VII Sem'
-    : 'CSE VII Sem';
+  const fetchPosts = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await apiService.getCommunityPosts({
+        tag: activeFilter !== 'All' ? activeFilter : null,
+        search: searchQuery.trim() || null,
+      });
+      setPosts(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to fetch community posts:', err);
+      setError('Unable to load live community discussions. Displaying cached records.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeFilter, searchQuery]);
 
-  const handleCreatePost = (e) => {
-    e.preventDefault();
-    if (!newPostText.trim()) return;
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
-    const newEntry = {
-      id: Date.now(),
-      author: postAuthorName,
-      initials: postAuthorInitials,
-      avatarBg: 'bg-teal-500/20 text-teal-300 border border-teal-500/40',
-      tag: postAuthorTag,
-      time: 'Just now',
-      content: newPostText,
-      likes: 0,
-      comments: 0,
-      icon: null,
-      isLiked: false,
-    };
-
-    setPosts([newEntry, ...posts]);
-    setNewPostText('');
-    onActionNotification?.(`Post published as ${postAuthorName}!`);
+  const handlePostCreated = (newPost) => {
+    setPosts((prev) => [newPost, ...prev]);
   };
 
-  const handleLike = (id) => {
-    setPosts(
-      posts.map((p) => {
-        if (p.id === id) {
-          return {
-            ...p,
-            likes: p.isLiked ? p.likes - 1 : p.likes + 1,
-            isLiked: !p.isLiked,
-          };
-        }
-        return p;
-      })
-    );
+  const handlePostDeleted = (deletedId) => {
+    setPosts((prev) => prev.filter((p) => p.id !== deletedId));
+  };
+
+  const handleTagClick = (tag) => {
+    setActiveFilter(tag);
+    // Smooth scroll to top of feed
+    window.scrollTo({ top: 300, behavior: 'smooth' });
   };
 
   return (
-    <section className="py-16 md:py-24 bg-background relative overflow-hidden" id="community">
-      <div className="absolute top-0 right-0 w-full h-[500px] z-0 opacity-25 pointer-events-none">
-        <CommunitySphereCanvas />
-      </div>
-
-      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative z-10">
-        {/* Compact, clean sans-serif heading that does not push feed down */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-8 gap-3">
-          <div>
-            <div className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full text-xs font-bold text-teal-400 mb-2 uppercase tracking-wider">
-              Student Square
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Campus community
-            </h2>
-            <p className="text-sm md:text-base text-on-surface-variant mt-1 max-w-2xl">
-              Live discussions, peer study groups, and updates from students and ECA societies.
-            </p>
+    <section id="community" className="py-16 md:py-24 bg-[#04132a] text-slate-100 relative overflow-hidden">
+      {/* Background glow effects */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-linear-to-b from-[#71d8c8]/10 via-[#bac3ff]/5 to-transparent blur-3xl pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#71d8c8]/10 border border-[#71d8c8]/30 text-[#71d8c8] text-xs font-bold tracking-wider uppercase mb-4 shadow-sm">
+            <span className="material-symbols-outlined text-sm">forum</span>
+            <span>Campus Community Square</span>
           </div>
-
-          {/* Quick Filter Pills */}
-          <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-            {['All Campus', 'Comp Sci', 'Official', 'Academics'].map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
-                  activeFilter.includes(filter)
-                    ? 'bg-teal-500/20 text-teal-300 border-teal-500/40 shadow-sm'
-                    : 'bg-slate-800/60 text-slate-400 hover:text-white border-slate-700/60 hover:bg-slate-800'
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
+            Connect, Collaborate & <span className="text-transparent bg-clip-text bg-linear-to-r from-[#71d8c8] via-[#bac3ff] to-[#e6c277]">Grow Together</span>
+          </h2>
+          <p className="text-sm md:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            The verified peer discussion hub for Govt. Engineering College Ajmer students. Share research notes, collaborate on hackathons, ask questions, and cast your votes.
+          </p>
         </div>
 
-        {/* Layout: Main Feed takes most of the width (3 of 4 columns) */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-          {/* Main Feed Container (75% width on desktop) */}
-          <div className="col-span-1 lg:col-span-3 flex flex-col gap-6">
-            {/* Post Composer right at the top */}
-            <div className="bg-[#0d213b]/90 rounded-2xl p-5 border border-slate-700/80 shadow-md">
-              <div className="flex gap-3.5 items-start">
-                <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 text-teal-300 font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
-                  {postAuthorInitials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <textarea
-                    rows={2}
-                    value={newPostText}
-                    onChange={(e) => setNewPostText(e.target.value)}
-                    placeholder={`Share an update, ask a question, or organize a study group, ${postAuthorName.split(' ')[0]}...`}
-                    className="w-full bg-slate-900/90 rounded-xl px-4 py-3 text-white text-sm border border-slate-700/80 placeholder:text-slate-500 focus:outline-none focus:border-teal-500/60 transition-colors resize-none mb-3"
-                  />
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-1.5 text-slate-400">
-                      <button
-                        type="button"
-                        onClick={() => onActionNotification?.('Image upload ready')}
-                        className="p-1.5 hover:text-teal-400 hover:bg-slate-800/80 rounded-lg transition-colors"
-                        title="Add Image"
-                      >
-                        <span className="material-symbols-outlined text-lg">image</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onActionNotification?.('Document attachment ready')}
-                        className="p-1.5 hover:text-indigo-400 hover:bg-slate-800/80 rounded-lg transition-colors"
-                        title="Add Document"
-                      >
-                        <span className="material-symbols-outlined text-lg">description</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onActionNotification?.('Poll generator ready')}
-                        className="p-1.5 hover:text-amber-400 hover:bg-slate-800/80 rounded-lg transition-colors"
-                        title="Create Poll"
-                      >
-                        <span className="material-symbols-outlined text-lg">poll</span>
-                      </button>
-                    </div>
+        {/* Main 2-Column Community Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Post Composer & Main Feed (8 Cols) */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Rich Post Composer */}
+            <CommunityPostComposer
+              currentUser={currentUser}
+              onPostCreated={handlePostCreated}
+              onRequireAuth={onRequireAuth}
+              onActionNotification={onActionNotification}
+            />
 
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-slate-400 hidden sm:inline-flex items-center gap-1 font-medium">
-                        <span className="material-symbols-outlined text-sm text-teal-400">account_circle</span>
-                        Posting as {postAuthorName}
-                      </span>
-                      <button
-                        onClick={handleCreatePost}
-                        disabled={!newPostText.trim()}
-                        className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm ${
-                          newPostText.trim()
-                            ? 'bg-teal-600 hover:bg-teal-500 text-white cursor-pointer shadow-[0_0_15px_rgba(20,184,166,0.3)]'
-                            : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                        }`}
-                      >
-                        <span>Publish</span>
-                        <span className="material-symbols-outlined text-xs">send</span>
-                      </button>
-                    </div>
-                  </div>
+            {/* Filter Pills and Search Bar */}
+            <div className="bg-[#081528] rounded-2xl border border-slate-800 p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {/* Search */}
+                <div className="relative flex-1">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search posts, topics, or study questions..."
+                    className="w-full bg-[#04132a] border border-slate-800 focus:border-[#71d8c8] rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-hidden"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Total posts count */}
+                <div className="text-[11px] text-slate-400 font-semibold px-2">
+                  {posts.length} {posts.length === 1 ? 'Discussion' : 'Discussions'}
                 </div>
               </div>
-            </div>
 
-            {/* Posts List */}
-            {posts.map((post) => (
-              <div
-                key={post.id}
-                className="bg-[#0d213b]/90 rounded-2xl p-5 md:p-6 border border-slate-700/70 hover:border-teal-400/40 transition-all shadow-md group"
-              >
-                <div className="flex items-start justify-between mb-3.5">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-11 h-11 rounded-xl ${post.avatarBg} flex items-center justify-center font-bold text-xs shrink-0 shadow-sm`}
-                    >
-                      {post.initials}
-                    </div>
-                    <div>
-                      <h4 className="text-white font-bold text-sm tracking-tight group-hover:text-teal-300 transition-colors">
-                        {post.author}
-                      </h4>
-                      <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                        <span className="bg-slate-800/90 text-slate-300 px-2 py-0.5 rounded text-[11px] font-medium border border-slate-700/50">
-                          {post.tag}
-                        </span>
-                        <span>•</span>
-                        <span>{post.time}</span>
-                      </div>
-                    </div>
-                  </div>
+              {/* Tag filters */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-800/80">
+                <span className="text-[11px] font-semibold text-slate-500 mr-1 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-xs">filter_alt</span>
+                  <span>Filter:</span>
+                </span>
+                {TOPIC_FILTERS.map((tag) => (
                   <button
-                    onClick={() => onActionNotification?.('Options menu opened')}
-                    className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/60 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-lg">more_vert</span>
-                  </button>
-                </div>
-
-                <p className="text-sm text-slate-200 mb-4 leading-relaxed font-sans">{post.content}</p>
-
-                {post.icon && (
-                  <div className="rounded-xl overflow-hidden mb-4 border border-slate-700/60 h-32 bg-slate-900/60 flex items-center justify-center gap-3 text-teal-400">
-                    <span className="material-symbols-outlined text-3xl">terminal</span>
-                    <span className="text-xs font-mono font-semibold text-slate-300">
-                      npm run start:ai-workshop --host=0.0.0.0
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-5 border-t border-slate-700/60 pt-3 text-xs text-slate-400">
-                  <button
-                    onClick={() => handleLike(post.id)}
-                    className={`flex items-center gap-1.5 transition-colors ${
-                      post.isLiked ? 'text-teal-400 font-bold' : 'hover:text-teal-300'
+                    key={tag}
+                    onClick={() => setActiveFilter(tag)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      activeFilter === tag
+                        ? 'bg-[#71d8c8] text-[#04132a] shadow-xs'
+                        : 'bg-[#04132a] text-slate-400 hover:text-slate-200 border border-slate-800'
                     }`}
                   >
-                    <span className="material-symbols-outlined text-base">
-                      {post.isLiked ? 'favorite' : 'favorite_border'}
-                    </span>
-                    <span>{post.likes}</span>
+                    {tag === 'All' ? 'All Posts' : `#${tag}`}
                   </button>
-                  <button
-                    onClick={() => onActionNotification?.(`Opening comments for ${post.author}'s post`)}
-                    className="flex items-center gap-1.5 hover:text-teal-300 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-base">chat_bubble</span>
-                    <span>{post.comments} comments</span>
-                  </button>
-                  <button
-                    onClick={() => onActionNotification?.('Post link copied to clipboard')}
-                    className="flex items-center gap-1.5 hover:text-teal-300 transition-colors ml-auto"
-                  >
-                    <span className="material-symbols-outlined text-base">share</span>
-                    <span>Share</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Slim Sidebar: Channels & Trending (25% width on desktop) */}
-          <div className="col-span-1 flex flex-col gap-5 sticky top-24">
-            {/* Trending Topics Card */}
-            <div className="bg-[#0d213b]/90 rounded-2xl p-5 border border-slate-700/70 shadow-md">
-              <h3 className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">trending_up</span> Trending Topics
-              </h3>
-              <div className="space-y-3">
-                {[
-                  { tag: '#Technotsav26', count: '450 posts', category: 'Fest' },
-                  { tag: '#BTUMidterms', count: '320 posts', category: 'Academics' },
-                  { tag: '#SIH2026', count: '185 posts', category: 'Hackathon' },
-                  { tag: '#RobowarECA', count: '112 posts', category: 'Robotics' },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => onActionNotification?.(`Viewing trend: ${item.tag}`)}
-                    className="group cursor-pointer p-2 rounded-xl hover:bg-slate-800/70 transition-all border border-transparent hover:border-slate-700/60"
-                  >
-                    <div className="flex items-center justify-between text-[11px] text-slate-400">
-                      <span>{item.category}</span>
-                      <span className="text-teal-400/80 font-medium">{item.count}</span>
-                    </div>
-                    <p className="font-bold text-white text-xs group-hover:text-teal-300 transition-colors mt-0.5">
-                      {item.tag}
-                    </p>
-                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Quick Community Guidelines Card */}
-            <div className="bg-[#0d213b]/90 rounded-2xl p-5 border border-slate-700/70 shadow-md">
-              <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">campaign</span> Community Guidelines
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Posts and discussions must adhere to the official ECA student community code of conduct.
-              </p>
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
+                <span>{error}</span>
+                <button onClick={fetchPosts} className="underline font-bold hover:text-white">
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {/* Post Feed List */}
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="p-6 rounded-2xl bg-[#081528] border border-slate-800 animate-pulse space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-800" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="h-3.5 bg-slate-800 rounded-md w-32" />
+                        <div className="h-2.5 bg-slate-800/60 rounded-md w-24" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-slate-800 rounded-md w-full" />
+                      <div className="h-3 bg-slate-800 rounded-md w-4/5" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-16 px-4 rounded-2xl bg-[#081528] border border-dashed border-slate-800 space-y-3">
+                <span className="material-symbols-outlined text-5xl text-slate-600">forum</span>
+                <h4 className="text-base font-bold text-slate-300">No discussions match your filter</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Be the first in your department to share updates, ask questions, or publish a poll!
+                </p>
+                {activeFilter !== 'All' && (
+                  <button
+                    onClick={() => setActiveFilter('All')}
+                    className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-[#71d8c8]"
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {posts.map((post) => (
+                  <CommunityPostCard
+                    key={post.id}
+                    post={post}
+                    currentUser={currentUser}
+                    onTagClick={handleTagClick}
+                    onPostDeleted={handlePostDeleted}
+                    onRequireAuth={onRequireAuth}
+                    onActionNotification={onActionNotification}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Trending Discussions, Guidelines & Stats (4 Cols) */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Trending Tags Widget */}
+            <div className="bg-[#081528] rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
+                <span className="material-symbols-outlined text-base text-[#e6c277]">trending_up</span>
+                <span>Trending Cohorts & Topics</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {[
+                  { tag: 'DSA', desc: 'BTU Midterm Data Structures & Algorithms', posts: 14 },
+                  { tag: 'Placements', desc: 'Campus Placement Prep & Company Drives', posts: 28 },
+                  { tag: 'AI_ML', desc: 'Deep Learning & NLP Project Collabs', posts: 19 },
+                  { tag: 'BTUExams', desc: 'Semester 7 & 5 Final Exam Schedules', posts: 11 },
+                  { tag: 'LostAndFound', desc: 'Found Campus Items & SAC Inquiries', posts: 7 },
+                ].map((item) => (
+                  <button
+                    key={item.tag}
+                    onClick={() => handleTagClick(item.tag)}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-[#04132a] hover:bg-[#04132a]/80 border border-slate-800/80 hover:border-[#71d8c8]/40 transition-all text-left cursor-pointer group"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-[#71d8c8] group-hover:underline">
+                        #{item.tag}
+                      </span>
+                      <p className="text-[11px] text-slate-400 line-clamp-1">{item.desc}</p>
+                    </div>
+                    <span className="text-[10px] font-semibold text-slate-500 bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">
+                      {item.posts}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Community Standards & Guidelines */}
+            <div className="bg-[#081528] rounded-2xl border border-slate-800 p-5 shadow-xl space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-800 text-white font-bold text-sm">
+                <span className="material-symbols-outlined text-base text-[#71d8c8]">verified_user</span>
+                <span>Community Guidelines</span>
+              </div>
+              <ul className="text-xs text-slate-300 space-y-2.5 leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-sm text-[#71d8c8] shrink-0 mt-0.5">check_circle</span>
+                  <span><strong>Respect Peer Discussions:</strong> Constructive academic inquiries and project feedback only.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-sm text-[#71d8c8] shrink-0 mt-0.5">check_circle</span>
+                  <span><strong>Verified Authenticity:</strong> All comments and polls are securely recorded with student verification.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-sm text-[#71d8c8] shrink-0 mt-0.5">check_circle</span>
+                  <span><strong>Accredited Attachments:</strong> Attach only valid study materials, syllabus docs, or campus event photos.</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>

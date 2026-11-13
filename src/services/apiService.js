@@ -73,8 +73,9 @@ export const apiClient = async (endpoint, options = {}) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...getAuthHeaders(),
     ...options.headers,
   };
@@ -279,15 +280,68 @@ export const apiService = {
     return apiClient('/assignments/');
   },
 
-  // Community
-  getCommunityPosts: async () => {
-    return apiClient('/community/');
+  // Community & Social Platform
+  getCommunityPosts: async ({ limit = 50, offset = 0, tag = null, search = null } = {}) => {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (offset) params.append('offset', offset.toString());
+    if (tag && tag !== 'All') params.append('tag', tag);
+    if (search) params.append('search', search);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return apiClient(`/community/${qs}`);
   },
 
   createCommunityPost: async (postData) => {
     return apiClient('/community/', {
       method: 'POST',
       body: JSON.stringify(postData),
+    });
+  },
+
+  uploadCommunityAttachment: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient('/community/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {},
+      timeout: 60000,
+    });
+  },
+
+  toggleCommunityPostLike: async (postId) => {
+    return apiClient(`/community/${postId}/like`, {
+      method: 'POST',
+    });
+  },
+
+  voteCommunityPoll: async (pollId, optionIds) => {
+    return apiClient(`/community/polls/${pollId}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ option_ids: optionIds }),
+    });
+  },
+
+  getCommunityComments: async (postId) => {
+    return apiClient(`/community/${postId}/comments`);
+  },
+
+  createCommunityComment: async (postId, content, parentId = null) => {
+    return apiClient(`/community/${postId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ content, parent_id: parentId }),
+    });
+  },
+
+  deleteCommunityComment: async (commentId) => {
+    return apiClient(`/community/comments/${commentId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  deleteCommunityPost: async (postId) => {
+    return apiClient(`/community/${postId}`, {
+      method: 'DELETE',
     });
   },
 

@@ -3,6 +3,8 @@ import { apiService, openOfficialLink } from '../../services/apiService';
 import EditProfileModal from './EditProfileModal';
 import CampusAiWorkspace from '../chat/CampusAiWorkspace';
 import CampusSyncLogo from '../ui/CampusSyncLogo';
+import CommunityPostComposer from '../community/CommunityPostComposer';
+import CommunityPostCard from '../community/CommunityPostCard';
 
 export default function StudentDashboard({ user, onSignOut, onActionNotification, onReturnHome }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -49,12 +51,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   // Clubs state preserved for Semester 8 (Project Phase 2)
   const [events, setEvents] = useState([]);
   const [communityPosts, setCommunityPosts] = useState([]);
-
-  // Community post creation state
-  const [isNewPostModalOpen, setIsNewPostModalOpen] = useState(false);
-  const [newPostContent, setNewPostContent] = useState('');
-  const [newPostTags, setNewPostTags] = useState('');
-  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -223,30 +219,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     setStudentProfile(user);
     loadData();
   }, [user, loadData]);
-
-  const handleCreateCommunityPost = async (e) => {
-    e.preventDefault();
-    if (!newPostContent.trim()) return;
-    setIsSubmittingPost(true);
-    try {
-      const tagsArray = newPostTags
-        ? newPostTags.split(',').map(t => t.trim()).filter(Boolean)
-        : ['General', 'StudentLife'];
-      const created = await apiService.createCommunityPost({
-        content: newPostContent.trim(),
-        tags: tagsArray
-      });
-      setCommunityPosts(prev => [created, ...prev]);
-      setNewPostContent('');
-      setNewPostTags('');
-      setIsNewPostModalOpen(false);
-      onActionNotification?.('Discussion thread published to Community Square!');
-    } catch (err) {
-      onActionNotification?.(`Error publishing post: ${err.message || 'Server error'}`);
-    } finally {
-      setIsSubmittingPost(false);
-    }
-  };
 
   const handleAiPromptClick = async (promptText) => {
     if (!promptText || !promptText.trim()) return;
@@ -1410,64 +1382,50 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
           {/* ============================================================== */}
           {activeTab === 'community' && (
             <div className="bg-[#0d1b33]/90 rounded-2xl p-6 md:p-8 border border-slate-800 shadow-xl animate-in fade-in duration-200 space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
                 <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">ECA Community Discussions</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#71d8c8]">forum</span>
+                    <span>Campus Community Square</span>
+                  </h3>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Peer question board, project collaborations, and student life
+                    Peer discussions, academic notes, live polls, and college project collaborations
                   </p>
                 </div>
-                <button
-                  onClick={() => setIsNewPostModalOpen(true)}
-                  className="bg-[#71d8c8] hover:bg-[#8ef4e4] text-[#04132a] font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5"
-                >
-                  <span className="material-symbols-outlined text-sm">add</span>
-                  <span>New Thread</span>
-                </button>
+                <div className="text-xs font-semibold text-slate-300 bg-[#081528] px-3.5 py-1.5 rounded-xl border border-slate-800 shadow-xs self-start sm:self-auto">
+                  <span className="text-[#71d8c8] font-bold">{communityPosts.length}</span> Discussions Active
+                </div>
               </div>
 
+              {/* Rich Community Post Composer */}
+              <CommunityPostComposer
+                currentUser={studentProfile || user}
+                onPostCreated={(newPost) => setCommunityPosts((prev) => [newPost, ...prev])}
+                onRequireAuth={() => onActionNotification?.('Please sign in to participate in the community.')}
+                onActionNotification={onActionNotification}
+              />
+
+              {/* Discussions Feed */}
               {communityPosts.length === 0 ? (
-                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800">
-                  <span className="material-symbols-outlined text-5xl text-slate-600 mb-3">forum</span>
+                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800 space-y-3">
+                  <span className="material-symbols-outlined text-5xl text-slate-600 mb-2">forum</span>
                   <h4 className="text-base font-bold text-slate-300">No community discussions posted yet</h4>
-                  <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto mb-4">
-                    Be the first to ask a peer question, share academic materials, or start a study group.
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    Be the first in your cohort to ask a question, share research notes, or start a live poll above!
                   </p>
-                  <button
-                    onClick={() => setIsNewPostModalOpen(true)}
-                    className="bg-[#71d8c8] hover:bg-[#8ef4e4] text-[#04132a] font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-xl transition-all"
-                  >
-                    Start a Thread
-                  </button>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {communityPosts.map((item, idx) => (
-                    <div key={item.id || idx} className="p-5 rounded-2xl bg-[#081528] border border-slate-800 hover:border-[#71d8c8]/40 transition-all shadow-xs">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-sm">{item.author_name || 'ECA Student'}</span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                            {item.author_role || 'Student'}
-                          </span>
-                        </div>
-                        <span className="text-xs text-slate-500 font-medium">
-                          {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Recent'}
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-200 font-medium mb-3 leading-relaxed">
-                        {item.content}
-                      </p>
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="flex gap-1.5 flex-wrap">
-                          {item.tags.map((tag, tIdx) => (
-                            <span key={tIdx} className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-[#71d8c8] border border-slate-700">
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                  {communityPosts.map((post) => (
+                    <CommunityPostCard
+                      key={post.id}
+                      post={post}
+                      currentUser={studentProfile || user}
+                      onPostDeleted={(deletedId) =>
+                        setCommunityPosts((prev) => prev.filter((p) => p.id !== deletedId))
+                      }
+                      onActionNotification={onActionNotification}
+                    />
                   ))}
                 </div>
               )}
@@ -1662,69 +1620,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         }}
         onNotification={onActionNotification}
       />
-
-      {/* Community New Thread Modal */}
-      {isNewPostModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d1b33] rounded-2xl p-6 border border-slate-700 w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#71d8c8]">forum</span>
-                <span>Create Community Thread</span>
-              </h3>
-              <button
-                onClick={() => setIsNewPostModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
-            <form onSubmit={handleCreateCommunityPost} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
-                  Discussion Content
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  placeholder="Share your peer question, project idea, or campus discussion..."
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                  className="w-full bg-[#081528] rounded-xl p-3 text-xs text-white placeholder:text-slate-500 border border-slate-700 focus:outline-none focus:border-[#71d8c8] focus:ring-1 focus:ring-[#71d8c8] transition-all"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
-                  Tags (Comma separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. CSE, Project, Midterm"
-                  value={newPostTags}
-                  onChange={(e) => setNewPostTags(e.target.value)}
-                  className="w-full bg-[#081528] rounded-xl px-3 py-2 text-xs text-white placeholder:text-slate-500 border border-slate-700 focus:outline-none focus:border-[#71d8c8] focus:ring-1 focus:ring-[#71d8c8] transition-all"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsNewPostModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-slate-800/80 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingPost || !newPostContent.trim()}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[#71d8c8] hover:bg-[#8ef4e4] text-[#04132a] transition-all disabled:opacity-50"
-                >
-                  {isSubmittingPost ? 'Posting...' : 'Publish Thread'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
