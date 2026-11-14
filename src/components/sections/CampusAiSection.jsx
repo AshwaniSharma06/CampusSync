@@ -454,8 +454,8 @@ export default function CampusAiSection({ currentUser }) {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Form Input Area with Multiline Support */}
-              <div className="mt-3 pt-2.5 border-t border-slate-700/60 shrink-0">
+              {/* Form Input Area */}
+              <div className="mt-3 shrink-0">
                 <div className="relative flex items-end">
                   <textarea
                     id="campus-ai-input"
@@ -464,35 +464,18 @@ export default function CampusAiSection({ currentUser }) {
                     value={inputVal}
                     onChange={handleInputChange}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask anything about ECA Ajmer, BTU syllabus, midterms... (Shift+Enter for newline)"
-                    className="w-full bg-slate-900/90 rounded-xl py-3 pl-4 pr-12 text-xs sm:text-sm text-white placeholder:text-slate-500 border border-slate-700 focus:outline-none focus:border-teal-400/80 transition-colors resize-none min-h-[46px] max-h-28"
+                    placeholder="Ask anything about ECA Ajmer, BTU syllabus, midterms..."
+                    className="w-full bg-slate-900/90 rounded-xl py-3 pl-4 pr-12 text-xs sm:text-sm text-white placeholder:text-slate-500 border border-slate-700 focus:outline-none focus:border-teal-400/80 transition-colors resize-none min-h-[46px] max-h-28 hide-scrollbar"
                   />
                   <button
                     type="button"
                     onClick={() => handleSend()}
                     disabled={isThinking || !inputVal.trim()}
                     className="absolute right-2 bottom-2 w-8 h-8 bg-teal-600 hover:bg-teal-500 disabled:opacity-40 disabled:hover:bg-teal-600 rounded-lg flex items-center justify-center text-white transition-all shadow-sm"
-                    title="Send Question (Enter)"
+                    title="Send Question"
                   >
                     <span className="material-symbols-outlined text-[16px]">send</span>
                   </button>
-                </div>
-                <div className="flex items-center justify-between mt-2 text-[10px] text-slate-500 px-1">
-                  <span>
-                    Press{' '}
-                    <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[9px] border border-slate-700">
-                      Enter ↵
-                    </kbd>{' '}
-                    to send •{' '}
-                    <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[9px] border border-slate-700">
-                      Shift + Enter
-                    </kbd>{' '}
-                    for new line
-                  </span>
-                  <span className="hidden sm:flex items-center gap-1 text-teal-400 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
-                    Verified ECA RAG System
-                  </span>
                 </div>
               </div>
             </div>
