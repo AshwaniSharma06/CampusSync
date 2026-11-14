@@ -25,12 +25,6 @@ const ECA_PROGRAMS = [
   'MBA (Dual Specialization)',
 ];
 
-const ADMISSION_CATEGORIES = [
-  'GAS (Government Aided Seat)',
-  'SFS (Self Finance Scheme)',
-  'TFWS (Tuition Fee Waiver Scheme)',
-];
-
 const SEMESTERS = [
   { value: 1, label: 'Semester 1 (1st Year)' },
   { value: 2, label: 'Semester 2 (1st Year)' },
@@ -585,7 +579,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                 </div>
 
                 {/* 7. College Roll No / Enrollment ID */}
-                <div>
+                <div className="col-span-1 sm:col-span-2">
                   <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     COLLEGE ROLL NO / ENROLLMENT ID <span className="text-teal-600">*</span>
                   </label>
@@ -601,29 +595,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                       className="w-full bg-slate-50/50 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
                       placeholder="22ECA081"
                     />
-                  </div>
-                </div>
-
-                {/* 8. Admission Scheme */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    ADMISSION SCHEME
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={formData.admissionCategory}
-                      onChange={(e) => setFormData({ ...formData, admissionCategory: e.target.value })}
-                      className="w-full bg-slate-50/50 rounded-xl px-3.5 py-2.5 pr-8 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all appearance-none cursor-pointer"
-                    >
-                      {ADMISSION_CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat} className="text-slate-800">
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base">
-                      expand_more
-                    </span>
                   </div>
                 </div>
 
