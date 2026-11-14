@@ -1272,7 +1272,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       <div className="text-center py-6 px-3 rounded-xl border border-dashed border-slate-800">
                         <span className="material-symbols-outlined text-3xl text-slate-600 mb-1">forum</span>
                         <p className="text-xs font-semibold text-slate-400">No discussions posted yet</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Start a new thread in the Community Square.</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">Start a new thread in the Campus Community.</p>
                       </div>
                     ) : (
                       <div className="space-y-2.5">
@@ -1295,7 +1295,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     onClick={() => setActiveTab('community')}
                     className="mt-4 w-full bg-slate-800/80 hover:bg-slate-700/80 text-white font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-colors flex items-center justify-center gap-1"
                   >
-                    <span>Open Community Square</span>
+                    <span>Open Campus Community</span>
                     <span className="material-symbols-outlined text-sm">arrow_forward</span>
                   </button>
                 </div>
@@ -1381,7 +1381,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 <div>
                   <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
                     <span className="material-symbols-outlined text-[#71d8c8]">forum</span>
-                    <span>Campus Community Square</span>
+                    <span>Campus Community</span>
                   </h3>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
                     Peer discussions, academic notes, live polls, and college project collaborations

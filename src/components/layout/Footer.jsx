@@ -88,7 +88,7 @@ export default function Footer({ onActionNotification }) {
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#community"
             >
-              Campus Community Square
+              Campus Community
             </a>
           </div>
         </div>

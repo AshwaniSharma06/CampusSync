@@ -66,7 +66,7 @@ export default function CommunityFeed({ currentUser, onActionNotification, onReq
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#71d8c8]/10 border border-[#71d8c8]/30 text-[#71d8c8] text-xs font-bold tracking-wider uppercase mb-4 shadow-sm">
             <span className="material-symbols-outlined text-sm">forum</span>
-            <span>Campus Community Square</span>
+            <span>Campus Community</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
             Connect, Collaborate & <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#71d8c8] via-[#bac3ff] to-[#e6c277]">Grow Together</span>
