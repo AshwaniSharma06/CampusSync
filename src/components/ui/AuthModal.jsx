@@ -310,7 +310,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
               ENGINEERING COLLEGE AJMER • BTU AFFILIATED
             </div>
 
-            <h3 className="font-serif text-3xl text-slate-900 tracking-tight">
+            <h3 className="text-2xl sm:text-[28px] font-bold text-slate-900 tracking-tight font-sans">
               {mode === 'login' ? 'Student Sign In' : 'Student Registration'}
             </h3>
 
