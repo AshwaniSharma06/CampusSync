@@ -98,3 +98,4 @@ export default function CommunityMediaViewer({ images = [], initialIndex = 0, on
     </div>
   );
 }
+

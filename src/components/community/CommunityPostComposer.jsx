@@ -630,3 +630,4 @@ export default function CommunityPostComposer({ currentUser, onPostCreated, onRe
     </div>
   );
 }
+

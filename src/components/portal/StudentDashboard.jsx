@@ -469,11 +469,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     setActiveTab(item.id);
                     onActionNotification?.(`Navigated to ${item.label}`);
                   }}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 lg:w-full ${
-                    isActive
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 lg:w-full ${isActive
                       ? 'bg-gradient-to-r from-[#71d8c8]/20 to-[#71d8c8]/5 border-l-4 border-[#71d8c8] text-white shadow-sm'
                       : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className={`material-symbols-outlined text-lg ${isActive ? 'text-[#71d8c8]' : 'text-slate-400'}`}>
@@ -483,11 +482,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   </div>
                   {item.badge && (
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 ${
-                        isActive
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 ${isActive
                           ? 'bg-[#71d8c8]/30 text-[#71d8c8]'
                           : item.badgeColor || 'bg-slate-800 text-slate-400 border border-slate-700/60'
-                      }`}
+                        }`}
                     >
                       {item.badge}
                     </span>
@@ -943,11 +941,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                             setNoticeFilter(f);
                             setNoticePage(1);
                           }}
-                          className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                            noticeFilter === f
+                          className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${noticeFilter === f
                               ? 'bg-[#71d8c8] text-[#04132a] shadow-xs'
                               : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700/80'
-                          }`}
+                            }`}
                         >
                           {f}
                         </button>
@@ -1002,33 +999,32 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                                     'Official notice link is currently unavailable.'
                                   )
                                 }
-                                className={`p-1.5 rounded-lg transition-colors ${
-                                  n.destination_type === 'HOSTED_DOWNLOAD'
+                                className={`p-1.5 rounded-lg transition-colors ${n.destination_type === 'HOSTED_DOWNLOAD'
                                     ? 'text-emerald-400 hover:bg-emerald-500/20'
                                     : n.destination_type === 'OFFICIAL_DOCUMENT'
-                                    ? 'text-[#71d8c8] hover:bg-[#71d8c8]/20'
-                                    : n.destination_type === 'OFFICIAL_PAGE'
-                                    ? 'text-blue-400 hover:bg-blue-500/20'
-                                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
-                                }`}
+                                      ? 'text-[#71d8c8] hover:bg-[#71d8c8]/20'
+                                      : n.destination_type === 'OFFICIAL_PAGE'
+                                        ? 'text-blue-400 hover:bg-blue-500/20'
+                                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+                                  }`}
                                 title={
                                   n.destination_type === 'HOSTED_DOWNLOAD'
                                     ? 'Download CampusSync-Hosted Document'
                                     : n.destination_type === 'OFFICIAL_DOCUMENT'
-                                    ? 'Open Verified Official Notice Document'
-                                    : n.destination_type === 'OFFICIAL_PAGE'
-                                    ? 'Open Official Notice Webpage'
-                                    : 'Official notice link is currently unavailable'
+                                      ? 'Open Verified Official Notice Document'
+                                      : n.destination_type === 'OFFICIAL_PAGE'
+                                        ? 'Open Official Notice Webpage'
+                                        : 'Official notice link is currently unavailable'
                                 }
                               >
                                 <span className="material-symbols-outlined text-base">
                                   {n.destination_type === 'HOSTED_DOWNLOAD'
                                     ? 'download'
                                     : n.destination_type === 'OFFICIAL_DOCUMENT'
-                                    ? 'description'
-                                    : n.destination_type === 'OFFICIAL_PAGE'
-                                    ? 'open_in_new'
-                                    : 'link_off'}
+                                      ? 'description'
+                                      : n.destination_type === 'OFFICIAL_PAGE'
+                                        ? 'open_in_new'
+                                        : 'link_off'}
                                 </span>
                               </button>
                             </div>
@@ -1097,7 +1093,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                                 <div className="w-8 h-8 rounded-lg bg-[#71d8c8]/20 text-[#71d8c8] flex items-center justify-center shrink-0">
                                   <span className="material-symbols-outlined text-base">
                                     {res.destination_type === 'HOSTED_DOWNLOAD' ? 'file_download' :
-                                     res.destination_type === 'OFFICIAL_DOCUMENT' ? 'description' : 'menu_book'}
+                                      res.destination_type === 'OFFICIAL_DOCUMENT' ? 'description' : 'menu_book'}
                                   </span>
                                 </div>
                                 <div className="min-w-0">
@@ -1112,9 +1108,8 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               <div className="flex items-center gap-1 shrink-0">
                                 <button
                                   onClick={() => toggleSaveResource(String(res.id), res.title)}
-                                  className={`p-1.5 rounded-lg transition-colors ${
-                                    isSaved ? 'text-[#71d8c8] bg-[#71d8c8]/20' : 'text-slate-400 hover:text-white'
-                                  }`}
+                                  className={`p-1.5 rounded-lg transition-colors ${isSaved ? 'text-[#71d8c8] bg-[#71d8c8]/20' : 'text-slate-400 hover:text-white'
+                                    }`}
                                   title={isSaved ? 'Remove from saved' : 'Save resource'}
                                 >
                                   <span className="material-symbols-outlined text-base">
@@ -1515,11 +1510,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   <button
                     key={cat}
                     onClick={() => setResourceCategoryFilter(cat)}
-                    className={`px-3.5 py-1 rounded-full text-xs font-bold transition-all ${
-                      resourceCategoryFilter === cat
+                    className={`px-3.5 py-1 rounded-full text-xs font-bold transition-all ${resourceCategoryFilter === cat
                         ? 'bg-[#71d8c8] text-[#04132a] shadow-xs'
                         : 'bg-slate-800/80 text-slate-400 hover:text-white'
-                    }`}
+                      }`}
                   >
                     {cat}
                   </button>
@@ -1546,7 +1540,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                             <div className="w-10 h-10 rounded-xl bg-[#71d8c8]/20 text-[#71d8c8] flex items-center justify-center shrink-0">
                               <span className="material-symbols-outlined text-lg">
                                 {r.destination_type === 'HOSTED_DOWNLOAD' ? 'file_download' :
-                                 r.destination_type === 'OFFICIAL_DOCUMENT' ? 'description' : 'menu_book'}
+                                  r.destination_type === 'OFFICIAL_DOCUMENT' ? 'description' : 'menu_book'}
                               </span>
                             </div>
                             <div className="min-w-0">
@@ -1561,9 +1555,8 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                           <div className="flex items-center gap-1.5 shrink-0">
                             <button
                               onClick={() => toggleSaveResource(String(r.id), r.title)}
-                              className={`p-2 rounded-xl transition-colors ${
-                                isSaved ? 'text-[#71d8c8] bg-[#71d8c8]/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                              }`}
+                              className={`p-2 rounded-xl transition-colors ${isSaved ? 'text-[#71d8c8] bg-[#71d8c8]/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                }`}
                               title={isSaved ? 'Saved to library' : 'Save resource'}
                             >
                               <span className="material-symbols-outlined text-base">
