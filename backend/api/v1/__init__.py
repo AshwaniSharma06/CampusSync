@@ -15,8 +15,10 @@ from backend.api.v1.recommendations import router as recommendations_router
 from backend.api.v1.examinations import router as examinations_router
 from backend.api.v1.admin_review import router as admin_router
 from backend.api.v1.resources import router as resources_router
+from backend.api.v1.feed import router as feed_router
 
 api_router = APIRouter()
+api_router.include_router(feed_router, prefix="/feed", tags=["feed"])
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
 api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
 api_router.include_router(profile_router, prefix="/profile", tags=["profile"])

@@ -27,7 +27,11 @@ export default function LandingPage({ currentUser, showToast, onOpenAuth }) {
       {/* ECA Clubs temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Project Phase 2) */}
       {/* Events temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Major Project Phase 2) */}
       {/* <EventsSection onActionNotification={showToast} /> */}
-      <CuratedForYou onActionNotification={showToast} />
+      <CuratedForYou
+        currentUser={currentUser}
+        onActionNotification={showToast}
+        onOpenAuth={onOpenAuth}
+      />
       <CampusAiSection />
       <CtaSection onOpenAuth={onOpenAuth} />
     </main>

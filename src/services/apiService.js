@@ -223,6 +223,16 @@ export const apiService = {
     return apiClient(`/recommendations/${queryString}`);
   },
 
+  // Intelligent Curated Feed (Phase 4.2)
+  getIntelligentFeed: async ({ category = 'all', limit = 30, offset = 0 } = {}) => {
+    const params = new URLSearchParams();
+    if (category && category !== 'all') params.append('category', category);
+    if (limit) params.append('limit', limit.toString());
+    if (offset) params.append('offset', offset.toString());
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return apiClient(`/feed/${qs}`);
+  },
+
   // Notices
   getNotices: async (filter = 'All', searchQuery = '') => {
     const params = new URLSearchParams();
