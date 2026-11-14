@@ -42,6 +42,30 @@ export default function App() {
     setToastMessage(msg);
   };
 
+  const handleNavigateToCampusAi = () => {
+    const el = document.getElementById('ai-assistant');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.pushState(null, '', '#ai-assistant');
+      setTimeout(() => {
+        const input = document.getElementById('campus-ai-input');
+        if (input) input.focus();
+      }, 450);
+    } else {
+      navigate('/');
+      setTimeout(() => {
+        const el2 = document.getElementById('ai-assistant');
+        if (el2) {
+          el2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(() => {
+            const input = document.getElementById('campus-ai-input');
+            if (input) input.focus();
+          }, 300);
+        }
+      }, 350);
+    }
+  };
+
   // Restore cached profile on first mount if signed in
   useEffect(() => {
     const cachedProfile = accountStore.getActiveSession();
@@ -128,7 +152,7 @@ export default function App() {
         <Navbar
           onOpenSignIn={(mode) => handleOpenAuth(mode || 'login')}
           onOpenSignUp={() => handleOpenAuth('signup')}
-          onOpenAiAgent={() => setAiWidgetOpen(true)}
+          onOpenAiAgent={handleNavigateToCampusAi}
           currentUser={isStudentAuthenticated ? (currentUser || userProfile) : null}
           onOpenPortalView={handleOpenDashboard}
         />
@@ -165,7 +189,7 @@ export default function App() {
 
       {!isDashboard && <Footer onActionNotification={showToast} />}
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />
-      <AiWidget isOpenExternal={aiWidgetOpen} setIsOpenExternal={setAiWidgetOpen} />
+      <AiWidget onNavigateToAi={handleNavigateToCampusAi} />
       <AuthModal
         isOpen={isAuthModalOpen}
         initialMode={authModalMode}

@@ -32,7 +32,7 @@ export default function LandingPage({ currentUser, showToast, onOpenAuth }) {
         onActionNotification={showToast}
         onOpenAuth={onOpenAuth}
       />
-      <CampusAiSection />
+      <CampusAiSection currentUser={currentUser} />
       <CtaSection onOpenAuth={onOpenAuth} />
     </main>
   );

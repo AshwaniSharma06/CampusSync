@@ -18,7 +18,7 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
 
-      const sectionIds = ['home', 'community', 'curated'];
+      const sectionIds = ['home', 'community', 'curated', 'ai-assistant'];
       const scrollPosition = window.scrollY + 140;
 
       for (let i = sectionIds.length - 1; i >= 0; i--) {
@@ -50,6 +50,27 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
       e.preventDefault();
       el.scrollIntoView({ behavior: 'smooth' });
       window.history.pushState(null, '', `#${id}`);
+    }
+  };
+
+  const handleCampusAiNav = (e) => {
+    if (e) e.preventDefault();
+    setMobileMenuOpen(false);
+    setActiveSection('ai-assistant');
+    if (onOpenAiAgent) {
+      onOpenAiAgent();
+    } else {
+      const el = document.getElementById('ai-assistant');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.history.pushState(null, '', '#ai-assistant');
+        setTimeout(() => {
+          const input = document.getElementById('campus-ai-input');
+          if (input) input.focus();
+        }, 450);
+      } else {
+        window.location.href = '/#ai-assistant';
+      }
     }
   };
 
@@ -105,11 +126,13 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
             );
           })}
           <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onOpenAiAgent();
-            }}
-            className="text-primary hover:text-primary-fixed border border-primary/30 bg-primary/10 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all hover:bg-primary/20"
+            onClick={handleCampusAiNav}
+            className={`px-3.5 py-1.5 rounded-full flex items-center gap-1.5 font-sans text-xs font-bold uppercase tracking-[0.1em] transition-all ${
+              activeSection === 'ai-assistant'
+                ? 'text-white bg-primary shadow-sm border border-primary'
+                : 'text-primary hover:text-primary-fixed border border-primary/30 bg-primary/10 hover:bg-primary/20'
+            }`}
+            title="Navigate to Campus AI Section"
           >
             <span className="material-symbols-outlined text-sm">smart_toy</span>
             Campus AI
