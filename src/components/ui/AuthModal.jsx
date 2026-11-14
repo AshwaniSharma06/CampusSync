@@ -3,7 +3,6 @@ import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/apiService';
 import { accountStore } from '../../services/accountStore';
 import CampusSyncLogo from './CampusSyncLogo';
-import authBg from '../../assets/auth-bg.jpg';
 
 // Official Academic Departments & Branches from ecajmer.ac.in
 const ECA_BRANCHES = [
@@ -291,34 +290,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-300 overflow-y-auto">
-      {/* 50% Blurred Campus Courtyard Background Layer */}
-      <div 
-        className="fixed inset-0 -z-10 overflow-hidden cursor-pointer"
-        onClick={onClose}
-        title="Click to close"
-      >
-        <img
-          src={authBg}
-          alt="Engineering College Ajmer Campus Courtyard"
-          className="w-full h-full object-cover object-center"
-          style={{
-            filter: 'blur(16px)',
-            transform: 'scale(1.08)',
-          }}
-        />
-        {/* Soft Ambient Overlay for Optimal Legibility and Contrast */}
-        <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-[3px]"></div>
-      </div>
-
-      <div className="relative w-full max-w-xl my-auto bg-white/98 backdrop-blur-md rounded-[24px] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.45)] border border-white/80 overflow-hidden font-sans z-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+      <div className="relative w-full max-w-xl my-auto bg-white rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden font-sans">
         {/* Top Decorative Gradient Accent Bar */}
         <div className="w-full h-1 bg-gradient-to-r from-teal-400 via-teal-500 to-cyan-400"></div>
 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100/90 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors shadow-sm cursor-pointer"
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors shadow-sm cursor-pointer"
           title="Close dialog"
         >
           <span className="material-symbols-outlined text-base">close</span>
