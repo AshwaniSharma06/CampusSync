@@ -216,7 +216,7 @@ export default function CommunityPostCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Avatar Initials */}
-          <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#71d8c8]/25 via-[#bac3ff]/20 to-[#04132a] border border-[#71d8c8]/40 flex items-center justify-center font-bold text-xs text-[#71d8c8] shadow-inner shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#71d8c8]/25 via-[#bac3ff]/20 to-[#04132a] border border-[#71d8c8]/40 flex items-center justify-center font-bold text-xs text-[#71d8c8] shadow-inner shrink-0">
             {post.author_initials || 'CS'}
           </div>
 
@@ -418,7 +418,7 @@ export default function CommunityPostCard({
                     <div
                       className={`absolute top-0 bottom-0 left-0 transition-all duration-700 ${
                         isVotedByMe
-                          ? 'bg-linear-to-r from-[#71d8c8]/30 to-[#bac3ff]/30 border-r-2 border-[#71d8c8]'
+                          ? 'bg-gradient-to-r from-[#71d8c8]/30 to-[#bac3ff]/30 border-r-2 border-[#71d8c8]'
                           : 'bg-slate-800/50'
                       }`}
                       style={{ width: `${Math.max(opt.percentage, 2)}%` }}

@@ -194,7 +194,7 @@ export default function CommunityPostComposer({ currentUser, onPostCreated, onRe
       {/* Header with Author identity */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-800/80 mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#71d8c8]/20 via-[#bac3ff]/20 to-[#04132a] border border-[#71d8c8]/30 flex items-center justify-center font-bold text-xs text-[#71d8c8] shadow-inner">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#71d8c8]/20 via-[#bac3ff]/20 to-[#04132a] border border-[#71d8c8]/30 flex items-center justify-center font-bold text-xs text-[#71d8c8] shadow-inner">
             {userInitials}
           </div>
           <div>
@@ -524,10 +524,10 @@ export default function CommunityPostComposer({ currentUser, onPostCreated, onRe
               <button
                 type="submit"
                 disabled={isSubmitting || isUploading || !content.trim() || content.trim().length < 3}
-                className={`px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                className={`px-5 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all ${
                   isSubmitting || isUploading || !content.trim() || content.trim().length < 3
-                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                    : 'bg-linear-to-r from-[#71d8c8] to-[#bac3ff] text-[#04132a] hover:opacity-95 shadow-md shadow-[#71d8c8]/20 cursor-pointer active:scale-98'
+                    ? 'bg-slate-800/80 text-slate-500 border border-slate-700/50 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#71d8c8] to-[#bac3ff] text-[#04132a] hover:opacity-95 shadow-md shadow-[#71d8c8]/25 cursor-pointer active:scale-98'
                 }`}
               >
                 {isSubmitting ? (
@@ -537,7 +537,7 @@ export default function CommunityPostComposer({ currentUser, onPostCreated, onRe
                   </>
                 ) : (
                   <>
-                    <span className="material-symbols-outlined text-sm">send</span>
+                    <span className="material-symbols-outlined text-sm font-bold">send</span>
                     <span>Publish Post</span>
                   </>
                 )}
@@ -551,7 +551,7 @@ export default function CommunityPostComposer({ currentUser, onPostCreated, onRe
           <div className="p-4 rounded-xl bg-[#04132a] border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-linear-to-br from-[#71d8c8]/20 via-[#bac3ff]/20 to-[#04132a] border border-[#71d8c8]/30 flex items-center justify-center font-bold text-xs text-[#71d8c8]">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#71d8c8]/20 via-[#bac3ff]/20 to-[#04132a] border border-[#71d8c8]/30 flex items-center justify-center font-bold text-xs text-[#71d8c8]">
                   {userInitials}
                 </div>
                 <div>
@@ -620,7 +620,7 @@ export default function CommunityPostComposer({ currentUser, onPostCreated, onRe
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !content.trim() || content.trim().length < 3}
-              className="px-5 py-1.5 rounded-xl bg-linear-to-r from-[#71d8c8] to-[#bac3ff] text-[#04132a] text-xs font-bold shadow-md cursor-pointer"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#71d8c8] to-[#bac3ff] text-[#04132a] text-xs font-extrabold shadow-md hover:opacity-95 cursor-pointer active:scale-98"
             >
               Looks Great, Publish!
             </button>

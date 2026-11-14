@@ -59,7 +59,7 @@ export default function CommunityFeed({ currentUser, onActionNotification, onReq
   return (
     <section id="community" className="py-16 md:py-24 bg-[#04132a] text-slate-100 relative overflow-hidden">
       {/* Background glow effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-linear-to-b from-[#71d8c8]/10 via-[#bac3ff]/5 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-[#71d8c8]/10 via-[#bac3ff]/5 to-transparent blur-3xl pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
@@ -69,7 +69,7 @@ export default function CommunityFeed({ currentUser, onActionNotification, onReq
             <span>Campus Community Square</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
-            Connect, Collaborate & <span className="text-transparent bg-clip-text bg-linear-to-r from-[#71d8c8] via-[#bac3ff] to-[#e6c277]">Grow Together</span>
+            Connect, Collaborate & <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#71d8c8] via-[#bac3ff] to-[#e6c277]">Grow Together</span>
           </h2>
           <p className="text-sm md:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
             The verified peer discussion hub for Govt. Engineering College Ajmer students. Share research notes, collaborate on hackathons, ask questions, and cast your votes.
