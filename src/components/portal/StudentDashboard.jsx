@@ -78,6 +78,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         assignsRes,
         notifsRes,
         resourcesRes,
+        // eventsRes preserved for Semester 8 (Major Project Phase 2)
         eventsRes,
         communityRes,
         profileRes,
@@ -90,7 +91,8 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         apiService.getNotifications(),
         apiService.getResources(),
         // apiService.getClubs() temporarily disabled for Semester 7 (Reintroduced in Sem 8)
-        apiService.getEvents(),
+        // apiService.getEvents() temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Major Project Phase 2)
+        Promise.resolve([]),
         apiService.getCommunityPosts(),
         apiService.getStudentProfile(),
       ]);
@@ -287,8 +289,9 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     { id: 'academics', label: 'Academics', icon: 'school', category: 'Academic Core', badge: `${courses.length} Courses` },
     { id: 'resources', label: 'Study Resources', icon: 'folder_open', category: 'Academic Core', badge: `${resources.length} Docs` },
     { id: 'community', label: 'Community', icon: 'forum', category: 'Campus Life', badge: 'Active' },
-    // Clubs & SAC temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Phase 2)
-    { id: 'events', label: 'Events', icon: 'event', category: 'Campus Life', badge: `${events.length} Upcoming` },
+    // Clubs & SAC temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Major Project Phase 2)
+    // Events temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Major Project Phase 2)
+    // { id: 'events', label: 'Events', icon: 'event', category: 'Campus Life', badge: `${events.length} Upcoming` },
     { id: 'ai', label: 'CampusSync AI', icon: 'smart_toy', category: 'Intelligence', badge: 'Verified RAG', badgeColor: 'bg-[#71d8c8]/20 text-[#71d8c8] border border-[#71d8c8]/40' },
   ];
 
@@ -1200,100 +1203,58 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 </div>
               </div>
 
-              {/* 4. Lower Highlights (Upcoming Events & Community Discussions) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Upcoming Events */}
-                <div className="bg-[#0d1b33]/90 rounded-2xl p-6 border border-slate-800 shadow-md flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-                      <div>
-                        <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[#e6c277]">event</span>
-                          <span>Upcoming Events</span>
-                        </h3>
-                        <p className="text-xs text-slate-400 font-medium">Campus fests & registrations</p>
-                      </div>
-                      <span className="text-xs bg-[#e6c277]/15 text-[#e6c277] border border-[#e6c277]/30 px-2 py-0.5 rounded-full font-bold">
-                        {events.length} Scheduled
-                      </span>
+              {/* 4. Lower Highlights (Campus Community Discussions - Events preserved for Semester 8 Major Project Phase 2) */}
+              <div className="bg-[#0d1b33]/90 rounded-2xl p-6 border border-slate-800 shadow-md flex flex-col justify-between">
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-3 border-b border-slate-800 gap-2">
+                    <div>
+                      <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[#71d8c8]">forum</span>
+                        <span>Campus Community Discussions</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 font-medium">Recent peer questions, notes, and cohort polls</p>
                     </div>
-
-                    {events.length === 0 ? (
-                      <div className="text-center py-6 px-3 rounded-xl border border-dashed border-slate-800">
-                        <span className="material-symbols-outlined text-3xl text-slate-600 mb-1">event_busy</span>
-                        <p className="text-xs font-semibold text-slate-400">No scheduled events</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Upcoming campus hackathons will appear here.</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2.5">
-                        {events.slice(0, 3).map((ev, idx) => (
-                          <div key={ev.id || idx} className="p-3 rounded-xl bg-[#081528] border border-slate-800">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-bold text-white">{ev.title}</h4>
-                              <span className="text-[10px] font-bold text-[#e6c277] bg-[#e6c277]/20 px-2 py-0.5 rounded">
-                                {ev.event_type || 'Event'}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-400 font-medium mt-1">
-                              {ev.start_time ? new Date(ev.start_time).toLocaleDateString() : 'Upcoming'} • {ev.location || 'Campus'}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <span className="text-xs bg-[#71d8c8]/15 text-[#71d8c8] border border-[#71d8c8]/30 px-3 py-1 rounded-full font-bold self-start sm:self-auto">
+                      {communityPosts.length} Active
+                    </span>
                   </div>
 
-                  <button
-                    onClick={() => setActiveTab('events')}
-                    className="mt-4 w-full bg-slate-800/80 hover:bg-slate-700/80 text-white font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-colors flex items-center justify-center gap-1"
-                  >
-                    <span>View Events Calendar</span>
-                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                  </button>
-                </div>
-
-                {/* Recent Community Activity */}
-                <div className="bg-[#0d1b33]/90 rounded-2xl p-6 border border-slate-800 shadow-md flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-                      <div>
-                        <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[#bac3ff]">forum</span>
-                          <span>Peer Community</span>
-                        </h3>
-                        <p className="text-xs text-slate-400 font-medium">Student discussion square</p>
-                      </div>
-                      <span className="text-xs bg-[#bac3ff]/15 text-[#bac3ff] border border-[#bac3ff]/30 px-2 py-0.5 rounded-full font-bold">
-                        {communityPosts.length} Threads
-                      </span>
+                  {communityPosts.length === 0 ? (
+                    <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-800">
+                      <span className="material-symbols-outlined text-4xl text-slate-600 mb-1">forum</span>
+                      <p className="text-xs font-semibold text-slate-400">No discussions posted yet</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Start a new thread or ask a question in Campus Community.</p>
                     </div>
-
-                    {communityPosts.length === 0 ? (
-                      <div className="text-center py-6 px-3 rounded-xl border border-dashed border-slate-800">
-                        <span className="material-symbols-outlined text-3xl text-slate-600 mb-1">forum</span>
-                        <p className="text-xs font-semibold text-slate-400">No discussions posted yet</p>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Start a new thread in the Campus Community.</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2.5">
-                        {communityPosts.slice(0, 3).map((post, idx) => (
-                          <div key={post.id || idx} className="p-3 rounded-xl bg-[#081528] border border-slate-800">
-                            <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
-                              <span className="font-bold text-white">{post.author_name || 'ECA Student'}</span>
-                              <span>{post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Recent'}</span>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                      {communityPosts.slice(0, 3).map((post, idx) => (
+                        <div key={post.id || idx} className="p-4 rounded-xl bg-[#081528] border border-slate-800 flex flex-col justify-between hover:border-[#71d8c8]/40 transition-colors">
+                          <div>
+                            <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium mb-1.5">
+                              <span className="font-bold text-white truncate max-w-[140px]">{post.author_name || 'ECA Student'}</span>
+                              <span className="shrink-0">{post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Recent'}</span>
                             </div>
-                            <p className="text-xs text-slate-300 font-medium mt-1 line-clamp-2">
+                            <p className="text-xs text-slate-300 font-medium line-clamp-3 leading-relaxed">
                               {post.content}
                             </p>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                          {post.tags && post.tags.length > 0 && (
+                            <div className="flex gap-1 flex-wrap mt-3 pt-2 border-t border-slate-800/60">
+                              {post.tags.slice(0, 2).map((t) => (
+                                <span key={t} className="text-[10px] text-[#71d8c8] font-mono">#{t}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
+                <div className="mt-4 flex justify-end">
                   <button
                     onClick={() => setActiveTab('community')}
-                    className="mt-4 w-full bg-slate-800/80 hover:bg-slate-700/80 text-white font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-colors flex items-center justify-center gap-1"
+                    className="w-full sm:w-auto px-6 bg-slate-800/80 hover:bg-[#71d8c8] hover:text-[#04132a] text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <span>Open Campus Community</span>
                     <span className="material-symbols-outlined text-sm">arrow_forward</span>
@@ -1429,10 +1390,9 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
           {/* TAB: CLUBS & SAC temporarily disabled for Semester 7 (Preserved for Semester 8 - Project Phase 2) */}
 
-          {/* ============================================================== */}
-          {/* TAB: EVENTS                                                    */}
-          {/* ============================================================== */}
-          {activeTab === 'events' && (
+          {/* TAB: EVENTS temporarily disabled for Semester 7 (Preserved for Semester 8 - Major Project Phase 2) */}
+          {/*
+          activeTab === 'events' && (
             <div className="bg-[#0d1b33]/90 rounded-2xl p-6 md:p-8 border border-slate-800 shadow-xl animate-in fade-in duration-200 space-y-6">
               <div className="flex justify-between items-center pb-4 border-b border-slate-800">
                 <div>
@@ -1485,7 +1445,8 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 </div>
               )}
             </div>
-          )}
+          )
+          */}
 
           {/* ============================================================== */}
           {/* TAB: STUDY RESOURCES                                           */}

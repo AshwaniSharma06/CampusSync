@@ -30,14 +30,14 @@ const AUTHENTIC_FALLBACK_NOTICES = [
   },
   {
     id: 3,
-    title: 'Technotsav 2026 Annual Technical Fest Event Registration',
-    notice_type: 'Events',
+    title: 'BTU B.Tech Semester Examination Form Guidelines & Fee Schedule',
+    notice_type: 'Examination',
     formatted_date: '02 Nov 2026',
     is_important: false,
-    has_pdf: false,
-    action_url: 'https://www.ecajmer.ac.in/events/technotsav-2026',
-    action_label: 'Open Official College Notice Page',
-    summary: 'Annual technical fest registrations open for robotics, web hackathons, and design challenges.'
+    has_pdf: true,
+    action_url: 'https://www.ecajmer.ac.in/academics/examinations',
+    action_label: 'Open Official Examination Circular',
+    summary: 'Guidelines for semester examination forms, verification portal links, and BTU fee schedules.'
   },
   {
     id: 2,

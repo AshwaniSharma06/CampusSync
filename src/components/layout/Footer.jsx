@@ -68,27 +68,21 @@ export default function Footer({ onActionNotification }) {
             </a>
           </div>
           <div className="flex flex-col gap-3">
-            <h5 className="text-white font-bold text-xs uppercase tracking-[0.12em] mb-2">Student Life &amp; Events</h5>
-            <a
-              onClick={(e) => handleLinkClick(e, 'Technotsav Tech Fest')}
-              className="text-on-surface-variant hover:text-primary transition-colors text-sm"
-              href="#events"
-            >
-              Technotsav Tech Fest
-            </a>
-            <a
-              onClick={(e) => handleLinkClick(e, 'Tarangini Cultural Fest')}
-              className="text-on-surface-variant hover:text-primary transition-colors text-sm"
-              href="#events"
-            >
-              Tarangini Cultural Fest
-            </a>
+            <h5 className="text-white font-bold text-xs uppercase tracking-[0.12em] mb-2">Student Life &amp; Community</h5>
+            {/* Events links temporarily suspended for Semester 7 (Preserved for Semester 8 - Major Project Phase 2) */}
             <a
               onClick={(e) => handleLinkClick(e, 'Campus Community')}
               className="text-on-surface-variant hover:text-primary transition-colors text-sm"
               href="#community"
             >
               Campus Community
+            </a>
+            <a
+              onClick={(e) => handleLinkClick(e, 'Curated Notices')}
+              className="text-on-surface-variant hover:text-primary transition-colors text-sm"
+              href="#curated"
+            >
+              Curated Academic Feed
             </a>
           </div>
         </div>

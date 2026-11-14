@@ -4,6 +4,7 @@ from datetime import datetime
 from backend.db.session import Base
 
 class Event(Base):
+    """Campus Events - Preserved for Semester 8 (Major Project Phase 2)"""
     __tablename__ = "events"
     
     id = Column(Integer, primary_key=True, index=True)

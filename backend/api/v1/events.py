@@ -1,3 +1,11 @@
+"""
+CampusSync Events & Clubs API Router
+====================================
+Feature Status: Temporarily Suspended for Semester 7
+Reintroduction: Semester 8 (Major Project Phase 2)
+Preservation: All database schemas, models, and endpoints remain 100% intact.
+"""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import Any, Optional, List, Dict

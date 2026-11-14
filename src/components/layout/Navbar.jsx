@@ -9,7 +9,8 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
   const navLinks = [
     { id: 'home', label: 'Home' },
     { id: 'community', label: 'Community' },
-    { id: 'events', label: 'Events' },
+    // Events temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Major Project Phase 2)
+    // { id: 'events', label: 'Events' },
     { id: 'curated', label: 'Curated' },
   ];
 
@@ -17,7 +18,7 @@ export default function Navbar({ onOpenSignIn, onOpenSignUp, onOpenAiAgent, curr
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
 
-      const sectionIds = ['home', 'community', 'events', 'curated'];
+      const sectionIds = ['home', 'community', 'curated'];
       const scrollPosition = window.scrollY + 140;
 
       for (let i = sectionIds.length - 1; i >= 0; i--) {

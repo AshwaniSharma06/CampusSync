@@ -257,14 +257,21 @@ export const apiService = {
     return apiClient('/examinations/');
   },
 
-  // Events
+  // Feature Flags - Preserved for Semester 8 (Major Project Phase 2)
+  EVENTS_ENABLED: false,
+
+  // Events - Temporarily suspended for Semester 7 (Reintroduced in Semester 8 - Major Project Phase 2)
   getEvents: async () => {
-    return apiClient('/events/');
+    // Feature flag suspended for Semester 7
+    return [];
+    // Preserved for Semester 8 - Major Project Phase 2:
+    // return apiClient('/events/');
   },
 
-  // Clubs
+  // Clubs - Preserved for Semester 8 (Major Project Phase 2)
   getClubs: async () => {
-    return apiClient('/events/clubs');
+    return [];
+    // return apiClient('/events/clubs');
   },
 
   // Academic Resources & Study Materials (Phase 4.1)
