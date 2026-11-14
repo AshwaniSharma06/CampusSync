@@ -75,13 +75,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
     if (isOpen) {
       setMode(initialMode || 'login');
       setError('');
-      if (initialMode === 'login' && !formData.email) {
-        setFormData(prev => ({
-          ...prev,
-          email: 'student@example.com',
-          password: 'password123',
-        }));
-      }
     }
   }, [isOpen, initialMode]);
 
@@ -494,7 +487,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       className="w-full bg-slate-50/50 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
-                      placeholder="Ashwani Sharma"
+                      placeholder="Enter full name"
                     />
                   </div>
                 </div>

@@ -78,7 +78,7 @@ export default function App() {
     if (jwtToken && currentUser) {
       apiService.getStudentProfile().then(profile => {
         const updated = {
-          name: profile.full_name || currentUser.displayName || 'Ashwani Sharma',
+          name: profile.full_name || currentUser.displayName || 'Student',
           email: profile.email,
           department: profile.department || 'Computer Engineering (CSE)',
           studentId: profile.student_id || '22ECA8941',

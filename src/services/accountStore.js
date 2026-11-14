@@ -14,7 +14,7 @@ const TOKEN_KEY = 'campussync_token';
 // Seed default official accounts
 const DEFAULT_ACCOUNTS = {
   'student@example.com': {
-    name: 'Ashwani Sharma',
+    name: 'Student User',
     email: 'student@example.com',
     password: 'password123',
     studentId: '22ECA081',
@@ -26,7 +26,7 @@ const DEFAULT_ACCOUNTS = {
     enrollment_year: 2022,
   },
   'student@ecajmer.ac.in': {
-    name: 'Ashwani Sharma',
+    name: 'Student User',
     email: 'student@ecajmer.ac.in',
     password: 'password123',
     studentId: '22ECA081',
