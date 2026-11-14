@@ -26,6 +26,8 @@ from backend.models.academic import (
 from backend.services.source_registry import OfficialSource, get_all_active_sources
 from backend.services.document_extractor import DocumentExtractor
 from backend.services.classifier import DocumentClassifier
+from backend.services.url_validator import clean_and_encode_url
+from backend.services.date_normalizer import DateNormalizer
 
 class IngestionPipeline:
     """
@@ -104,6 +106,15 @@ class IngestionPipeline:
                         doc_url = doc_path
                     else:
                         doc_url = f"{source.base_url}/{doc_path.lstrip('/')}"
+                    doc_url = clean_and_encode_url(doc_url)
+
+                # Standardize publication date using DateNormalizer
+                norm_date, _ = DateNormalizer.parse_publication_date(
+                    raw_date_str=pub_date,
+                    title=title,
+                    doc_url=doc_url,
+                    content=content_field
+                )
 
                 # Extract content
                 cleaned_text = content_field

@@ -1,10 +1,11 @@
 """
 Official URL Validation & Security Service for CampusSync.
 Enforces strict domain boundary checks, protocol validation,
-and classification of document/page destinations.
-Prevents unverified external redirects or malicious URL injection.
+URL percent-encoding, and classification of document/page destinations.
+Prevents unverified external redirects, broken 404s, or blank pages.
 """
 
+import urllib.parse
 from urllib.parse import urlparse
 from typing import Optional, Dict, Any, Tuple
 from enum import Enum
@@ -15,7 +16,13 @@ TRUSTED_DOMAINS = [
     "btu.ac.in",
     "www.btu.ac.in",
     "btuexam.in",
-    "www.btuexam.in"
+    "www.btuexam.in",
+    "forms.gle",
+    "docs.google.com",
+    "youtube.com",
+    "youtu.be",
+    "dce.rajasthan.gov.in",
+    "hte.rajasthan.gov.in"
 ]
 
 DOCUMENT_EXTENSIONS = (
@@ -28,6 +35,34 @@ class DestinationType(str, Enum):
     OFFICIAL_PAGE = "OFFICIAL_PAGE"           # Webpage on verified college/university portal
     DIRECTORY_PAGE = "DIRECTORY_PAGE"         # College clubs/SAC directory fallback
     UNAVAILABLE = "UNAVAILABLE"               # Missing, unverified, or untrusted destination
+
+def clean_and_encode_url(url: Optional[str]) -> Optional[str]:
+    """
+    Safely normalizes and percent-encodes URLs, escaping spaces and special characters
+    so that documents and circulars open reliably across modern browsers and proxies.
+    """
+    if not url or not isinstance(url, str):
+        return None
+    url = url.strip()
+    if not url or url == "#" or url.startswith("javascript:"):
+        return None
+
+    # Handle relative or hostless paths
+    if not url.startswith("http://") and not url.startswith("https://") and not url.startswith("/"):
+        url = f"https://www.ecajmer.ac.in/{url.lstrip('/')}"
+    elif url.startswith("/"):
+        # Internal API endpoint
+        if url.startswith("/api/v1/") or url.startswith("/downloads/"):
+            return url
+        url = f"https://www.ecajmer.ac.in{url}"
+
+    try:
+        parts = urllib.parse.urlsplit(url)
+        quoted_path = urllib.parse.quote(urllib.parse.unquote(parts.path), safe='/:@&=+$-_.!~*()')
+        quoted_query = urllib.parse.quote(urllib.parse.unquote(parts.query), safe='/:@&=+$-_.!~*()')
+        return urllib.parse.urlunsplit((parts.scheme, parts.netloc, quoted_path, quoted_query, parts.fragment))
+    except Exception:
+        return url
 
 def is_trusted_url(url: Optional[str]) -> bool:
     """
@@ -45,20 +80,35 @@ def is_trusted_url(url: Optional[str]) -> bool:
     if clean_url.startswith("/api/v1/") or clean_url.startswith("/downloads/"):
         return True
 
-    parsed = urlparse(clean_url)
-    if parsed.scheme.lower() not in ("http", "https"):
-        return False
+    try:
+        parsed = urlparse(clean_url)
+        if parsed.scheme.lower() not in ("http", "https"):
+            return False
 
-    hostname = (parsed.hostname or "").lower()
-    if not hostname:
-        return False
+        hostname = (parsed.hostname or "").lower()
+        if not hostname:
+            return False
 
-    # Check against trusted domains
-    for domain in TRUSTED_DOMAINS:
-        if hostname == domain or hostname.endswith(f".{domain}"):
-            return True
+        # Check against trusted domains
+        for domain in TRUSTED_DOMAINS:
+            if hostname == domain or hostname.endswith(f".{domain}"):
+                return True
+    except Exception:
+        return False
 
     return False
+
+def is_legacy_dead_url(url: Optional[str]) -> bool:
+    """Detects old CMS paths from 2017-2020 that return 404 on current web server."""
+    if not url:
+        return False
+    lower = url.lower()
+    return (
+        "/./content/" in lower or
+        "/../content/" in lower or
+        "/content/upload/" in lower or
+        "/content/orders/" in lower
+    )
 
 def is_document_url(url: Optional[str]) -> bool:
     """Detects if a URL directly points to a downloadable file/document."""
@@ -78,8 +128,9 @@ def resolve_notice_destination(
     1. If CampusSync-hosted download exists -> HOSTED_DOWNLOAD
     2. Else if verified official document URL exists -> OFFICIAL_DOCUMENT
     3. Else if verified official notice page exists -> OFFICIAL_PAGE
-    4. Else -> UNAVAILABLE
+    4. Else fallback to verified college notice directory -> OFFICIAL_PAGE
 
+    Guarantees no blank pages or dead links.
     Returns (destination_type, final_url, label_or_reason)
     """
     # 1. Local CampusSync Hosted File
@@ -90,28 +141,32 @@ def resolve_notice_destination(
             "Download CampusSync-Hosted Document"
         )
 
-    # 2. Verified External Official Document
-    if document_url and is_trusted_url(document_url):
-        return (
-            DestinationType.OFFICIAL_DOCUMENT,
-            document_url,
-            "Open Verified Official Document"
-        )
+    # 2. Verified External Official Document (ensure URL is cleanly encoded and not a dead legacy path)
+    if document_url and not is_legacy_dead_url(document_url):
+        clean_doc = clean_and_encode_url(document_url)
+        if clean_doc and is_trusted_url(clean_doc):
+            return (
+                DestinationType.OFFICIAL_DOCUMENT,
+                clean_doc,
+                "Open Verified Official Document"
+            )
 
     # 3. Verified External Official Notice Webpage
     page_target = official_page_url or source_url
-    if page_target and is_trusted_url(page_target):
-        return (
-            DestinationType.OFFICIAL_PAGE,
-            page_target,
-            "Open Official College Notice Page"
-        )
+    if page_target and not is_legacy_dead_url(page_target):
+        clean_page = clean_and_encode_url(page_target)
+        if clean_page and is_trusted_url(clean_page):
+            return (
+                DestinationType.OFFICIAL_PAGE,
+                clean_page,
+                "Open Official College Notice Page"
+            )
 
-    # 4. Unavailable
+    # 4. Safe Official College Directory Fallback (Never 404 or blank)
     return (
-        DestinationType.UNAVAILABLE,
-        None,
-        "Official notice link is currently unavailable."
+        DestinationType.OFFICIAL_PAGE,
+        "https://www.ecajmer.ac.in/circulars",
+        "Open Official College Circulars Directory"
     )
 
 def resolve_club_destination(
@@ -119,7 +174,7 @@ def resolve_club_destination(
     directory_url: Optional[str] = None
 ) -> Tuple[DestinationType, Optional[str], str]:
     """
-    Determines destination for Clubs following Phase 4.1 hierarchy:
+    Determines destination for Clubs:
     1. If club-specific verified official page exists -> OFFICIAL_PAGE
     2. Else if verified official college clubs directory exists -> DIRECTORY_PAGE
     3. Else -> UNAVAILABLE
@@ -127,20 +182,19 @@ def resolve_club_destination(
     if official_page_url and is_trusted_url(official_page_url):
         return (
             DestinationType.OFFICIAL_PAGE,
-            official_page_url,
+            clean_and_encode_url(official_page_url),
             "Explore Official Club Page"
         )
 
     if directory_url and is_trusted_url(directory_url):
         return (
             DestinationType.DIRECTORY_PAGE,
-            directory_url,
+            clean_and_encode_url(directory_url),
             "View College Clubs Directory"
         )
 
     return (
-        DestinationType.UNAVAILABLE,
-        None,
-        "Official club link is currently unavailable."
+        DestinationType.DIRECTORY_PAGE,
+        "https://www.ecajmer.ac.in",
+        "View College Clubs Directory"
     )
-

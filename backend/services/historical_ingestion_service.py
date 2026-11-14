@@ -36,6 +36,8 @@ from backend.models.academic import (
 from backend.services.document_extractor import DocumentExtractor
 from backend.services.classifier import DocumentClassifier
 from backend.services.vector_service import index_document
+from backend.services.url_validator import clean_and_encode_url
+from backend.services.date_normalizer import DateNormalizer
 
 # SSL context for HTTPS requests
 SSL_CTX = ssl.create_default_context()
@@ -339,6 +341,10 @@ class HistoricalIngestionEngine:
             return
 
         try:
+            # Safely encode document URL to prevent blank/404 page errors
+            if doc_url:
+                doc_url = clean_and_encode_url(doc_url)
+
             # 1. SHA-256 Content Hash
             hash_input = f"{title.strip().lower()}|{sno.strip().lower()}|{pub_date_str}"
             content_hash = hashlib.sha256(hash_input.encode("utf-8")).hexdigest()
@@ -384,16 +390,13 @@ class HistoricalIngestionEngine:
             if scope == ClassificationScope.UNCLASSIFIED.value:
                 stats["unclassified_count"] += 1
 
-            # 4. Parse publication date
-            pub_dt = datetime.utcnow()
-            if pub_date_str:
-                try:
-                    pub_dt = datetime.strptime(pub_date_str[:10], "%Y-%m-%d")
-                except Exception:
-                    try:
-                        pub_dt = datetime.fromisoformat(pub_date_str.replace("Z", "+00:00")).replace(tzinfo=None)
-                    except Exception:
-                        pub_dt = datetime.utcnow()
+            # 4. Standardized publication date parsing with DateNormalizer
+            pub_dt, _ = DateNormalizer.parse_publication_date(
+                raw_date_str=pub_date_str,
+                title=title,
+                doc_url=doc_url,
+                content=content_text
+            )
 
             # 5. Insert into Notice table
             # All items directly scraped from ecajmer.ac.in official API are VERIFIED
