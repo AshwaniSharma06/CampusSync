@@ -96,6 +96,25 @@ export default function App() {
     setIsAuthModalOpen(true);
   };
 
+  const handleCloseAuth = () => {
+    setIsAuthModalOpen(false);
+    const path = location.pathname.toLowerCase();
+    if (path === '/login' || path === '/signin' || path === '/signup' || path === '/register') {
+      navigate('/');
+    }
+  };
+
+  useEffect(() => {
+    const path = location.pathname.toLowerCase();
+    if (path === '/login' || path === '/signin') {
+      setAuthModalMode('login');
+      setIsAuthModalOpen(true);
+    } else if (path === '/signup' || path === '/register') {
+      setAuthModalMode('signup');
+      setIsAuthModalOpen(true);
+    }
+  }, [location.pathname]);
+
   const handleAuthSuccess = (profileData) => {
     setIsAuthModalOpen(false);
     if (profileData) {
@@ -170,6 +189,46 @@ export default function App() {
             } 
           />
           <Route 
+            path="/login" 
+            element={
+              <LandingPage 
+                currentUser={isStudentAuthenticated ? (currentUser || userProfile) : null} 
+                showToast={showToast} 
+                onOpenAuth={handleOpenAuth} 
+              />
+            } 
+          />
+          <Route 
+            path="/signin" 
+            element={
+              <LandingPage 
+                currentUser={isStudentAuthenticated ? (currentUser || userProfile) : null} 
+                showToast={showToast} 
+                onOpenAuth={handleOpenAuth} 
+              />
+            } 
+          />
+          <Route 
+            path="/signup" 
+            element={
+              <LandingPage 
+                currentUser={isStudentAuthenticated ? (currentUser || userProfile) : null} 
+                showToast={showToast} 
+                onOpenAuth={handleOpenAuth} 
+              />
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              <LandingPage 
+                currentUser={isStudentAuthenticated ? (currentUser || userProfile) : null} 
+                showToast={showToast} 
+                onOpenAuth={handleOpenAuth} 
+              />
+            } 
+          />
+          <Route 
             path="/dashboard" 
             element={
               <ProtectedRoute user={isStudentAuthenticated ? effectiveUser : null} redirectPath="/">
@@ -192,7 +251,7 @@ export default function App() {
       <AuthModal
         isOpen={isAuthModalOpen}
         initialMode={authModalMode}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={handleCloseAuth}
         onAuthSuccess={handleAuthSuccess}
       />
     </div>
