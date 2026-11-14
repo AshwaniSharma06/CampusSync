@@ -489,32 +489,11 @@ export default function CuratedForYou({ currentUser, onActionNotification, onOpe
                   className="bg-[#081528] rounded-2xl border border-slate-800/90 hover:border-[#71d8c8]/40 p-5 shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between group hover:-translate-y-0.5"
                 >
                   <div className="space-y-3">
-                    {/* Top row: Category Badge & Save Button */}
+                    {/* Top row: Category Badge */}
                     <div className="flex items-center justify-between gap-2">
                       <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${badgeStyle}`}>
                         {item.category_label}
                       </span>
-
-                      <div className="flex items-center gap-1">
-                        {item.has_pdf && (
-                          <span className="text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-md flex items-center gap-1">
-                            <span className="material-symbols-outlined text-xs">picture_as_pdf</span>
-                            <span>PDF</span>
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          onClick={(e) => handleToggleSave(item, e)}
-                          className={`p-1.5 rounded-lg transition-colors ${
-                            isSaved ? 'text-[#71d8c8] bg-[#71d8c8]/15' : 'text-slate-500 hover:text-slate-300'
-                          }`}
-                          title={isSaved ? 'Remove from saved' : 'Save notice to profile'}
-                        >
-                          <span className={`material-symbols-outlined text-base ${isSaved ? 'font-fill' : ''}`}>
-                            {isSaved ? 'bookmark' : 'bookmark_border'}
-                          </span>
-                        </button>
-                      </div>
                     </div>
 
                     {/* Notice Title */}
