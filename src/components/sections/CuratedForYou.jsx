@@ -25,7 +25,9 @@ const AUTHENTIC_VERIFIED_FEED = {
       is_important: true,
       has_pdf: true,
       published_date: '2026-11-03T10:00:00Z',
+      formatted_date: '03 Nov 2026',
       target_url: 'https://www.ecajmer.ac.in/uploads/circulars/1793693243432-DOC-20261103-WA0012.pdf',
+      action_url: 'https://www.ecajmer.ac.in/uploads/circulars/1793693243432-DOC-20261103-WA0012.pdf',
       action_label: 'Open Verified Official Document',
       is_saved: false,
     },
@@ -40,7 +42,9 @@ const AUTHENTIC_VERIFIED_FEED = {
       is_important: true,
       has_pdf: true,
       published_date: '2026-11-03T09:30:00Z',
+      formatted_date: '03 Nov 2026',
       target_url: 'https://www.ecajmer.ac.in/uploads/circulars/1793247267504-BTU%20-%20Circular%20for%20B.Tech.%20III%20Sem%20(Main%20and%20Back%20Exam)%20Session%202026-27%20(Last%20date%2001.11.2026%20with%20single%20fee).pdf',
+      action_url: 'https://www.ecajmer.ac.in/uploads/circulars/1793247267504-BTU%20-%20Circular%20for%20B.Tech.%20III%20Sem%20(Main%20and%20Back%20Exam)%20Session%202026-27%20(Last%20date%2001.11.2026%20with%20single%20fee).pdf',
       action_label: 'Open Verified Official Document',
       is_saved: false,
     },
@@ -55,7 +59,9 @@ const AUTHENTIC_VERIFIED_FEED = {
       is_important: true,
       has_pdf: true,
       published_date: '2026-11-02T14:00:00Z',
+      formatted_date: '02 Nov 2026',
       target_url: 'https://www.ecajmer.ac.in/announcements',
+      action_url: 'https://www.ecajmer.ac.in/announcements',
       action_label: 'View Hackathon Circular',
       is_saved: false,
     },
@@ -70,7 +76,9 @@ const AUTHENTIC_VERIFIED_FEED = {
       is_important: false,
       has_pdf: true,
       published_date: '2026-11-02T11:00:00Z',
+      formatted_date: '02 Nov 2026',
       target_url: 'https://www.ecajmer.ac.in/academics/examinations',
+      action_url: 'https://www.ecajmer.ac.in/academics/examinations',
       action_label: 'Open Official Examination Circular',
       is_saved: false,
     },
@@ -85,7 +93,9 @@ const AUTHENTIC_VERIFIED_FEED = {
       is_important: false,
       has_pdf: false,
       published_date: '2026-11-01T15:00:00Z',
+      formatted_date: '01 Nov 2026',
       target_url: 'https://www.ecajmer.ac.in/academics/cse',
+      action_url: 'https://www.ecajmer.ac.in/academics/cse',
       action_label: 'View Workshop Details',
       is_saved: false,
     },
@@ -100,7 +110,9 @@ const AUTHENTIC_VERIFIED_FEED = {
       is_important: false,
       has_pdf: false,
       published_date: '2026-11-01T09:00:00Z',
+      formatted_date: '01 Nov 2026',
       target_url: 'https://www.ecajmer.ac.in/facilities/library',
+      action_url: 'https://www.ecajmer.ac.in/facilities/library',
       action_label: 'Open Official College Notice Page',
       is_saved: false,
     },
@@ -223,16 +235,21 @@ export default function CuratedForYou({ currentUser, onActionNotification, onOpe
   };
 
   const handleCardClick = (item) => {
-    const targetUrl = item.action_url || item.document_url || item.source_url;
-    if (targetUrl) {
-      openOfficialLink(
-        targetUrl,
-        onActionNotification,
-        'Official notice document link is currently unavailable.'
-      );
-    } else {
-      onActionNotification?.(`Viewing verified notice: ${item.title}`);
-    }
+    if (!item) return;
+    const targetUrl =
+      item.action_url ||
+      item.target_url ||
+      item.document_url ||
+      item.download_url ||
+      item.source_url ||
+      item.official_page_url ||
+      'https://www.ecajmer.ac.in';
+
+    openOfficialLink(
+      targetUrl,
+      onActionNotification,
+      'Opening Govt. Engineering College Ajmer official portal...'
+    );
   };
 
   const isAuthenticated = feedData?.is_authenticated || Boolean(currentUser);
@@ -526,12 +543,20 @@ export default function CuratedForYou({ currentUser, onActionNotification, onOpe
                       <span className="truncate">{item.formatted_date}</span>
                     </div>
 
-                    <span className="text-[#71d8c8] font-bold text-xs flex items-center gap-1 group-hover:underline shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCardClick(item);
+                      }}
+                      className="text-[#71d8c8] hover:text-[#95e4d7] font-bold text-xs flex items-center gap-1 group-hover:underline shrink-0 bg-transparent border-0 cursor-pointer p-0"
+                      title="Open official notice in new tab"
+                    >
                       <span>{item.action_label || 'View Notice'}</span>
                       <span className="material-symbols-outlined text-xs group-hover:translate-x-0.5 transition-transform">
                         arrow_forward
                       </span>
-                    </span>
+                    </button>
                   </div>
                 </div>
               );

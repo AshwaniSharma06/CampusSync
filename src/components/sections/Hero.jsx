@@ -122,10 +122,14 @@ export default function Hero({ onEnter }) {
 
   const handleCardClick = (notice) => {
     if (!notice) return;
-    const targetUrl = notice.action_url || notice.document_url || notice.source_url;
-    if (targetUrl) {
-      window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    }
+    const targetUrl =
+      notice.action_url ||
+      notice.target_url ||
+      notice.document_url ||
+      notice.download_url ||
+      notice.source_url ||
+      'https://www.ecajmer.ac.in';
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (

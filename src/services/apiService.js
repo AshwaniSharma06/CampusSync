@@ -481,17 +481,20 @@ export const apiService = {
 export const openOfficialLink = (
   targetUrl,
   onActionNotification,
-  unavailableFallback = 'Official link is currently unavailable.'
+  unavailableFallback = 'Opening Govt. Engineering College Ajmer official portal...'
 ) => {
+  // If targetUrl is missing, redirect to ECA official portal
   if (!targetUrl || targetUrl === '#' || targetUrl === 'javascript:void(0)') {
-    if (onActionNotification) onActionNotification(`⚠️ ${unavailableFallback}`);
-    return false;
+    const fallbackUrl = 'https://www.ecajmer.ac.in';
+    window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+    if (onActionNotification) onActionNotification('Opening Govt. Engineering College Ajmer official portal...');
+    return true;
   }
 
   // Handle local CampusSync hosted file download
   if (targetUrl.startsWith('/api/v1/')) {
     const fullDownloadUrl = `${API_BASE_URL.replace(/\/api\/v1\/?$/, '')}${targetUrl}`;
-    if (onActionNotification) onActionNotification('Downloading official file from CampusSync server...');
+    if (onActionNotification) onActionNotification('Opening official document from CampusSync...');
     const link = document.createElement('a');
     link.href = fullDownloadUrl;
     link.target = '_blank';
@@ -502,29 +505,23 @@ export const openOfficialLink = (
     return true;
   }
 
-  // Handle external HTTP/HTTPS official portals
+  // Handle external HTTP/HTTPS official portals and PDFs
   try {
-    const urlObj = new URL(targetUrl);
-    if (!['http:', 'https:'].includes(urlObj.protocol)) {
-      if (onActionNotification) onActionNotification('⚠️ Invalid or untrusted link scheme.');
-      return false;
+    let cleanUrl = targetUrl.trim();
+    if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+      cleanUrl = `https://${cleanUrl}`;
     }
 
-    const trustedDomains = ['ecajmer.ac.in', 'btu.ac.in', 'btuexam.in'];
-    const isDomainTrusted = trustedDomains.some(
-      (d) => urlObj.hostname === d || urlObj.hostname.endsWith(`.${d}`)
-    );
-
-    if (!isDomainTrusted) {
-      if (onActionNotification) onActionNotification('⚠️ Unverified external link blocked for security.');
-      return false;
+    const urlObj = new URL(cleanUrl);
+    if (onActionNotification) {
+      onActionNotification(`Opening official circular (${urlObj.hostname})...`);
     }
-
-    if (onActionNotification) onActionNotification(`Opening official page (${urlObj.hostname})...`);
-    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    window.open(cleanUrl, '_blank', 'noopener,noreferrer');
     return true;
-  } catch (_) {
-    if (onActionNotification) onActionNotification(`⚠️ ${unavailableFallback}`);
-    return false;
+  } catch (err) {
+    console.warn('URL parsing fallback:', err);
+    window.open('https://www.ecajmer.ac.in', '_blank', 'noopener,noreferrer');
+    if (onActionNotification) onActionNotification('Opening ECA Official Portal...');
+    return true;
   }
 };

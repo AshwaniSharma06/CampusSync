@@ -997,7 +997,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               <button
                                 onClick={() =>
                                   openOfficialLink(
-                                    n.action_url || n.download_url || n.document_url || n.source_url,
+                                    n.action_url || n.target_url || n.download_url || n.document_url || n.source_url || 'https://www.ecajmer.ac.in',
                                     onActionNotification,
                                     'Official notice link is currently unavailable.'
                                   )
