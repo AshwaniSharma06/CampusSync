@@ -230,7 +230,57 @@ export const apiService = {
     if (limit) params.append('limit', limit.toString());
     if (offset) params.append('offset', offset.toString());
     const qs = params.toString() ? `?${params.toString()}` : '';
-    return apiClient(`/feed/${qs}`);
+
+    try {
+      return await apiClient(`/feed/${qs}`);
+    } catch (feedErr) {
+      console.warn('Dedicated /feed endpoint unavailable, gracefully failing over to public notices:', feedErr);
+      try {
+        const notices = await apiService.getPublicNotices({ limit: 50 });
+        if (Array.isArray(notices) && notices.length > 0) {
+          const oppCount = notices.filter(n => {
+            const t = (n.title || '').toLowerCase();
+            return t.includes('workshop') || t.includes('hackathon') || t.includes('training') || t.includes('internship');
+          }).length;
+
+          return {
+            is_authenticated: false,
+            category,
+            total: notices.length,
+            counts: {
+              all: notices.length,
+              semester: 0,
+              department: 0,
+              college: notices.length - oppCount,
+              opportunities: oppCount,
+              recommended: 0,
+            },
+            items: notices.map((n) => {
+              const t = (n.title || '').toLowerCase();
+              const isOpp = t.includes('workshop') || t.includes('hackathon') || t.includes('training') || t.includes('internship');
+              return {
+                id: n.id,
+                type: 'NOTICE',
+                title: n.title,
+                summary: n.summary || n.content || n.title,
+                category: isOpp ? 'opportunities' : 'college',
+                category_label: isOpp ? 'Learning & Opportunities' : 'College Update',
+                reason: 'Verified ECA Official Notice',
+                is_important: n.is_important || false,
+                has_pdf: n.has_pdf || false,
+                published_date: n.published_date || n.formatted_date || new Date().toISOString(),
+                target_url: n.action_url || n.document_url || n.source_url || 'https://www.ecajmer.ac.in',
+                action_label: n.action_label || 'View Verified Document',
+                is_saved: false,
+              };
+            }),
+          };
+        }
+      } catch (fallbackErr) {
+        console.warn('Public notices fallback also unavailable:', fallbackErr);
+      }
+      throw feedErr;
+    }
   },
 
   // Notices

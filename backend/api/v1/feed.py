@@ -155,6 +155,7 @@ def format_resource_item(
     }
 
 
+@router.get("")
 @router.get("/")
 def get_intelligent_feed(
     category: Optional[str] = Query(None, description="Category filter: all, semester, department, college, opportunities, recommended"),
@@ -504,3 +505,4 @@ def get_intelligent_feed(
         "has_more": (offset + limit) < len(items_pool),
         "items": paginated_items
     }
+
