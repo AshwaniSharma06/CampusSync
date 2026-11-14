@@ -261,7 +261,7 @@ def chat_with_ai(
             "email": current_user.email,
             "department": prof.department if prof else "Computer Engineering (CSE)",
             "semester": prof.semester if prof else 7,
-            "session": f"{prof.enrollment_year} - {prof.enrollment_year + 4}" if prof and prof.enrollment_year else "2022 - 2026",
+            "session": f"{prof.enrollment_year} - {prof.enrollment_year + 4}" if prof and prof.enrollment_year else "2023 - 2027",
             "student_id": prof.student_id if prof else "22ECA8941"
         }
 

@@ -27,7 +27,7 @@ class RegisterRequest(BaseModel):
     student_id: Optional[str] = None
     department: Optional[str] = "Computer Engineering (CSE)"
     semester: Optional[int] = 7
-    session: Optional[str] = "2022 – 2026 (Final Year Batch)"
+    session: Optional[str] = "2023 – 2027 (Final Year Batch)"
     program: Optional[str] = "B.Tech (Regular 4-Year)"
     admission_category: Optional[str] = "GAS (Government Aided Seat)"
 
@@ -44,14 +44,14 @@ def format_user_profile(user: User) -> dict[str, Any]:
             elif "Category:" in part:
                 admission_category = part.split("Category:", 1)[1].strip()
 
-    enrollment_yr = prof.enrollment_year if prof and prof.enrollment_year else 2022
+    enrollment_yr = prof.enrollment_year if prof and prof.enrollment_year else 2023
     session_str = f"{enrollment_yr} – {enrollment_yr + 4} (Batch)"
 
     return {
         "id": user.id,
         "name": user.full_name,
         "email": user.email,
-        "studentId": prof.student_id if prof and prof.student_id else f"22ECA{user.id:03d}",
+        "studentId": prof.student_id if prof and prof.student_id else f"23ECA{user.id:03d}",
         "department": prof.department if prof and prof.department else "Computer Engineering (CSE)",
         "semester": prof.semester if prof and prof.semester else 7,
         "session": session_str,
@@ -129,16 +129,16 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     # Create associated StudentProfile
-    enrollment_year = 2022
+    enrollment_year = 2023
     if request.session:
         try:
             enrollment_year = int(request.session[:4])
         except Exception:
-            enrollment_year = 2022
+            enrollment_year = 2023
 
     profile = StudentProfile(
         user_id=new_user.id,
-        student_id=request.student_id.strip() if request.student_id else f"22ECA{new_user.id:03d}",
+        student_id=request.student_id.strip() if request.student_id else f"23ECA{new_user.id:03d}",
         department=request.department or "Computer Engineering (CSE)",
         semester=request.semester or 7,
         enrollment_year=enrollment_year,

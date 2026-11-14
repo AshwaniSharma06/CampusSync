@@ -81,9 +81,9 @@ export default function App() {
           name: profile.full_name || currentUser.displayName || 'Student',
           email: profile.email,
           department: profile.department || 'Computer Engineering (CSE)',
-          studentId: profile.student_id || '22ECA8941',
+          studentId: profile.student_id || '23ECA081',
           semester: profile.semester || 7,
-          session: profile.enrollment_year ? `${profile.enrollment_year} – ${profile.enrollment_year + 4}` : '2022 – 2026'
+          session: profile.enrollment_year ? `${profile.enrollment_year} – ${profile.enrollment_year + 4}` : '2023 – 2027'
         };
         setUserProfile(updated);
         accountStore.setActiveSession(updated);

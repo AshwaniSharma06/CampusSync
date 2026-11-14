@@ -37,10 +37,10 @@ const SEMESTERS = [
 ];
 
 const ACADEMIC_SESSIONS = [
-  '2022 – 2026 (Final Year Batch)',
-  '2023 – 2027 (Pre-Final Batch)',
-  '2024 – 2028 (Sophomore Batch)',
-  '2025 – 2029 (Freshman Batch)',
+  '2023 – 2027 (Final Year Batch)',
+  '2024 – 2028 (Pre-Final Batch)',
+  '2025 – 2029 (Sophomore Batch)',
+  '2026 – 2030 (Freshman Batch)',
 ];
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = 'login' }) {
@@ -61,7 +61,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
     department: 'Computer Engineering (CSE)',
     admissionCategory: 'GAS (Government Aided Seat)',
     semester: 7,
-    session: '2022 – 2026 (Final Year Batch)',
+    session: '2023 – 2027 (Final Year Batch)',
   });
 
   useEffect(() => {
@@ -75,17 +75,17 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
   const validateAcademicBatchSemester = (batch, semester) => {
     const sem = Number(semester);
-    if (batch.includes('2025 – 2029') && sem > 2) {
-      return 'Freshman batch (2025–2029) is only valid for Semester 1 or 2.';
+    if (batch.includes('2026 – 2030') && sem > 2) {
+      return 'Freshman batch (2026–2030) is only valid for Semester 1 or 2.';
     }
-    if (batch.includes('2024 – 2028') && (sem < 3 || sem > 4)) {
-      return 'Sophomore batch (2024–2028) is only valid for Semester 3 or 4.';
+    if (batch.includes('2025 – 2029') && (sem < 3 || sem > 4)) {
+      return 'Sophomore batch (2025–2029) is only valid for Semester 3 or 4.';
     }
-    if (batch.includes('2023 – 2027') && (sem < 5 || sem > 6)) {
-      return 'Pre-Final batch (2023–2027) is only valid for Semester 5 or 6.';
+    if (batch.includes('2024 – 2028') && (sem < 5 || sem > 6)) {
+      return 'Pre-Final batch (2024–2028) is only valid for Semester 5 or 6.';
     }
-    if (batch.includes('2022 – 2026') && sem < 7) {
-      return 'Final Year batch (2022–2026) is only valid for Semester 7 or 8.';
+    if (batch.includes('2023 – 2027') && sem < 7) {
+      return 'Final Year batch (2023–2027) is only valid for Semester 7 or 8.';
     }
     return null;
   };
@@ -160,7 +160,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         admissionCategory: formData.admissionCategory,
         semester: Number(formData.semester) || 7,
         session: formData.session,
-        enrollment_year: parseInt(formData.session.slice(0, 4), 10) || 2022,
+        enrollment_year: parseInt(formData.session.slice(0, 4), 10) || 2023,
       };
 
       try {
@@ -593,7 +593,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                       value={formData.studentId}
                       onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
                       className="w-full bg-slate-50/50 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
-                      placeholder="22ECA081"
+                      placeholder="23ECA081"
                     />
                   </div>
                 </div>
