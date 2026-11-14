@@ -135,3 +135,4 @@ class DateNormalizer:
                     pass
 
         return None
+

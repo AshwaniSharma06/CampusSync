@@ -17,7 +17,7 @@ const DEFAULT_ACCOUNTS = {
     name: 'Ashwani Sharma',
     email: 'student@example.com',
     password: 'password123',
-    studentId: '22ECA8941',
+    studentId: '22ECA081',
     program: 'B.Tech (Regular 4-Year)',
     department: 'Computer Engineering (CSE)',
     semester: 7,
@@ -29,7 +29,7 @@ const DEFAULT_ACCOUNTS = {
     name: 'Ashwani Sharma',
     email: 'student@ecajmer.ac.in',
     password: 'password123',
-    studentId: '22ECA8941',
+    studentId: '22ECA081',
     program: 'B.Tech (Regular 4-Year)',
     department: 'Computer Engineering (CSE)',
     semester: 7,
@@ -64,6 +64,22 @@ export const accountStore = {
     const cleanEmail = email.trim().toLowerCase();
     const users = accountStore.getAllUsers();
     return users[cleanEmail] || null;
+  },
+
+  /**
+   * Find an account by Enrollment ID / Roll No (case-insensitive)
+   */
+  findByStudentId: (studentId) => {
+    if (!studentId) return null;
+    const cleanId = studentId.trim().toUpperCase();
+    const users = accountStore.getAllUsers();
+    for (const key of Object.keys(users)) {
+      const u = users[key];
+      if (u && u.studentId && u.studentId.trim().toUpperCase() === cleanId) {
+        return u;
+      }
+    }
+    return null;
   },
 
   /**

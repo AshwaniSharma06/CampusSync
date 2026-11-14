@@ -31,17 +31,33 @@ class RegisterRequest(BaseModel):
     program: Optional[str] = "B.Tech (Regular 4-Year)"
     admission_category: Optional[str] = "GAS (Government Aided Seat)"
 
+import re
+
 def format_user_profile(user: User) -> dict[str, Any]:
     prof = user.student_profile
+    program = "B.Tech (Regular 4-Year)"
+    admission_category = "GAS (Government Aided Seat)"
+    if prof and prof.interests:
+        for part in prof.interests.split(";"):
+            if "Program:" in part:
+                program = part.split("Program:", 1)[1].strip()
+            elif "Category:" in part:
+                admission_category = part.split("Category:", 1)[1].strip()
+
+    enrollment_yr = prof.enrollment_year if prof and prof.enrollment_year else 2022
+    session_str = f"{enrollment_yr} – {enrollment_yr + 4} (Batch)"
+
     return {
         "id": user.id,
         "name": user.full_name,
         "email": user.email,
-        "studentId": prof.student_id if prof and prof.student_id else "22ECA8941",
+        "studentId": prof.student_id if prof and prof.student_id else f"22ECA{user.id:03d}",
         "department": prof.department if prof and prof.department else "Computer Engineering (CSE)",
         "semester": prof.semester if prof and prof.semester else 7,
-        "session": "2022 – 2026",
-        "enrollment_year": prof.enrollment_year if prof and prof.enrollment_year else 2022,
+        "session": session_str,
+        "program": program,
+        "admissionCategory": admission_category,
+        "enrollment_year": enrollment_yr,
         "role": user.role.value if hasattr(user.role, "value") else str(user.role)
     }
 
@@ -50,9 +66,37 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     """
     Register a new student account with email, password, and ECA academic details.
     """
-    email_clean = request.email.strip().lower()
+    email_clean = (request.email or "").strip().lower()
     
-    # Check if user already exists
+    # 1. Email format validation
+    if not email_clean or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email_clean):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide a valid email address."
+        )
+
+    # 2. Full Name validation
+    if not request.full_name or not request.full_name.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Full legal name is required."
+        )
+
+    # 3. Password length validation
+    if not request.password or len(request.password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 6 characters long."
+        )
+
+    # 4. Semester validation
+    if request.semester is not None and (request.semester < 1 or request.semester > 8):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current semester must be between 1 and 8."
+        )
+
+    # 5. Check duplicate email
     existing = db.query(User).filter(User.email.ilike(email_clean)).first()
     if existing:
         raise HTTPException(
@@ -60,7 +104,17 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             detail="An account with this email address already exists. Please sign in instead."
         )
 
-    # Hash password
+    # 6. Check duplicate enrollment ID (student_id)
+    if request.student_id and request.student_id.strip():
+        clean_sid = request.student_id.strip()
+        existing_sid = db.query(StudentProfile).filter(StudentProfile.student_id.ilike(clean_sid)).first()
+        if existing_sid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"College Roll No / Enrollment ID '{clean_sid}' is already registered with another student account."
+            )
+
+    # Hash password securely
     hashed = get_password_hash(request.password)
 
     # Create User
@@ -88,7 +142,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         department=request.department or "Computer Engineering (CSE)",
         semester=request.semester or 7,
         enrollment_year=enrollment_year,
-        interests=f"Program: {request.program or 'B.Tech'}; Category: {request.admission_category or 'GAS'}"
+        interests=f"Program: {request.program or 'B.Tech (Regular 4-Year)'}; Category: {request.admission_category or 'GAS (Government Aided Seat)'}"
     )
     db.add(profile)
     db.commit()

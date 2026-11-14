@@ -55,6 +55,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -73,7 +74,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
     if (isOpen) {
       setMode(initialMode || 'login');
       setError('');
-      // If blank, set smart default placeholders for easy demo testing
       if (initialMode === 'login' && !formData.email) {
         setFormData(prev => ({
           ...prev,
@@ -86,12 +86,30 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
   if (!isOpen) return null;
 
+  const validateAcademicBatchSemester = (batch, semester) => {
+    const sem = Number(semester);
+    if (batch.includes('2025 – 2029') && sem > 2) {
+      return 'Freshman batch (2025–2029) is only valid for Semester 1 or 2.';
+    }
+    if (batch.includes('2024 – 2028') && (sem < 3 || sem > 4)) {
+      return 'Sophomore batch (2024–2028) is only valid for Semester 3 or 4.';
+    }
+    if (batch.includes('2023 – 2027') && (sem < 5 || sem > 6)) {
+      return 'Pre-Final batch (2023–2027) is only valid for Semester 5 or 6.';
+    }
+    if (batch.includes('2022 – 2026') && sem < 7) {
+      return 'Final Year batch (2022–2026) is only valid for Semester 7 or 8.';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     const cleanEmail = (formData.email || '').trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // 1. SIGNUP WORKFLOW
     if (mode === 'signup') {
@@ -100,18 +118,18 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         setLoading(false);
         return;
       }
-      if (!cleanEmail) {
-        setError('Please provide a valid email address.');
+      if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+        setError('Please enter a valid academic email address.');
         setLoading(false);
         return;
       }
-      if (formData.password.length < 6) {
+      if (!formData.password || formData.password.length < 6) {
         setError('Password must be at least 6 characters long.');
         setLoading(false);
         return;
       }
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match. Please re-enter.');
+        setError('Passwords do not match. Please verify and re-enter.');
         setLoading(false);
         return;
       }
@@ -121,10 +139,26 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         return;
       }
 
-      // Check if this email is already registered locally
-      const existing = accountStore.findByEmail(cleanEmail);
-      if (existing && existing.password) {
-        setError('An account with this email already exists. Please switch to Sign In.');
+      // Check Academic Session and Semester compatibility
+      const batchSemError = validateAcademicBatchSemester(formData.session, formData.semester);
+      if (batchSemError) {
+        setError(batchSemError);
+        setLoading(false);
+        return;
+      }
+
+      // Check if email already registered locally
+      const existingEmail = accountStore.findByEmail(cleanEmail);
+      if (existingEmail && existingEmail.password) {
+        setError('An account with this email address already exists. Please switch to Sign In.');
+        setLoading(false);
+        return;
+      }
+
+      // Check if enrollment ID already registered locally
+      const existingSid = accountStore.findByStudentId(formData.studentId);
+      if (existingSid && existingSid.email !== cleanEmail) {
+        setError(`College Roll No / Enrollment ID '${formData.studentId.trim()}' is already registered with another student account.`);
         setLoading(false);
         return;
       }
@@ -133,7 +167,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         name: formData.fullName.trim(),
         email: cleanEmail,
         password: formData.password,
-        studentId: formData.studentId.trim(),
+        studentId: formData.studentId.trim().toUpperCase(),
         program: formData.program,
         department: formData.department,
         admissionCategory: formData.admissionCategory,
@@ -144,7 +178,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
       try {
         let backendToken = null;
-        // Attempt backend registration
+        let registeredProfile = null;
+
+        // Backend API registration
         try {
           const res = await apiService.registerUser({
             email: cleanEmail,
@@ -159,14 +195,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
           });
           if (res?.access_token) {
             backendToken = res.access_token;
+            if (res.user) {
+              registeredProfile = res.user;
+            }
           }
         } catch (apiErr) {
-          console.warn('Backend API registration offline or skipped:', apiErr);
-          // If backend actively reported duplicate user
-          if (apiErr.message && apiErr.message.includes('already exists')) {
-            setError('An account with this email already exists. Please switch to Sign In.');
-            setLoading(false);
-            return;
+          console.warn('Backend API registration notice:', apiErr);
+          if (apiErr.message) {
+            if (apiErr.message.includes('already exists') || apiErr.message.includes('email')) {
+              setError('An account with this email address already exists. Please switch to Sign In.');
+              setLoading(false);
+              return;
+            }
+            if (apiErr.message.includes('Enrollment ID') || apiErr.message.includes('already registered')) {
+              setError(apiErr.message);
+              setLoading(false);
+              return;
+            }
           }
         }
 
@@ -176,7 +221,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         } catch (_) {}
 
         // Persist account in permanent users registry & set active session
-        const savedAccount = accountStore.saveUser(newStudentPayload);
+        const profileToSave = registeredProfile || newStudentPayload;
+        const savedAccount = accountStore.saveUser(profileToSave);
         accountStore.setActiveSession(savedAccount, backendToken);
 
         onAuthSuccess?.(savedAccount);
@@ -190,8 +236,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
     // 2. SIGN IN / LOGIN WORKFLOW
     if (mode === 'login') {
-      if (!cleanEmail) {
-        setError('Please enter your registered email address.');
+      if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+        setError('Please enter a valid registered email address.');
         setLoading(false);
         return;
       }
@@ -237,7 +283,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
           await login(cleanEmail, formData.password);
         } catch (_) {}
 
-        // Set as active session (preserving the exact user profile, never overwriting with defaults)
+        // Set as active session (preserving the exact student profile)
         const finalProfile = accountStore.saveUser(authenticatedProfile);
         accountStore.setActiveSession(finalProfile, backendToken);
 
@@ -250,261 +296,118 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
     }
   };
 
-  const handleQuickDemoAccess = () => {
-    const demoPayload = {
-      name: 'Ashwani Sharma',
-      email: 'ashwani.sharma@example.com',
-      studentId: '22ECA8941',
-      program: 'B.Tech (Regular 4-Year)',
-      department: 'Computer Engineering (CSE)',
-      admissionCategory: 'GAS (Government Aided Seat)',
-      semester: 7,
-      session: '2022 – 2026 (Final Year Batch)',
-      enrollment_year: 2022,
-    };
-    accountStore.saveUser(demoPayload);
-    accountStore.setActiveSession(demoPayload);
-    onAuthSuccess?.(demoPayload);
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl max-h-[92vh] flex flex-col bg-surface-container-high border border-primary/30 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden font-sans">
-        {/* Top Decorative Ambient Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-secondary to-tertiary"></div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+      <div className="relative w-full max-w-xl my-auto bg-white rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden font-sans">
+        {/* Top Decorative Gradient Accent Bar */}
+        <div className="w-full h-1 bg-gradient-to-r from-teal-400 via-teal-500 to-cyan-400"></div>
 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface-variant hover:text-white transition-colors"
+          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors shadow-sm"
           title="Close dialog"
         >
-          <span className="material-symbols-outlined text-lg">close</span>
+          <span className="material-symbols-outlined text-base">close</span>
         </button>
 
-        {/* Scrollable Container */}
-        <div className="overflow-y-auto p-5 sm:p-7 hide-scrollbar">
+        {/* Modal Content */}
+        <div className="p-6 sm:p-8 max-h-[90vh] overflow-y-auto hide-scrollbar">
           {/* Header */}
           <div className="text-center mb-5 flex flex-col items-center">
-            <div className="mb-2">
-              <CampusSyncLogo variant="horizontal" theme="dark" size={42} className="h-10 w-auto" />
+            <div className="mb-1">
+              <CampusSyncLogo variant="horizontal" theme="light" size={38} className="h-9 w-auto" />
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-[11px] font-bold uppercase tracking-wider mb-2">
-              Engineering College Ajmer • BTU Affiliated
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-teal-50 border border-teal-200/80 text-teal-700 text-[10.5px] font-bold uppercase tracking-wider mt-2.5 mb-2">
+              ENGINEERING COLLEGE AJMER • BTU AFFILIATED
             </div>
-            <h3 className="font-serif text-2xl sm:text-3xl text-white">
+
+            <h3 className="font-serif text-3xl text-slate-900 tracking-tight">
               {mode === 'login' ? 'Student Sign In' : 'Student Registration'}
             </h3>
-            <p className="text-xs text-on-surface-variant mt-1 max-w-md mx-auto">
+
+            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto text-center">
               {mode === 'login'
                 ? 'Sign in to access your semester schedule, BTU circulars & Campus AI'
                 : 'Register with your verified ECA department, semester, and session'}
             </p>
           </div>
 
-          {/* Mode Switcher Tabs */}
-          <div className="flex bg-surface-container p-1 rounded-xl mb-4 border border-outline/10">
+          {/* Segmented Tab Switcher */}
+          <div className="flex bg-slate-100/90 p-1 rounded-xl mb-6 border border-slate-200/60 max-w-xs mx-auto w-full">
             <button
               type="button"
               onClick={() => { setMode('login'); setError(''); }}
-              className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
+              className={`flex-1 py-1.5 px-3 text-xs uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
                 mode === 'login'
-                  ? 'bg-primary text-on-primary shadow-sm'
-                  : 'text-on-surface-variant hover:text-white'
+                  ? 'bg-white text-slate-800 font-bold shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800 font-semibold'
               }`}
             >
-              Sign In
+              SIGN IN
             </button>
             <button
               type="button"
               onClick={() => { setMode('signup'); setError(''); }}
-              className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
+              className={`flex-1 py-1.5 px-3 text-xs uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 mode === 'signup'
-                  ? 'bg-primary text-on-primary shadow-sm'
-                  : 'text-on-surface-variant hover:text-white'
+                  ? 'bg-white text-slate-800 font-bold shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800 font-semibold'
               }`}
             >
-              New Student Sign Up
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span>
+              <span>NEW STUDENT SIGN UP</span>
             </button>
           </div>
 
+          {/* Error Message Alert */}
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm shrink-0">error</span>
-              <span>{error}</span>
+            <div className="mb-5 p-3.5 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-base shrink-0">error</span>
+              <span className="font-medium">{error}</span>
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-3.5">
-            {/* SIGNUP: Full Legal Name */}
-            {mode === 'signup' && (
+          {/* ========================================================= */}
+          {/* 1. STUDENT SIGN IN FORM                                   */}
+          {/* ========================================================= */}
+          {mode === 'login' && (
+            <form onSubmit={handleSubmit} className="max-w-md mx-auto w-full space-y-4">
               <div>
-                <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                  Full Name <span className="text-primary">*</span>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  EMAIL ADDRESS <span className="text-teal-600">*</span>
                 </label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-base">
-                    person
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">
+                    mail
                   </span>
                   <input
-                    type="text"
+                    type="email"
                     required
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="w-full bg-surface-container rounded-xl pl-10 pr-4 py-2.5 text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors placeholder:text-on-surface-variant/40"
-                    placeholder="Ashwani Sharma"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-slate-50/50 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
+                    placeholder="student@example.com"
                   />
                 </div>
               </div>
-            )}
 
-            {/* Email Field (Both Modes - Standard Simple Email) */}
-            <div>
-              <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                Email Address <span className="text-primary">*</span>
-              </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-base">
-                  mail
-                </span>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full bg-surface-container rounded-xl pl-10 pr-4 py-2.5 text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors placeholder:text-on-surface-variant/40"
-                  placeholder="student@example.com"
-                />
-              </div>
-            </div>
-
-            {/* SIGNUP: Official ECA Academic Fields */}
-            {mode === 'signup' && (
-              <>
-                {/* Row 1: Program Degree & Branch / Department */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                      Degree Program <span className="text-primary">*</span>
-                    </label>
-                    <select
-                      value={formData.program}
-                      onChange={(e) => setFormData({ ...formData, program: e.target.value })}
-                      className="w-full bg-surface-container rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors"
-                    >
-                      {ECA_PROGRAMS.map((prog) => (
-                        <option key={prog} value={prog} className="bg-surface-container-high text-white">
-                          {prog}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                      ECA Branch / Department <span className="text-primary">*</span>
-                    </label>
-                    <select
-                      value={formData.department}
-                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                      className="w-full bg-surface-container rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors"
-                    >
-                      {ECA_BRANCHES.map((dept) => (
-                        <option key={dept} value={dept} className="bg-surface-container-high text-white">
-                          {dept}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Row 2: Current Semester & Academic Session / Batch */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                      Current Semester <span className="text-primary">*</span>
-                    </label>
-                    <select
-                      value={formData.semester}
-                      onChange={(e) => setFormData({ ...formData, semester: Number(e.target.value) })}
-                      className="w-full bg-surface-container rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors"
-                    >
-                      {SEMESTERS.map((sem) => (
-                        <option key={sem.value} value={sem.value} className="bg-surface-container-high text-white">
-                          {sem.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                      Academic Session / Batch <span className="text-primary">*</span>
-                    </label>
-                    <select
-                      value={formData.session}
-                      onChange={(e) => setFormData({ ...formData, session: e.target.value })}
-                      className="w-full bg-surface-container rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors"
-                    >
-                      {ACADEMIC_SESSIONS.map((sess) => (
-                        <option key={sess} value={sess} className="bg-surface-container-high text-white">
-                          {sess}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Row 3: College Roll No / Enrollment ID & Admission Category (GAS/SFS/TFWS) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                      College Roll No / Enrollment ID <span className="text-primary">*</span>
-                    </label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-base">
-                        badge
-                      </span>
-                      <input
-                        type="text"
-                        required
-                        value={formData.studentId}
-                        onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                        className="w-full bg-surface-container rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors placeholder:text-on-surface-variant/40"
-                        placeholder="22ECA081"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                      Admission Scheme
-                    </label>
-                    <select
-                      value={formData.admissionCategory}
-                      onChange={(e) => setFormData({ ...formData, admissionCategory: e.target.value })}
-                      className="w-full bg-surface-container rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors"
-                    >
-                      {ADMISSION_CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat} className="bg-surface-container-high text-white">
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Password Fields */}
-            <div className={mode === 'signup' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'space-y-1'}>
               <div>
-                <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                  Password <span className="text-primary">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    PASSWORD <span className="text-teal-600">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setError('Please contact ECA IT Helpdesk (academic-sync@ecajmer.ac.in) for credential recovery.')}
+                    className="text-[11px] text-teal-600 hover:text-teal-700 font-medium cursor-pointer"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-base">
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">
                     lock
                   </span>
                   <input
@@ -512,13 +415,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full bg-surface-container rounded-xl pl-10 pr-10 py-2.5 text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors placeholder:text-on-surface-variant/40"
-                    placeholder="••••••••"
+                    className="w-full bg-slate-50/50 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
+                    placeholder="••••••••••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-white"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-base">
                       {showPassword ? 'visibility_off' : 'visibility'}
@@ -527,63 +430,300 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                 </div>
               </div>
 
-              {mode === 'signup' && (
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center gap-2 mt-5 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined text-base">vpn_key</span>
+                <span>{loading ? 'Authenticating...' : 'SIGN IN TO STUDENT PORTAL'}</span>
+              </button>
+
+              <div className="flex items-center justify-center gap-2.5 text-xs text-slate-400 mt-6 pt-2">
+                <a href="https://www.ecajmer.ac.in" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 transition-colors">
+                  Portal Guidelines
+                </a>
+                <span>•</span>
+                <a href="https://btuexam.in" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 transition-colors">
+                  BTU ERP Sync
+                </a>
+                <span>•</span>
+                <a href="mailto:academic-sync@ecajmer.ac.in" className="hover:text-slate-600 transition-colors">
+                  IT Helpdesk ECA
+                </a>
+              </div>
+            </form>
+          )}
+
+          {/* ========================================================= */}
+          {/* 2. STUDENT REGISTRATION FORM                              */}
+          {/* ========================================================= */}
+          {mode === 'signup' && (
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {/* 1. Full Legal Name */}
                 <div>
-                  <label className="block text-[11px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
-                    Confirm Password <span className="text-primary">*</span>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    FULL NAME <span className="text-teal-600">*</span>
                   </label>
                   <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-base">
-                      lock_reset
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">
+                      person
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
+                      placeholder="Ashwani Sharma"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Email Address */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    EMAIL ADDRESS <span className="text-teal-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">
+                      mail
+                    </span>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
+                      placeholder="student@example.com"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. Degree Program */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    DEGREE PROGRAM <span className="text-teal-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.program}
+                      onChange={(e) => setFormData({ ...formData, program: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl px-3.5 py-2.5 pr-8 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all appearance-none cursor-pointer"
+                    >
+                      {ECA_PROGRAMS.map((prog) => (
+                        <option key={prog} value={prog} className="text-slate-800">
+                          {prog}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base">
+                      expand_more
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4. ECA Branch / Department */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    ECA BRANCH / DEPARTMENT <span className="text-teal-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl px-3.5 py-2.5 pr-8 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all appearance-none cursor-pointer"
+                    >
+                      {ECA_BRANCHES.map((dept) => (
+                        <option key={dept} value={dept} className="text-slate-800">
+                          {dept}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base">
+                      expand_more
+                    </span>
+                  </div>
+                </div>
+
+                {/* 5. Current Semester */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    CURRENT SEMESTER <span className="text-teal-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.semester}
+                      onChange={(e) => setFormData({ ...formData, semester: Number(e.target.value) })}
+                      className="w-full bg-slate-50/50 rounded-xl px-3.5 py-2.5 pr-8 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all appearance-none cursor-pointer"
+                    >
+                      {SEMESTERS.map((sem) => (
+                        <option key={sem.value} value={sem.value} className="text-slate-800">
+                          {sem.label}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base">
+                      expand_more
+                    </span>
+                  </div>
+                </div>
+
+                {/* 6. Academic Session / Batch */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    ACADEMIC SESSION / BATCH <span className="text-teal-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.session}
+                      onChange={(e) => setFormData({ ...formData, session: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl px-3.5 py-2.5 pr-8 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all appearance-none cursor-pointer"
+                    >
+                      {ACADEMIC_SESSIONS.map((sess) => (
+                        <option key={sess} value={sess} className="text-slate-800">
+                          {sess}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base">
+                      expand_more
+                    </span>
+                  </div>
+                </div>
+
+                {/* 7. College Roll No / Enrollment ID */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    COLLEGE ROLL NO / ENROLLMENT ID <span className="text-teal-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">
+                      badge
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={formData.studentId}
+                      onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
+                      placeholder="22ECA081"
+                    />
+                  </div>
+                </div>
+
+                {/* 8. Admission Scheme */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    ADMISSION SCHEME
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.admissionCategory}
+                      onChange={(e) => setFormData({ ...formData, admissionCategory: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl px-3.5 py-2.5 pr-8 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all appearance-none cursor-pointer"
+                    >
+                      {ADMISSION_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat} className="text-slate-800">
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base">
+                      expand_more
+                    </span>
+                  </div>
+                </div>
+
+                {/* 9. Password */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    PASSWORD <span className="text-teal-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">
+                      lock
                     </span>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      value={formData.confirmPassword}
-                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      className="w-full bg-surface-container rounded-xl pl-10 pr-4 py-2.5 text-sm text-white border border-outline/20 focus:outline-none focus:border-primary/60 transition-colors placeholder:text-on-surface-variant/40"
-                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
+                      placeholder="••••••••••••••••"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-base">
+                        {showPassword ? 'visibility_off' : 'visibility'}
+                      </span>
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full bg-primary text-on-primary py-3 rounded-xl font-bold text-xs uppercase tracking-[0.14em] transition-all shadow-lg mt-3 flex items-center justify-center gap-2 ${
-                loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-primary-fixed glow-hover'
-              }`}
-            >
-              <span className="material-symbols-outlined text-sm">
-                {mode === 'login' ? 'login' : 'how_to_reg'}
-              </span>
-              <span>
-                {loading
-                  ? 'Authenticating...'
-                  : mode === 'login'
-                  ? 'Sign In to Student Portal'
-                  : 'Register Student Account'}
-              </span>
-            </button>
-          </form>
+                {/* 10. Confirm Password */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    CONFIRM PASSWORD <span className="text-teal-600">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">
+                      sync
+                    </span>
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      className="w-full bg-slate-50/50 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-800 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all placeholder:text-slate-400"
+                      placeholder="••••••••••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-base">
+                        {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-          {/* Quick 1-Click Demo Access for Viva / Professor Evaluation */}
-          <div className="mt-4 pt-3 border-t border-outline/10 text-center space-y-2">
-            <button
-              type="button"
-              onClick={handleQuickDemoAccess}
-              className="w-full py-2.5 px-4 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-300 hover:text-teal-200 text-xs font-bold transition-all flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined text-sm text-teal-400">bolt</span>
-              <span>1-Click Demo Access (Ashwani Sharma • 22ECA8941 • CSE)</span>
-            </button>
-            <p className="text-[11px] text-on-surface-variant">
-              Quick evaluator preview matching official ECA BTU records
-            </p>
-          </div>
+              {/* Security Verification Badge */}
+              <div className="flex items-center justify-center gap-1.5 text-xs text-slate-600 pt-3 pb-1">
+                <span className="material-symbols-outlined text-teal-600 text-base">verified_user</span>
+                <span className="font-medium">Directly verified with ECA BTU Student Records Database</span>
+              </div>
+
+              {/* Complete Registration Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <span>{loading ? 'Processing Registration...' : 'COMPLETE STUDENT REGISTRATION'}</span>
+                <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+
+              {/* Terms & Conditions */}
+              <p className="text-center text-[11px] text-slate-400 mt-2.5">
+                By signing up, you agree to the{' '}
+                <a href="https://www.ecajmer.ac.in" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-600">
+                  ECA Academic Portal Terms
+                </a>{' '}
+                and{' '}
+                <a href="https://www.btu.ac.in" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-600">
+                  BTU Student Policy
+                </a>.
+              </p>
+            </form>
+          )}
         </div>
       </div>
     </div>
