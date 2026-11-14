@@ -19,13 +19,12 @@ export default function AiWidget({ onNavigateToAi }) {
     const el = document.getElementById('ai-assistant');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.history.pushState(null, '', '#ai-assistant');
       setTimeout(() => {
         const input = document.getElementById('campus-ai-input');
         if (input) input.focus();
       }, 450);
     } else {
-      window.location.href = '/#ai-assistant';
+      window.location.href = '/';
     }
   };
 

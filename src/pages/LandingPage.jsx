@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Hero from '../components/sections/Hero';
 import CommunityFeed from '../components/sections/CommunityFeed';
 // ClubsSection preserved for Semester 8 (Project Phase 2)
@@ -10,6 +10,13 @@ import CampusAiSection from '../components/sections/CampusAiSection';
 import CtaSection from '../components/sections/CtaSection';
 
 export default function LandingPage({ currentUser, showToast, onOpenAuth }) {
+  useEffect(() => {
+    // If the page is refreshed or reloaded with any hash, strip the hash and ensure top home position
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname);
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  }, []);
   return (
     <main>
       <Hero

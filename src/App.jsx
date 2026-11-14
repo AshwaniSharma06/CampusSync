@@ -46,7 +46,6 @@ export default function App() {
     const el = document.getElementById('ai-assistant');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.history.pushState(null, '', '#ai-assistant');
       setTimeout(() => {
         const input = document.getElementById('campus-ai-input');
         if (input) input.focus();

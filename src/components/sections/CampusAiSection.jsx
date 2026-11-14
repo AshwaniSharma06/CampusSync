@@ -83,18 +83,6 @@ export default function CampusAiSection({ currentUser }) {
     }
   }, [messages, isThinking]);
 
-  // Smooth scroll into view if landed with #ai-assistant hash
-  useEffect(() => {
-    if (window.location.hash === '#ai-assistant') {
-      setTimeout(() => {
-        const el = document.getElementById('ai-assistant');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 300);
-    }
-  }, []);
-
   const handleResetChat = () => {
     setMessages([]);
     setActiveSessionId(null);
