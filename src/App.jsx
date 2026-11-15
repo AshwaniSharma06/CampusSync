@@ -247,7 +247,7 @@ export default function App() {
 
       {!isDashboard && <Footer onActionNotification={showToast} />}
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />
-      <AiWidget onNavigateToAi={handleNavigateToCampusAi} />
+      {!isDashboard && <AiWidget onNavigateToAi={handleNavigateToCampusAi} />}
       <AuthModal
         isOpen={isAuthModalOpen}
         initialMode={authModalMode}

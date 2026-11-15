@@ -1346,23 +1346,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         </main>
       </div>
 
-      {/* Floating Action Button: Docked bottom-right CAMPUS AI with robot icon & pulse ping */}
-      <button
-        onClick={() => {
-          setActiveTab('ai');
-          onActionNotification?.('Opening CampusSync AI workspace');
-        }}
-        className="fixed bottom-6 right-6 z-40 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 group cursor-pointer active:scale-95"
-        title="Open CampusSync AI Workspace"
-      >
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-        </span>
-        <span className="material-symbols-outlined text-lg">smart_toy</span>
-        <span className="text-xs uppercase tracking-wider font-extrabold">Campus AI</span>
-      </button>
-
       {/* Edit Profile Modal */}
       <EditProfileModal
         isOpen={isProfileModalOpen}
