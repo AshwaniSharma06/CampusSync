@@ -12,7 +12,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   const [apiError, setApiError] = useState(null);
   const [studentProfile, setStudentProfile] = useState(user);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   // AI interactive quick copilot state
@@ -25,10 +24,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   const [noticePage, setNoticePage] = useState(1);
   const NOTICES_PER_PAGE = 6;
 
-  // Resources state
-  const [savedResourceIds, setSavedResourceIds] = useState(['res-1', 'res-3']);
-  const [resourceCategoryFilter, setResourceCategoryFilter] = useState('All');
-
   // Dynamic greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -37,8 +32,11 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     return 'Good evening';
   };
 
-  const displayName = studentProfile?.full_name || studentProfile?.name || user?.full_name || user?.name || 'Student';
-  const firstName = displayName.split(' ')[0] || 'Student';
+  const displayName = studentProfile?.full_name || studentProfile?.name || user?.full_name || user?.name || 'Ashwani Sharma';
+  const firstName = displayName.split(' ')[0] || 'Ashwani';
+  const studentRollNo = studentProfile?.studentId || studentProfile?.student_id || user?.studentId || '23EEACS15';
+  const studentDepartment = studentProfile?.department || user?.department || 'Computer Engineering (CSE)';
+  const studentSemester = studentProfile?.semester || user?.semester || 7;
 
   // State for all API records
   const [dashboardData, setDashboardData] = useState(null);
@@ -48,7 +46,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   const [assignments, setAssignments] = useState([]);
   const [notificationsData, setNotificationsData] = useState([]);
   const [resources, setResources] = useState([]);
-  // Clubs state preserved for Semester 8 (Project Phase 2)
   const [events, setEvents] = useState([]);
   const [communityPosts, setCommunityPosts] = useState([]);
 
@@ -78,7 +75,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         assignsRes,
         notifsRes,
         resourcesRes,
-        // eventsRes preserved for Semester 8 (Major Project Phase 2)
         eventsRes,
         communityRes,
         profileRes,
@@ -90,8 +86,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
         apiService.getAssignments(),
         apiService.getNotifications(),
         apiService.getResources(),
-        // apiService.getClubs() temporarily disabled for Semester 7 (Reintroduced in Sem 8)
-        // apiService.getEvents() temporarily disabled for Semester 7 (Reintroduced in Sem 8 - Major Project Phase 2)
         Promise.resolve([]),
         apiService.getCommunityPosts(),
         apiService.getStudentProfile(),
@@ -198,20 +192,13 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       }
 
       if (hadError) {
-        const hasAuthError = [summaryRes, coursesRes, noticesRes, examsRes].some(
-          r => r.status === 'rejected' && (r.reason?.status === 401 || r.reason?.status === 403)
-        );
-        if (hasAuthError) {
-          setApiError('Session authorization expired. Please Sign Out and Sign In to refresh your verified session.');
-        } else {
-          setApiError('Unable to synchronize latest records from college server. Displaying verified local session.');
-        }
+        setApiError('Unable to synchronize latest records from college server. Displaying verified local session.');
       } else {
         setApiError(null);
       }
     } catch (err) {
       console.error('General loadData error:', err);
-      setApiError('Network connection error. Please verify backend availability.');
+      setApiError('Unable to synchronize latest records from college server. Displaying verified local session.');
     } finally {
       setIsLoading(false);
     }
@@ -245,16 +232,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     }
   };
 
-  const toggleSaveResource = (id, title) => {
-    if (savedResourceIds.includes(id)) {
-      setSavedResourceIds(prev => prev.filter(item => item !== id));
-      onActionNotification?.(`Removed "${title}" from saved offline library`);
-    } else {
-      setSavedResourceIds(prev => [...prev, id]);
-      onActionNotification?.(`Saved "${title}" to your offline library`);
-    }
-  };
-
   // Filtered notices based on active category pill and search
   const filteredNotices = useMemo(() => {
     let result = notices;
@@ -282,35 +259,36 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   }, [filteredNotices, noticePage]);
 
   const totalNoticePages = Math.max(1, Math.ceil(filteredNotices.length / NOTICES_PER_PAGE));
+  const verifiedNoticesCount = notices.filter(n => n.data_origin === 'VERIFIED_OFFICIAL').length;
 
   // Navigation sidebar configuration
   const sidebarNavItems = [
     { id: 'overview', label: 'Overview', icon: 'dashboard', category: 'Academic Core', badge: null },
-    { id: 'notices', label: 'Official Notices', icon: 'campaign', category: 'Academic Core', badge: `${notices.filter(n => n.data_origin === 'VERIFIED_OFFICIAL').length} Verified` },
+    { id: 'notices', label: 'Official Notices', icon: 'campaign', category: 'Academic Core', badge: `${verifiedNoticesCount} Verified` },
     { id: 'examinations', label: 'Examinations', icon: 'event_available', category: 'Academic Core', badge: `${examinations.length} Active` },
     { id: 'community', label: 'Community', icon: 'forum', category: 'Campus Life', badge: 'Active' },
-    { id: 'ai', label: 'CampusSync AI', icon: 'smart_toy', category: 'Intelligence', badge: 'Verified RAG', badgeColor: 'bg-[#71d8c8]/20 text-[#71d8c8] border border-[#71d8c8]/40' },
+    { id: 'ai', label: 'CampusSync AI', icon: 'smart_toy', category: 'Intelligence', badge: 'Verified RAG', badgeColor: 'bg-emerald-100 text-emerald-800 border border-emerald-200' },
   ];
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#04132a] text-[#d7e3ff] p-6 max-w-[1440px] mx-auto animate-pulse flex flex-col gap-6 font-sans">
-        <div className="bg-[#0d1b33] border border-slate-800 h-20 rounded-2xl w-full flex items-center px-6 justify-between">
-          <div className="h-8 w-48 bg-slate-800/80 rounded-xl"></div>
-          <div className="h-10 w-48 bg-slate-800/80 rounded-xl"></div>
+      <div className="min-h-screen bg-[#f8fafc] text-slate-800 p-6 max-w-7xl mx-auto animate-pulse flex flex-col gap-6 font-sans">
+        <div className="bg-white border border-slate-200 h-16 rounded-2xl w-full flex items-center px-6 justify-between shadow-xs">
+          <div className="h-8 w-44 bg-slate-100 rounded-xl"></div>
+          <div className="h-9 w-40 bg-slate-100 rounded-xl"></div>
         </div>
         <div className="flex flex-col lg:flex-row gap-6">
-          <div className="w-full lg:w-64 h-[500px] bg-[#0d1b33] border border-slate-800 rounded-2xl shrink-0 hidden lg:block"></div>
+          <div className="w-full lg:w-64 h-[500px] bg-white border border-slate-200 rounded-2xl shrink-0 hidden lg:block shadow-xs"></div>
           <div className="flex-1 space-y-6">
-            <div className="h-56 bg-[#0d1b33] border border-slate-800 rounded-2xl w-full"></div>
+            <div className="h-48 bg-white border border-slate-200 rounded-2xl w-full shadow-xs"></div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-28 bg-[#0d1b33] border border-slate-800 rounded-2xl"></div>
+                <div key={i} className="h-28 bg-white border border-slate-200 rounded-2xl shadow-xs"></div>
               ))}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-7 h-96 bg-[#0d1b33] border border-slate-800 rounded-2xl"></div>
-              <div className="lg:col-span-5 h-96 bg-[#0d1b33] border border-slate-800 rounded-2xl"></div>
+              <div className="lg:col-span-7 h-96 bg-white border border-slate-200 rounded-2xl shadow-xs"></div>
+              <div className="lg:col-span-5 h-96 bg-white border border-slate-200 rounded-2xl shadow-xs"></div>
             </div>
           </div>
         </div>
@@ -319,15 +297,25 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   }
 
   return (
-    <div className="min-h-screen bg-[#04132a] text-[#d7e3ff] font-sans antialiased flex flex-col selection:bg-[#71d8c8]/30 selection:text-white">
-      {/* 1. Header Bar - Cleaned: search bar and notifications removed per requirements */}
-      <header className="bg-[#071733]/90 backdrop-blur-xl border-b border-slate-800/90 sticky top-0 z-40 px-4 md:px-8 py-3.5 shadow-md">
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between gap-4">
-          {/* Left: Brand Crest & Portal Context */}
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans antialiased flex flex-col selection:bg-emerald-100 selection:text-emerald-900 relative">
+      {/* 2. AMBIENT BACKGROUND LAYER (LIGHT SHARP BOKEH) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <img 
+          src="/assets/campus-bg.jpg" 
+          alt="Campus Architecture" 
+          className="w-full h-full object-cover scale-105 filter blur-[8px] opacity-15"
+        />
+        <div className="absolute inset-0 bg-slate-50/70 backdrop-blur-[2px]"></div>
+      </div>
+
+      {/* 1. Top Navigation Bar (h-16, sticky top, bg-white/90 backdrop-blur-md, border-b border-slate-200) */}
+      <header className="h-16 sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 shadow-xs">
+        <div className="max-w-7xl mx-auto h-full flex items-center justify-between gap-4">
+          {/* Left: CampusSync Logo + LIVE PORTAL Pill */}
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={onReturnHome}
-              className="w-10 h-10 rounded-xl bg-[#0d1b33] border border-slate-700/70 text-[#71d8c8] hover:bg-[#71d8c8]/15 hover:border-[#71d8c8]/50 flex items-center justify-center transition-all shadow-sm group shrink-0 cursor-pointer"
+              className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-emerald-700 flex items-center justify-center transition-all shadow-xs group shrink-0 cursor-pointer active:scale-95"
               title="Return to Public CampusSync Website"
             >
               <span className="material-symbols-outlined text-lg group-hover:-translate-x-0.5 transition-transform">
@@ -337,33 +325,33 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             <div className="flex items-center gap-2.5">
               <CampusSyncLogo
                 variant="horizontal"
-                theme="dark"
+                theme="light"
                 size={38}
                 className="h-9 md:h-10 w-auto"
               />
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#71d8c8]/15 text-[#71d8c8] border border-[#71d8c8]/30 uppercase tracking-wider hidden lg:inline">
-                Live Portal
+              <span className="bg-emerald-50 text-emerald-700 text-xs px-2.5 py-0.5 rounded-full border border-emerald-200 font-semibold uppercase tracking-wider hidden lg:inline">
+                LIVE PORTAL
               </span>
             </div>
           </div>
 
-          {/* Right: Student Profile & Sign Out */}
+          {/* Right: Student Avatar Pill & Sign Out Button */}
           <div className="flex items-center gap-3 shrink-0">
-            {/* Profile Pill */}
+            {/* Student Avatar Pill */}
             <div
               onClick={() => setIsProfileModalOpen(true)}
-              className="flex items-center gap-2.5 pl-2 pr-3.5 py-1.5 rounded-xl border border-slate-700/70 hover:border-[#71d8c8]/50 bg-[#0d1b33] hover:bg-[#112240] transition-all cursor-pointer shadow-xs group"
+              className="flex items-center gap-2.5 pl-2 pr-3.5 py-1.5 rounded-xl border border-slate-200 hover:border-emerald-300 bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-xs group"
               title="Click to View Official Record"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#71d8c8] to-[#1c786c] text-[#04132a] font-extrabold text-xs flex items-center justify-center shadow-xs">
-                {displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'ST'}
+              <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white font-extrabold text-xs flex items-center justify-center shadow-xs">
+                {firstName.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="text-left hidden sm:block leading-tight">
-                <p className="text-xs font-bold text-white group-hover:text-[#71d8c8] transition-colors truncate max-w-[150px]">
-                  {displayName}
+                <p className="text-xs font-bold text-slate-900 group-hover:text-emerald-600 transition-colors truncate max-w-[150px]">
+                  {firstName}
                 </p>
-                <p className="text-[11px] text-slate-400 font-medium">
-                  {studentProfile?.studentId || '22ECA081'} • Sem {studentProfile?.semester || 7}
+                <p className="text-[11px] text-slate-500 font-medium">
+                  {studentRollNo} • Sem {studentSemester}
                 </p>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-sm hidden sm:block">
@@ -374,10 +362,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             {/* Sign Out Button */}
             <button
               onClick={onSignOut}
-              className="flex items-center gap-1.5 text-xs font-bold text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-900/50 border border-red-800/40 px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer"
+              className="text-rose-600 hover:bg-rose-50 border border-rose-200 text-sm font-medium px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-[0.99]"
               title="Sign Out of Portal"
             >
-              <span className="material-symbols-outlined text-sm">logout</span>
+              <span className="material-symbols-outlined text-base">logout</span>
               <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
@@ -385,9 +373,9 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       </header>
 
       {/* Main Container: Sidebar + Tab Views */}
-      <div className="flex-1 max-w-[1440px] w-full mx-auto px-4 md:px-8 py-6 flex flex-col lg:flex-row gap-6 items-start">
-        {/* 2. Modern Sidebar */}
-        <aside className="w-full lg:w-64 shrink-0 bg-[#0d1b33]/90 backdrop-blur-xl rounded-2xl p-4 border border-slate-800/90 shadow-lg lg:sticky lg:top-24 z-20">
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6 flex flex-col lg:flex-row gap-6 items-start relative z-10">
+        {/* Command Center Sidebar (Fixed left / w-64 / border-r border-slate-200) */}
+        <aside className="w-full lg:w-64 shrink-0 bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-card lg:sticky lg:top-20 z-20">
           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-3 hidden lg:block">
             Command Center
           </div>
@@ -402,23 +390,25 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     setActiveTab(item.id);
                     onActionNotification?.(`Navigated to ${item.label}`);
                   }}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 lg:w-full ${isActive
-                      ? 'bg-gradient-to-r from-[#71d8c8]/20 to-[#71d8c8]/5 border-l-4 border-[#71d8c8] text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border-l-4 border-transparent'
-                    }`}
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 lg:w-full cursor-pointer ${
+                    isActive
+                      ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-4 border-emerald-500 rounded-r-lg shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-l-4 border-transparent'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`material-symbols-outlined text-lg ${isActive ? 'text-[#71d8c8]' : 'text-slate-400'}`}>
+                    <span className={`material-symbols-outlined text-lg ${isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
                       {item.icon}
                     </span>
                     <span>{item.label}</span>
                   </div>
                   {item.badge && (
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 ${isActive
-                          ? 'bg-[#71d8c8]/30 text-[#71d8c8]'
-                          : item.badgeColor || 'bg-slate-800 text-slate-400 border border-slate-700/60'
-                        }`}
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ml-2 ${
+                        isActive
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : item.badgeColor || 'bg-slate-100 text-slate-600 border border-slate-200'
+                      }`}
                     >
                       {item.badge}
                     </span>
@@ -428,26 +418,28 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             })}
           </nav>
 
-          {/* Student Profile Card in Sidebar */}
-          <div className="hidden lg:block mt-6 pt-4 border-t border-slate-800/80">
-            <div className="p-3.5 rounded-xl bg-[#09152a] border border-slate-800 flex flex-col gap-2">
+          {/* Bottom Docked Profile Card */}
+          <div className="hidden lg:block mt-6 pt-4 border-t border-slate-200/80">
+            <div className="p-3.5 rounded-xl bg-slate-50/90 border border-slate-200 flex flex-col gap-2">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#71d8c8]/20 border border-[#71d8c8]/30 flex items-center justify-center text-[#71d8c8] text-xs font-bold">
-                  {studentProfile?.semester ? `S${studentProfile.semester}` : 'BT'}
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 text-xs font-bold">
+                  S{studentSemester}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white truncate">{displayName}</p>
-                  <p className="text-[10px] text-slate-400 truncate">{studentProfile?.department || 'CSE Department'}</p>
+                  <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
+                  <p className="text-[10px] text-slate-500 truncate">{studentDepartment}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono">
-                <span>ID: {studentProfile?.studentId || '22ECA8941'}</span>
-                <span className="text-[#71d8c8] font-bold">VERIFIED</span>
+              <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-[10px] text-slate-500 font-mono">
+                <span>ID: {studentRollNo}</span>
+                <span className="text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded text-[9px]">
+                  VERIFIED
+                </span>
               </div>
             </div>
             <button
               onClick={() => setIsProfileModalOpen(true)}
-              className="mt-3 w-full flex items-center justify-center gap-1.5 p-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
+              className="mt-3 w-full flex items-center justify-center gap-1.5 p-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm">manage_accounts</span>
               <span>Edit Profile Settings</span>
@@ -457,17 +449,18 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
         {/* Main Content Area */}
         <main className="flex-1 w-full min-w-0">
+          {/* Sync Alert Warning Banner */}
           {apiError && (
-            <div className="mb-6 p-4 rounded-2xl bg-amber-950/40 border border-amber-600/40 text-amber-200 text-xs flex items-center justify-between gap-3 shadow-md">
+            <div className="mb-6 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm flex items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-2.5">
-                <span className="material-symbols-outlined text-amber-400 text-lg">warning</span>
-                <span>{apiError}</span>
+                <span className="text-base">⚠️</span>
+                <span className="font-medium">{apiError}</span>
               </div>
               <button
                 onClick={() => loadData()}
-                className="bg-amber-600/40 hover:bg-amber-600 text-amber-100 text-[11px] font-bold px-3 py-1.5 rounded-xl uppercase tracking-wider transition-colors shrink-0"
+                className="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-3 py-1.5 rounded-lg text-xs tracking-wide transition-colors shrink-0 cursor-pointer active:scale-[0.99]"
               >
-                Retry Sync
+                RETRY SYNC
               </button>
             </div>
           )}
@@ -477,68 +470,68 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
           {/* ============================================================== */}
           {activeTab === 'overview' && (
             <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-              {/* 1. Academic Command Center Hero Banner */}
-              <div className="bg-gradient-to-br from-[#0d1b33] via-[#09152a] to-[#050f20] rounded-2xl p-6 md:p-7 border border-slate-700/80 shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#71d8c8] via-[#bac3ff] to-[#e6c277]"></div>
+              {/* 1. Academic Command Center Hero Welcome Card */}
+              <div className="bg-white rounded-2xl p-6 md:p-7 border border-slate-200/80 shadow-card relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400"></div>
 
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                   <div>
-                    <div className="inline-flex items-center gap-2 bg-[#71d8c8]/10 border border-[#71d8c8]/30 px-3 py-1 rounded-full text-[11px] font-bold text-[#71d8c8] uppercase tracking-wider mb-2.5">
-                      <span className="w-2 h-2 rounded-full bg-[#71d8c8] animate-ping"></span>
-                      Academic Command Center • Semester {studentProfile?.semester || 7} • {studentProfile?.department || 'CSE'}
+                    <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                      ACADEMIC COMMAND CENTER • SEMESTER {studentSemester} • COMPUTER ENGINEERING (CSE)
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                      {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#71d8c8] to-[#bac3ff]">{firstName}</span>!
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                      {getGreeting()}, <span className="text-emerald-600 font-extrabold">{firstName}</span>!
                     </h2>
-                    <p className="text-sm text-slate-300 mt-1 font-medium leading-relaxed max-w-xl">
-                      You have <span className="text-white font-bold">{examinations.length} scheduled examinations</span> and{' '}
-                      <span className="text-white font-bold">{notices.filter(n => n.data_origin === 'VERIFIED_OFFICIAL').length} verified notices</span> in your cohort.
+                    <p className="text-sm text-slate-600 mt-1 font-medium leading-relaxed max-w-xl">
+                      You have <span className="text-slate-900 font-bold">{examinations.length} scheduled examinations</span> and{' '}
+                      <span className="text-slate-900 font-bold">{verifiedNoticesCount} verified notices</span> in your cohort.
                     </p>
 
                     <div className="flex flex-wrap gap-2.5 mt-4">
                       <button
                         onClick={() => setActiveTab('notices')}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#71d8c8] text-[#04132a] hover:bg-[#8ef4e4] transition-all shadow-md cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm transition-all cursor-pointer active:scale-[0.99]"
                       >
                         <span className="material-symbols-outlined text-base">campaign</span>
                         <span>Official Notices</span>
                       </button>
                       <button
                         onClick={() => setActiveTab('examinations')}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#132747] text-white border border-slate-700 hover:border-[#71d8c8]/50 transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-xs transition-all cursor-pointer active:scale-[0.99]"
                       >
                         <span className="material-symbols-outlined text-base">event_available</span>
                         <span>Exam Schedule</span>
                       </button>
                       <button
                         onClick={() => setActiveTab('ai')}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#132747] text-white border border-slate-700 hover:border-[#71d8c8]/50 transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs transition-all cursor-pointer active:scale-[0.99]"
                       >
-                        <span className="material-symbols-outlined text-base">smart_toy</span>
+                        <span className="material-symbols-outlined text-base text-emerald-600">smart_toy</span>
                         <span>Ask CampusSync AI</span>
                       </button>
                     </div>
                   </div>
 
-                  {/* Highlight: Next Important Action / Exam Milestone Card */}
+                  {/* Right Column Callout Card */}
                   {examinations.length > 0 ? (
-                    <div className="w-full lg:w-auto bg-[#10223d]/90 rounded-2xl p-4 md:p-5 border border-[#71d8c8]/40 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
+                    <div className="w-full lg:w-auto bg-slate-50/90 rounded-2xl p-4 md:p-5 border border-emerald-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
                       <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#71d8c8] to-[#1a6e63] text-[#04132a] flex flex-col items-center justify-center shrink-0 shadow-md">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex flex-col items-center justify-center shrink-0 shadow-sm">
                           <span className="text-[10px] font-extrabold uppercase leading-none">Exam</span>
                           <span className="text-xs font-extrabold mt-0.5">{examinations[0].start_time ? examinations[0].start_time.slice(0, 5) : 'Active'}</span>
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#71d8c8]/20 text-[#71d8c8] border border-[#71d8c8]/30">
+                            <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
                               {examinations[0].exam_type || 'Examination'}
                             </span>
-                            <span className="text-xs text-slate-300 font-semibold">{examinations[0].exam_date}</span>
+                            <span className="text-xs text-slate-600 font-semibold">{examinations[0].exam_date}</span>
                           </div>
-                          <h4 className="text-sm font-bold text-white mt-1">
+                          <h4 className="text-sm font-bold text-slate-900 mt-1">
                             {examinations[0].course_code ? `${examinations[0].course_code}: ` : ''}{examinations[0].course_name}
                           </h4>
-                          <p className="text-xs text-slate-400 font-medium">
+                          <p className="text-xs text-slate-500 font-medium">
                             Hall {examinations[0].hall_number || 'TBA'} • Max Marks: {examinations[0].max_marks || 'N/A'}
                           </p>
                         </div>
@@ -552,26 +545,26 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                             onActionNotification?.(`Exam details: ${examinations[0].course_name} on ${examinations[0].exam_date}`);
                           }
                         }}
-                        className="bg-[#71d8c8] hover:bg-[#8ef4e4] text-[#04132a] font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 self-stretch sm:self-auto justify-center shrink-0 cursor-pointer"
+                        className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 self-stretch sm:self-auto justify-center shrink-0 cursor-pointer active:scale-[0.99]"
                       >
                         <span>{examinations[0].document_url ? 'View Schedule PDF' : 'Details'}</span>
                         <span className="material-symbols-outlined text-sm">arrow_forward</span>
                       </button>
                     </div>
                   ) : (
-                    <div className="w-full lg:w-auto bg-[#10223d]/90 rounded-2xl p-4 md:p-5 border border-slate-700 shadow-xl flex items-center gap-3.5 shrink-0">
-                      <div className="w-12 h-12 rounded-xl bg-[#71d8c8]/20 text-[#71d8c8] flex items-center justify-center shrink-0">
+                    <div className="w-full lg:w-auto bg-slate-50/80 rounded-2xl p-4 md:p-5 border border-slate-200 shadow-xs flex items-center gap-3.5 shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
                         <span className="material-symbols-outlined text-2xl">event_available</span>
                       </div>
                       <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#71d8c8]/20 text-[#71d8c8] border border-[#71d8c8]/30">
-                          Schedule Clear
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          SCHEDULE CLEAR
                         </span>
-                        <h4 className="text-sm font-bold text-white mt-1">
+                        <h4 className="text-sm font-bold text-slate-900 mt-1">
                           No Immediate Deadlines
                         </h4>
-                        <p className="text-xs text-slate-400 font-medium">
-                          Semester {studentProfile?.semester || 7} • {studentProfile?.department || 'Engineering'}
+                        <p className="text-xs text-slate-500 font-medium">
+                          Semester {studentSemester} • {studentDepartment}
                         </p>
                       </div>
                     </div>
@@ -579,91 +572,92 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 </div>
               </div>
 
-              {/* 2. Authenticated Academic Metrics Grid - Cleaned: Enrolled Courses & Pending Tasks removed */}
+              {/* 2. KPI Metric Grid (4 Columns) */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div
                   onClick={() => setActiveTab('examinations')}
-                  className="bg-[#0d1b33]/90 rounded-2xl p-5 border border-slate-800 hover:border-[#e6c277]/50 transition-all shadow-md group cursor-pointer"
+                  className="bg-white rounded-2xl p-5 border border-slate-200/80 hover:border-amber-300 transition-all shadow-card group cursor-pointer"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Examinations</span>
-                    <div className="w-8 h-8 rounded-lg bg-[#e6c277]/15 text-[#e6c277] flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Examinations</span>
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                       <span className="material-symbols-outlined text-lg">event_available</span>
                     </div>
                   </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
+                  <div className="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight">
                     {examinations.length}
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium mt-1 truncate">
+                  <p className="text-[11px] text-slate-500 font-medium mt-1 truncate">
                     {examinations.length > 0 ? `Next: ${examinations[0].exam_date}` : 'Schedule Synchronized'}
                   </p>
                 </div>
 
                 <div
                   onClick={() => setActiveTab('notices')}
-                  className="bg-[#0d1b33]/90 rounded-2xl p-5 border border-slate-800 hover:border-emerald-500/50 transition-all shadow-md group cursor-pointer"
+                  className="bg-white rounded-2xl p-5 border border-slate-200/80 hover:border-emerald-300 transition-all shadow-card group cursor-pointer"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Verified Notices</span>
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Verified Notices</span>
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                       <span className="material-symbols-outlined text-lg">verified</span>
                     </div>
                   </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
-                    {notices.filter(n => n.data_origin === 'VERIFIED_OFFICIAL').length}
+                  <div className="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight">
+                    {verifiedNoticesCount}
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium mt-1 truncate">
+                  <p className="text-[11px] text-slate-500 font-medium mt-1 truncate">
                     Official BTU & ECA Circulars
                   </p>
                 </div>
 
-                <div className="bg-[#0d1b33]/90 rounded-2xl p-5 border border-slate-800 hover:border-[#71d8c8]/40 transition-all shadow-md group">
+                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 hover:border-emerald-300 transition-all shadow-card group">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Academic Term</span>
-                    <div className="w-8 h-8 rounded-lg bg-[#71d8c8]/15 text-[#71d8c8] flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Academic Term</span>
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                       <span className="material-symbols-outlined text-lg">school</span>
                     </div>
                   </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-white leading-tight">
-                    Semester {studentProfile?.semester || 7}
+                  <div className="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight">
+                    Semester {studentSemester}
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium mt-1 truncate">
+                  <p className="text-[11px] text-slate-500 font-medium mt-1 truncate">
                     Batch 2023–2027 • Final Year
                   </p>
                 </div>
 
-                <div className="bg-[#0d1b33]/90 rounded-2xl p-5 border border-slate-800 hover:border-[#bac3ff]/40 transition-all shadow-md group">
+                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 hover:border-emerald-300 transition-all shadow-card group">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Status</span>
-                    <div className="w-8 h-8 rounded-lg bg-[#bac3ff]/15 text-[#bac3ff] flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Status</span>
+                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                       <span className="material-symbols-outlined text-lg">verified_user</span>
                     </div>
                   </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-emerald-400 leading-tight">
+                  <div className="text-2xl md:text-3xl font-extrabold text-emerald-600 leading-tight">
                     Enrolled
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium mt-1 truncate">
-                    {studentProfile?.department || 'Computer Engineering'}
+                  <p className="text-[11px] text-slate-500 font-medium mt-1 truncate">
+                    {studentDepartment}
                   </p>
                 </div>
               </div>
 
-              {/* 3. Core Workspace Grid - Reorganized naturally without empty spaces */}
+              {/* 3. Main 2-Column Split Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                {/* LEFT COLUMN: Official Notice Board (7 cols) */}
+                {/* LEFT COLUMN: ~60% (lg:col-span-7) */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
-                  <div className="bg-[#0d1b33]/90 rounded-2xl p-6 border border-slate-800 shadow-lg">
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                  {/* Official Notice Board Card */}
+                  <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-card">
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                       <div>
-                        <h3 className="text-lg md:text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[#71d8c8]">campaign</span>
+                        <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                          <span className="material-symbols-outlined text-emerald-600">campaign</span>
                           <span>Official Notice Board</span>
                         </h3>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
                           Verified administrative and BTU notifications
                         </p>
                       </div>
-                      <span className="text-xs bg-[#71d8c8]/15 text-[#71d8c8] border border-[#71d8c8]/30 px-2.5 py-1 rounded-full font-bold">
+                      <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold">
                         {filteredNotices.length} Active
                       </span>
                     </div>
@@ -681,8 +675,8 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                             }}
                             className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                               noticeFilter === f
-                                ? 'bg-[#71d8c8] text-[#04132a] shadow-xs'
-                                : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700/80'
+                                ? 'bg-emerald-500 text-white shadow-xs'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                           >
                             {f}
@@ -701,12 +695,12 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                             setSearchQuery(e.target.value);
                             setNoticePage(1);
                           }}
-                          className="w-full bg-[#081528] rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 border border-slate-700/70 focus:outline-hidden focus:border-[#71d8c8] focus:ring-1 focus:ring-[#71d8c8] transition-all font-medium"
+                          className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl pl-8 pr-7 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-medium"
                         />
                         {searchQuery && (
                           <button
                             onClick={() => setSearchQuery('')}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs cursor-pointer"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
                           >
                             ✕
                           </button>
@@ -715,10 +709,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     </div>
 
                     {paginatedNotices.length === 0 ? (
-                      <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-800">
-                        <span className="material-symbols-outlined text-4xl text-slate-600 mb-2">notifications_off</span>
-                        <h4 className="text-sm font-bold text-slate-300">No notices found</h4>
-                        <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+                      <div className="text-center py-10 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">notifications_off</span>
+                        <h4 className="text-sm font-bold text-slate-700">No notices found</h4>
+                        <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
                           No active notices matching the filter "{noticeFilter}".
                         </p>
                       </div>
@@ -727,29 +721,29 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                         {paginatedNotices.map((n) => (
                           <div
                             key={n.id}
-                            className="p-3.5 rounded-xl bg-[#081528] border border-slate-800/90 hover:border-[#71d8c8]/40 transition-all flex items-start justify-between gap-3 group"
+                            className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:border-emerald-300 hover:bg-white transition-all flex items-start justify-between gap-3 group shadow-xs"
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#71d8c8]/20 text-[#71d8c8] uppercase">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 uppercase border border-emerald-100">
                                   {n.scope ? n.scope.replace('_SPECIFIC', '') : (n.classification_scope ? n.classification_scope.replace('_SPECIFIC', '') : (n.notice_type || 'Official'))}
                                 </span>
                                 {n.data_origin === 'VERIFIED_OFFICIAL' && (
-                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
                                     <span className="material-symbols-outlined text-[12px]">verified</span>
                                     Official
                                   </span>
                                 )}
                                 {(n.data_origin === 'DEMO_SEED' || n.verification_status === 'PENDING_VERIFICATION') && (
-                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
                                     Pending Review
                                   </span>
                                 )}
-                                <span className="text-[11px] text-slate-400 font-medium">
+                                <span className="text-[11px] text-slate-500 font-medium">
                                   {n.date || (n.published_date ? new Date(n.published_date).toLocaleDateString() : 'Active')}
                                 </span>
                               </div>
-                              <h4 className="text-xs font-bold text-white group-hover:text-[#71d8c8] transition-colors leading-snug">
+                              <h4 className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug">
                                 {n.title}
                               </h4>
                             </div>
@@ -764,12 +758,12 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                                 }
                                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                                   n.destination_type === 'HOSTED_DOWNLOAD'
-                                    ? 'text-emerald-400 hover:bg-emerald-500/20'
+                                    ? 'text-emerald-600 hover:bg-emerald-50'
                                     : n.destination_type === 'OFFICIAL_DOCUMENT'
-                                      ? 'text-[#71d8c8] hover:bg-[#71d8c8]/20'
+                                      ? 'text-emerald-600 hover:bg-emerald-50'
                                       : n.destination_type === 'OFFICIAL_PAGE'
-                                        ? 'text-blue-400 hover:bg-blue-500/20'
-                                        : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+                                        ? 'text-blue-600 hover:bg-blue-50'
+                                        : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                                 }`}
                                 title={
                                   n.destination_type === 'HOSTED_DOWNLOAD'
@@ -799,20 +793,20 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
                     {/* Notice Pagination Controls */}
                     {totalNoticePages > 1 && (
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-800 text-xs text-slate-400">
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
                         <span>Page {noticePage} of {totalNoticePages}</span>
                         <div className="flex gap-1.5">
                           <button
                             disabled={noticePage <= 1}
                             onClick={() => setNoticePage(p => Math.max(1, p - 1))}
-                            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold transition-all cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-bold transition-all cursor-pointer"
                           >
                             Prev
                           </button>
                           <button
                             disabled={noticePage >= totalNoticePages}
                             onClick={() => setNoticePage(p => Math.min(totalNoticePages, p + 1))}
-                            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold transition-all cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-bold transition-all cursor-pointer"
                           >
                             Next
                           </button>
@@ -820,32 +814,91 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       </div>
                     )}
                   </div>
+
+                  {/* Campus Community Discussions Card */}
+                  <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-card flex flex-col justify-between">
+                    <div>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-3 border-b border-slate-100 gap-2">
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                            <span className="material-symbols-outlined text-emerald-600">forum</span>
+                            <span>Campus Community Discussions</span>
+                          </h3>
+                          <p className="text-xs text-slate-500 font-medium">Recent peer questions, notes, and cohort polls</p>
+                        </div>
+                        <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full font-bold self-start sm:self-auto">
+                          {communityPosts.length} Active
+                        </span>
+                      </div>
+
+                      {communityPosts.length === 0 ? (
+                        <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+                          <span className="material-symbols-outlined text-4xl text-slate-300 mb-1">forum</span>
+                          <p className="text-xs font-semibold text-slate-600">No discussions posted yet</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Start a new thread or ask a question in Campus Community.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                          {communityPosts.slice(0, 3).map((post, idx) => (
+                            <div key={post.id || idx} className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 flex flex-col justify-between hover:border-emerald-300 hover:bg-white transition-all shadow-xs">
+                              <div>
+                                <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium mb-1.5">
+                                  <span className="font-bold text-slate-900 truncate max-w-[140px]">{post.author_name || 'ECA Student'}</span>
+                                  <span className="shrink-0">{post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Recent'}</span>
+                                </div>
+                                <p className="text-xs text-slate-600 font-medium line-clamp-3 leading-relaxed">
+                                  {post.content}
+                                </p>
+                              </div>
+                              {post.tags && post.tags.length > 0 && (
+                                <div className="flex gap-1 flex-wrap mt-3 pt-2 border-t border-slate-200">
+                                  {post.tags.slice(0, 2).map((t) => (
+                                    <span key={t} className="text-[10px] text-emerald-700 font-mono bg-emerald-50 px-1.5 py-0.5 rounded">#{t}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        onClick={() => setActiveTab('community')}
+                        className="w-full sm:w-auto px-5 bg-slate-100 hover:bg-emerald-500 hover:text-white text-slate-700 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.99]"
+                      >
+                        <span>Open Campus Community</span>
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                {/* RIGHT COLUMN: Upcoming Examinations & Campus AI (5 cols) */}
+                {/* RIGHT COLUMN: ~40% (lg:col-span-5) */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
                   {/* Upcoming Examinations Card */}
-                  <div className="bg-[#0d1b33]/90 rounded-2xl p-6 border border-slate-800 shadow-lg">
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                  <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-card">
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                       <div>
-                        <h3 className="text-lg md:text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[#e6c277]">event_available</span>
+                        <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                          <span className="material-symbols-outlined text-amber-500">event_available</span>
                           <span>Upcoming Examinations</span>
                         </h3>
-                        <p className="text-xs text-slate-400 font-medium mt-0.5">
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
                           Midterms, end-semester and practical exams
                         </p>
                       </div>
-                      <span className="text-xs bg-[#e6c277]/15 text-[#e6c277] border border-[#e6c277]/30 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                      <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
                         {examinations.length} Active
                       </span>
                     </div>
 
                     {examinations.length === 0 ? (
-                      <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-800">
-                        <span className="material-symbols-outlined text-4xl text-slate-600 mb-2">event_available</span>
-                        <h4 className="text-sm font-bold text-slate-300">No scheduled exam deadlines</h4>
-                        <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                      <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
+                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">event_available</span>
+                        <h4 className="text-sm font-bold text-slate-700">No scheduled exam deadlines</h4>
+                        <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
                           Official examination notices and practical schedules will appear here once published.
                         </p>
                       </div>
@@ -854,27 +907,27 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                         {examinations.map((exam) => (
                           <div
                             key={`exam-${exam.id}`}
-                            className="p-4 rounded-xl bg-[#081528] border border-amber-500/30 hover:border-amber-500/60 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                            className="p-4 rounded-xl bg-slate-50/80 border border-amber-200 hover:border-amber-400 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
                           >
                             <div>
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-[10px] font-extrabold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                                   {exam.exam_type || 'Examination'}
                                 </span>
-                                <span className="text-xs text-slate-300 font-bold">
+                                <span className="text-xs text-slate-600 font-bold">
                                   {exam.exam_date} {exam.start_time ? `• ${exam.start_time}` : ''}
                                 </span>
                                 {exam.data_origin === 'VERIFIED_OFFICIAL' && (
-                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
                                     <span className="material-symbols-outlined text-[12px]">verified</span>
                                     Official
                                   </span>
                                 )}
                               </div>
-                              <h4 className="text-sm font-bold text-white mt-1.5">
+                              <h4 className="text-sm font-bold text-slate-900 mt-1.5">
                                 {exam.course_code ? `${exam.course_code}: ` : ''}{exam.course_name}
                               </h4>
-                              <p className="text-xs text-slate-400 font-medium mt-0.5">
+                              <p className="text-xs text-slate-500 font-medium mt-0.5">
                                 Hall: {exam.hall_number || 'TBA'} • Max Marks: {exam.max_marks || 'N/A'} • {exam.department}
                               </p>
                             </div>
@@ -886,7 +939,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                                   onActionNotification?.(`Exam details: ${exam.course_name} on ${exam.exam_date}`);
                                 }
                               }}
-                              className="border border-amber-500/40 hover:bg-amber-500/20 text-amber-200 font-bold text-xs uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto cursor-pointer"
+                              className="border border-amber-300 hover:bg-amber-100 text-amber-900 font-bold text-xs uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto cursor-pointer active:scale-[0.99]"
                             >
                               {exam.document_url ? 'Schedule PDF' : 'Details'}
                             </button>
@@ -896,20 +949,20 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     )}
                   </div>
 
-                  {/* CampusSync AI Copilot Box */}
-                  <div className="bg-gradient-to-br from-[#0e2448] to-[#071733] rounded-2xl p-5 border border-[#71d8c8]/40 shadow-xl">
+                  {/* CampusSync AI Copilot Card */}
+                  <div className="bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 rounded-2xl p-5 border border-emerald-200/80 shadow-card">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#71d8c8] to-[#146e62] flex items-center justify-center text-[#04132a] shadow-md shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-sm shrink-0">
                         <span className="material-symbols-outlined text-xl">smart_toy</span>
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                           <span>CampusSync AI Copilot</span>
-                          <span className="text-[9px] bg-[#71d8c8]/20 text-[#71d8c8] border border-[#71d8c8]/30 px-1.5 py-0.2 rounded font-mono">
+                          <span className="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">
                             RAG ONLINE
                           </span>
                         </h4>
-                        <p className="text-[11px] text-slate-300">
+                        <p className="text-[11px] text-slate-600">
                           Instant verified answers grounded on official ECA circulars
                         </p>
                       </div>
@@ -924,10 +977,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                         <button
                           key={idx}
                           onClick={() => handleAiPromptClick(prompt)}
-                          className="w-full text-left p-2 rounded-xl bg-[#081528]/80 hover:bg-[#71d8c8]/15 border border-slate-700/60 hover:border-[#71d8c8]/40 text-xs text-slate-300 hover:text-white transition-all flex items-center justify-between group cursor-pointer"
+                          className="w-full text-left p-2 rounded-xl bg-white/80 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-xs text-slate-700 hover:text-emerald-900 transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
                         >
                           <span className="truncate">{prompt}</span>
-                          <span className="material-symbols-outlined text-sm text-slate-500 group-hover:text-[#71d8c8] shrink-0 ml-1">
+                          <span className="material-symbols-outlined text-sm text-slate-400 group-hover:text-emerald-600 shrink-0 ml-1">
                             arrow_forward
                           </span>
                         </button>
@@ -935,86 +988,26 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     </div>
 
                     {aiLoading && (
-                      <div className="p-3 rounded-xl bg-[#081528] border border-slate-700 text-xs text-[#71d8c8] flex items-center gap-2 mb-3">
+                      <div className="p-3 rounded-xl bg-white border border-emerald-200 text-xs text-emerald-700 flex items-center gap-2 mb-3 shadow-xs">
                         <span className="material-symbols-outlined animate-spin text-base">progress_activity</span>
                         <span>Retrieving verified official records...</span>
                       </div>
                     )}
 
                     {aiResponse && (
-                      <div className="p-3.5 rounded-xl bg-[#081528] border border-[#71d8c8]/40 text-xs text-slate-200 mb-3 max-h-48 overflow-y-auto leading-relaxed">
-                        <p className="font-bold text-[#71d8c8] mb-1">CampusSync AI Answer:</p>
+                      <div className="p-3.5 rounded-xl bg-white border border-emerald-200 text-xs text-slate-800 mb-3 max-h-48 overflow-y-auto leading-relaxed shadow-xs">
+                        <p className="font-bold text-emerald-700 mb-1">CampusSync AI Answer:</p>
                         <div className="whitespace-pre-wrap">{aiResponse}</div>
                       </div>
                     )}
 
                     <button
                       onClick={() => setActiveTab('ai')}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#71d8c8] to-[#8ef4e4] text-[#04132a] font-extrabold text-xs uppercase tracking-wider transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-sm hover:shadow flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.99]"
                     >
-                      <span>Open Full AI Workspace</span>
-                      <span className="material-symbols-outlined text-base">open_in_full</span>
+                      <span>OPEN FULL AI WORKSPACE ↗</span>
                     </button>
                   </div>
-                </div>
-              </div>
-
-              {/* 4. Lower Highlights (Campus Community Discussions) */}
-              <div className="bg-[#0d1b33]/90 rounded-2xl p-6 border border-slate-800 shadow-md flex flex-col justify-between">
-                <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-3 border-b border-slate-800 gap-2">
-                    <div>
-                      <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[#71d8c8]">forum</span>
-                        <span>Campus Community Discussions</span>
-                      </h3>
-                      <p className="text-xs text-slate-400 font-medium">Recent peer questions, notes, and cohort polls</p>
-                    </div>
-                    <span className="text-xs bg-[#71d8c8]/15 text-[#71d8c8] border border-[#71d8c8]/30 px-3 py-1 rounded-full font-bold self-start sm:self-auto">
-                      {communityPosts.length} Active
-                    </span>
-                  </div>
-
-                  {communityPosts.length === 0 ? (
-                    <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-800">
-                      <span className="material-symbols-outlined text-4xl text-slate-600 mb-1">forum</span>
-                      <p className="text-xs font-semibold text-slate-400">No discussions posted yet</p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">Start a new thread or ask a question in Campus Community.</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                      {communityPosts.slice(0, 3).map((post, idx) => (
-                        <div key={post.id || idx} className="p-4 rounded-xl bg-[#081528] border border-slate-800 flex flex-col justify-between hover:border-[#71d8c8]/40 transition-colors">
-                          <div>
-                            <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium mb-1.5">
-                              <span className="font-bold text-white truncate max-w-[140px]">{post.author_name || 'ECA Student'}</span>
-                              <span className="shrink-0">{post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Recent'}</span>
-                            </div>
-                            <p className="text-xs text-slate-300 font-medium line-clamp-3 leading-relaxed">
-                              {post.content}
-                            </p>
-                          </div>
-                          {post.tags && post.tags.length > 0 && (
-                            <div className="flex gap-1 flex-wrap mt-3 pt-2 border-t border-slate-800/60">
-                              {post.tags.slice(0, 2).map((t) => (
-                                <span key={t} className="text-[10px] text-[#71d8c8] font-mono">#{t}</span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={() => setActiveTab('community')}
-                    className="w-full sm:w-auto px-6 bg-slate-800/80 hover:bg-[#71d8c8] hover:text-[#04132a] text-white font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <span>Open Campus Community</span>
-                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -1024,18 +1017,18 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
           {/* TAB: NOTICES                                                   */}
           {/* ============================================================== */}
           {activeTab === 'notices' && (
-            <div className="bg-[#0d1b33]/90 rounded-2xl p-6 md:p-8 border border-slate-800 shadow-xl animate-in fade-in duration-200 space-y-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-800 gap-4">
+            <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200/80 shadow-card animate-in fade-in duration-200 space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-4">
                 <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#71d8c8]">campaign</span>
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <span className="material-symbols-outlined text-emerald-600">campaign</span>
                     <span>Official BTU & ECA Notice Board</span>
                   </h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
                     Verified administrative orders, academic circulars, and departmental updates
                   </p>
                 </div>
-                <div className="px-3.5 py-1.5 rounded-xl bg-[#71d8c8]/15 border border-[#71d8c8]/30 text-[#71d8c8] text-xs font-bold">
+                <div className="px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
                   {filteredNotices.length} Notices Available
                 </div>
               </div>
@@ -1052,8 +1045,8 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       }}
                       className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                         noticeFilter === f
-                          ? 'bg-[#71d8c8] text-[#04132a] shadow-xs'
-                          : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700/80'
+                          ? 'bg-emerald-500 text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
                       {f}
@@ -1071,12 +1064,12 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       setSearchQuery(e.target.value);
                       setNoticePage(1);
                     }}
-                    className="w-full bg-[#081528] rounded-xl pl-9 pr-8 py-2 text-xs text-slate-100 placeholder:text-slate-500 border border-slate-700/70 focus:outline-hidden focus:border-[#71d8c8] focus:ring-1 focus:ring-[#71d8c8] transition-all font-medium"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-medium"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
                     >
                       ✕
                     </button>
@@ -1086,9 +1079,9 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
               {/* Notices List */}
               {paginatedNotices.length === 0 ? (
-                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800">
-                  <span className="material-symbols-outlined text-5xl text-slate-600 mb-3">notifications_off</span>
-                  <h4 className="text-base font-bold text-slate-300">No notices found</h4>
+                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
+                  <span className="material-symbols-outlined text-5xl text-slate-300 mb-3">notifications_off</span>
+                  <h4 className="text-base font-bold text-slate-700">No notices found</h4>
                   <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                     No verified notices matching "{noticeFilter}" {searchQuery ? `and query "${searchQuery}"` : ''}.
                   </p>
@@ -1098,28 +1091,28 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   {paginatedNotices.map((n) => (
                     <div
                       key={n.id}
-                      className="p-4 rounded-xl bg-[#081528] border border-slate-800 hover:border-[#71d8c8]/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs group"
+                      className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:border-emerald-300 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs group"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#71d8c8]/20 text-[#71d8c8] uppercase">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 uppercase border border-emerald-100">
                             {n.scope ? n.scope.replace('_SPECIFIC', '') : (n.classification_scope ? n.classification_scope.replace('_SPECIFIC', '') : (n.notice_type || 'Official'))}
                           </span>
                           {n.data_origin === 'VERIFIED_OFFICIAL' && (
-                            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
                               <span className="material-symbols-outlined text-[12px]">verified</span>
                               Official
                             </span>
                           )}
-                          <span className="text-[11px] text-slate-400 font-medium">
+                          <span className="text-[11px] text-slate-500 font-medium">
                             {n.date || (n.published_date ? new Date(n.published_date).toLocaleDateString() : 'Active')}
                           </span>
                         </div>
-                        <h4 className="text-sm font-bold text-white group-hover:text-[#71d8c8] transition-colors leading-snug">
+                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug">
                           {n.title}
                         </h4>
                         {n.content && (
-                          <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
                             {n.content}
                           </p>
                         )}
@@ -1133,7 +1126,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               'Official notice link is currently unavailable.'
                             )
                           }
-                          className="px-3.5 py-2 rounded-xl bg-[#71d8c8]/15 hover:bg-[#71d8c8] text-[#71d8c8] hover:text-[#04132a] font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                          className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-500 text-emerald-700 hover:text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.99]"
                         >
                           <span>{n.destination_type === 'HOSTED_DOWNLOAD' ? 'Download PDF' : 'View Circular'}</span>
                           <span className="material-symbols-outlined text-sm">
@@ -1148,20 +1141,20 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
               {/* Pagination */}
               {totalNoticePages > 1 && (
-                <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs text-slate-400">
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs text-slate-500">
                   <span>Page {noticePage} of {totalNoticePages}</span>
                   <div className="flex gap-2">
                     <button
                       disabled={noticePage <= 1}
                       onClick={() => setNoticePage(p => Math.max(1, p - 1))}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold transition-all cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-bold transition-all cursor-pointer"
                     >
                       Prev
                     </button>
                     <button
                       disabled={noticePage >= totalNoticePages}
                       onClick={() => setNoticePage(p => Math.min(totalNoticePages, p + 1))}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold transition-all cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-bold transition-all cursor-pointer"
                     >
                       Next
                     </button>
@@ -1175,28 +1168,28 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
           {/* TAB: EXAMINATIONS                                              */}
           {/* ============================================================== */}
           {activeTab === 'examinations' && (
-            <div className="bg-[#0d1b33]/90 rounded-2xl p-6 md:p-8 border border-slate-800 shadow-xl animate-in fade-in duration-200 space-y-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-800 gap-4">
+            <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200/80 shadow-card animate-in fade-in duration-200 space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-4">
                 <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#e6c277]">event_available</span>
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <span className="material-symbols-outlined text-amber-500">event_available</span>
                     <span>Academic Examination Schedule</span>
                   </h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
                     Official BTU midterms, end-semester examinations, and practical assessments
                   </p>
                 </div>
-                <div className="px-3.5 py-1.5 rounded-xl bg-[#e6c277]/15 border border-[#e6c277]/30 text-[#e6c277] text-xs font-bold">
+                <div className="px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
                   {examinations.length} Scheduled
                 </div>
               </div>
 
               {examinations.length === 0 ? (
-                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800">
-                  <span className="material-symbols-outlined text-5xl text-slate-600 mb-3">event_available</span>
-                  <h4 className="text-base font-bold text-slate-300">No scheduled examinations at this moment</h4>
-                  <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                    Official BTU examination dates and practical schedules for Semester {studentProfile?.semester || 7} will appear here once published by the examination branch.
+                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
+                  <span className="material-symbols-outlined text-5xl text-slate-300 mb-3">event_available</span>
+                  <h4 className="text-base font-bold text-slate-700">No scheduled examinations at this moment</h4>
+                  <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                    Official BTU examination dates and practical schedules for Semester {studentSemester} will appear here once published by the examination branch.
                   </p>
                 </div>
               ) : (
@@ -1204,38 +1197,38 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   {examinations.map((exam) => (
                     <div
                       key={`exam-tab-${exam.id}`}
-                      className="p-5 rounded-2xl bg-[#081528] border border-slate-800 hover:border-amber-500/40 transition-all flex flex-col justify-between shadow-md"
+                      className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200 hover:border-amber-300 hover:bg-white transition-all flex flex-col justify-between shadow-xs"
                     >
                       <div>
                         <div className="flex items-center justify-between mb-3 gap-2">
-                          <span className="text-[10px] font-extrabold text-amber-300 bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                          <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                             {exam.exam_type || 'Examination'}
                           </span>
-                          <span className="text-xs text-slate-300 font-bold">
+                          <span className="text-xs text-slate-600 font-bold">
                             {exam.exam_date} {exam.start_time ? `• ${exam.start_time}` : ''}
                           </span>
                         </div>
-                        <h4 className="text-base font-bold text-white leading-snug">
+                        <h4 className="text-base font-bold text-slate-900 leading-snug">
                           {exam.course_code ? `${exam.course_code}: ` : ''}{exam.course_name}
                         </h4>
-                        <div className="mt-3 space-y-1 text-xs text-slate-400 font-medium">
+                        <div className="mt-3 space-y-1 text-xs text-slate-600 font-medium">
                           <p className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-sm text-slate-500">meeting_room</span>
-                            <span>Venue / Hall: <strong className="text-slate-300">{exam.hall_number || 'TBA'}</strong></span>
+                            <span className="material-symbols-outlined text-sm text-slate-400">meeting_room</span>
+                            <span>Venue / Hall: <strong className="text-slate-800">{exam.hall_number || 'TBA'}</strong></span>
                           </p>
                           <p className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-sm text-slate-500">grade</span>
-                            <span>Max Marks: <strong className="text-slate-300">{exam.max_marks || 'N/A'}</strong></span>
+                            <span className="material-symbols-outlined text-sm text-slate-400">grade</span>
+                            <span>Max Marks: <strong className="text-slate-800">{exam.max_marks || 'N/A'}</strong></span>
                           </p>
                           <p className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-sm text-slate-500">domain</span>
-                            <span>Department: <strong className="text-slate-300">{exam.department || studentProfile?.department}</strong></span>
+                            <span className="material-symbols-outlined text-sm text-slate-400">domain</span>
+                            <span>Department: <strong className="text-slate-800">{exam.department || studentDepartment}</strong></span>
                           </p>
                         </div>
                       </div>
 
-                      <div className="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
-                        <span className="text-[11px] text-slate-400 font-medium">Official Assessment</span>
+                      <div className="mt-5 pt-3 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <span className="text-[11px] text-slate-500 font-medium">Official Assessment</span>
                         <button
                           onClick={() => {
                             if (exam.document_url) {
@@ -1244,7 +1237,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               onActionNotification?.(`Official schedule details: ${exam.course_name} on ${exam.exam_date}`);
                             }
                           }}
-                          className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-200 hover:text-[#04132a] font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                          className="px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-500 text-amber-900 hover:text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.99]"
                         >
                           <span>{exam.document_url ? 'Schedule PDF' : 'Details'}</span>
                           <span className="material-symbols-outlined text-sm">
@@ -1261,22 +1254,22 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
           {/* Fallback alias: If a user ever navigates to legacy tabs, route cleanly */}
           {(activeTab === 'academics' || activeTab === 'resources') && (
-            <div className="bg-[#0d1b33]/90 rounded-2xl p-6 md:p-8 border border-slate-800 shadow-xl animate-in fade-in duration-200 space-y-4 text-center">
-              <span className="material-symbols-outlined text-4xl text-[#71d8c8]">event_available</span>
-              <h3 className="text-lg font-bold text-white">Academic Schedule & Examinations</h3>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
-                Academic schedules and syllabus circulars are unified under Examinations and Official Notices for Semester {studentProfile?.semester || 7}.
+            <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-card animate-in fade-in duration-200 space-y-4 text-center">
+              <span className="material-symbols-outlined text-4xl text-emerald-600">event_available</span>
+              <h3 className="text-lg font-bold text-slate-900">Academic Schedule & Examinations</h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                Academic schedules and syllabus circulars are unified under Examinations and Official Notices for Semester {studentSemester}.
               </p>
               <div className="pt-2 flex justify-center gap-3">
                 <button
                   onClick={() => setActiveTab('overview')}
-                  className="px-4 py-2 rounded-xl bg-[#71d8c8] text-[#04132a] text-xs font-bold uppercase tracking-wider cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs active:scale-[0.99]"
                 >
                   Return to Command Center
                 </button>
                 <button
                   onClick={() => setActiveTab('examinations')}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-white border border-slate-700 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xs active:scale-[0.99]"
                 >
                   View Examinations
                 </button>
@@ -1288,19 +1281,19 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
           {/* TAB: COMMUNITY                                                 */}
           {/* ============================================================== */}
           {activeTab === 'community' && (
-            <div className="bg-[#0d1b33]/90 rounded-2xl p-6 md:p-8 border border-slate-800 shadow-xl animate-in fade-in duration-200 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+            <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200/80 shadow-card animate-in fade-in duration-200 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#71d8c8]">forum</span>
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <span className="material-symbols-outlined text-emerald-600">forum</span>
                     <span>Campus Community</span>
                   </h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
                     Peer discussions, academic notes, live polls, and college project collaborations
                   </p>
                 </div>
-                <div className="text-xs font-semibold text-slate-300 bg-[#081528] px-3.5 py-1.5 rounded-xl border border-slate-800 shadow-xs self-start sm:self-auto">
-                  <span className="text-[#71d8c8] font-bold">{communityPosts.length}</span> Discussions Active
+                <div className="text-xs font-semibold text-slate-600 bg-slate-50 px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-xs self-start sm:self-auto">
+                  <span className="text-emerald-600 font-bold">{communityPosts.length}</span> Discussions Active
                 </div>
               </div>
 
@@ -1314,10 +1307,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
               {/* Discussions Feed */}
               {communityPosts.length === 0 ? (
-                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800 space-y-3">
-                  <span className="material-symbols-outlined text-5xl text-slate-600 mb-2">forum</span>
-                  <h4 className="text-base font-bold text-slate-300">No community discussions posted yet</h4>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 space-y-3">
+                  <span className="material-symbols-outlined text-5xl text-slate-300 mb-2">forum</span>
+                  <h4 className="text-base font-bold text-slate-700">No community discussions posted yet</h4>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
                     Be the first in your cohort to ask a question, share research notes, or start a live poll above!
                   </p>
                 </div>
@@ -1339,73 +1332,11 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             </div>
           )}
 
-          {/* TAB: CLUBS & SAC temporarily disabled for Semester 7 (Preserved for Semester 8 - Project Phase 2) */}
-
-          {/* TAB: EVENTS temporarily disabled for Semester 7 (Preserved for Semester 8 - Major Project Phase 2) */}
-          {/*
-          activeTab === 'events' && (
-            <div className="bg-[#0d1b33]/90 rounded-2xl p-6 md:p-8 border border-slate-800 shadow-xl animate-in fade-in duration-200 space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-800">
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">Campus Events & Technical Fests</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Tarangini, Technorion hackathons, and departmental workshops
-                  </p>
-                </div>
-                <div className="px-3 py-1 rounded-xl bg-[#e6c277]/15 border border-[#e6c277]/30 text-[#e6c277] text-xs font-bold">
-                  {events.length} Scheduled
-                </div>
-              </div>
-
-              {events.length === 0 ? (
-                <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-800">
-                  <span className="material-symbols-outlined text-5xl text-slate-600 mb-3">event_busy</span>
-                  <p className="text-sm font-semibold text-slate-400">No scheduled events at this moment.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {events.map((ev, idx) => (
-                    <div key={ev.id || idx} className="p-5 rounded-2xl bg-[#081528] border border-slate-800 hover:border-[#e6c277]/40 transition-all flex flex-col justify-between shadow-xs">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                            {ev.event_type || 'Event'}
-                          </span>
-                          <span className="text-xs text-slate-400 font-medium">
-                            {ev.start_time ? new Date(ev.start_time).toLocaleDateString() : 'Upcoming'}
-                          </span>
-                        </div>
-                        <h4 className="text-base font-bold text-white mt-1">{ev.title}</h4>
-                        <p className="text-xs text-slate-400 font-medium mt-1">
-                          Location: {ev.location || 'College Auditorium'}
-                        </p>
-                        {ev.description && (
-                          <p className="text-xs text-slate-300 mt-2 line-clamp-3 leading-relaxed">
-                            {ev.description}
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => onActionNotification?.(`Registered for event pass: ${ev.title}`)}
-                        className="mt-4 w-full bg-[#e6c277] hover:bg-[#ffdf9f] text-[#04132a] font-bold text-xs uppercase tracking-wider py-2 rounded-xl transition-all shadow-xs"
-                      >
-                        Register for Pass
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )
-          */}
-
-
-
           {/* ============================================================== */}
           {/* TAB: CAMPUSSYNC AI WORKSPACE                                   */}
           {/* ============================================================== */}
           {activeTab === 'ai' && (
-            <div className="bg-[#0d1b33]/90 rounded-2xl border border-slate-800 shadow-2xl animate-in fade-in duration-200 overflow-hidden">
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-card animate-in fade-in duration-200 overflow-hidden">
               <CampusAiWorkspace
                 studentProfile={studentProfile}
                 onActionNotification={onActionNotification}
@@ -1414,6 +1345,23 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
           )}
         </main>
       </div>
+
+      {/* Floating Action Button: Docked bottom-right CAMPUS AI with robot icon & pulse ping */}
+      <button
+        onClick={() => {
+          setActiveTab('ai');
+          onActionNotification?.('Opening CampusSync AI workspace');
+        }}
+        className="fixed bottom-6 right-6 z-40 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 group cursor-pointer active:scale-95"
+        title="Open CampusSync AI Workspace"
+      >
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+        </span>
+        <span className="material-symbols-outlined text-lg">smart_toy</span>
+        <span className="text-xs uppercase tracking-wider font-extrabold">Campus AI</span>
+      </button>
 
       {/* Edit Profile Modal */}
       <EditProfileModal

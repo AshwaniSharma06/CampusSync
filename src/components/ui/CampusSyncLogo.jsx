@@ -38,7 +38,7 @@ export default function CampusSyncLogo({
   const currentHeight = typeof size === 'number' ? size : (heightMap[size] || 42);
 
   const isLight = theme === 'light';
-  const campusTextColor = isLight ? '#04132a' : '#FFFFFF';
+  const campusTextColor = isLight ? '#0f172a' : '#FFFFFF';
   const maskBg = isLight ? '#ffffff' : '#04132a';
 
   // Common Gradients Definition
@@ -70,8 +70,8 @@ export default function CampusSyncLogo({
       </linearGradient>
 
       <linearGradient id="csSyncText" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor={isLight ? '#00a89d' : '#00f0d4'} />
-        <stop offset="100%" stopColor={isLight ? '#0d9488' : '#71d8c8'} />
+        <stop offset="0%" stopColor={isLight ? '#10b981' : '#00f0d4'} />
+        <stop offset="100%" stopColor={isLight ? '#059669' : '#71d8c8'} />
       </linearGradient>
 
       <linearGradient id="csDivider" x1="0%" y1="0%" x2="0%" y2="100%">

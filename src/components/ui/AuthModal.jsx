@@ -285,7 +285,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-      <div className="relative w-full max-w-xl my-auto bg-white rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden font-sans">
+      <div className={`relative w-full ${mode === 'signup' ? 'max-w-2xl' : 'max-w-md'} my-auto bg-white rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden font-sans transition-all duration-300`}>
         {/* Top Decorative Gradient Accent Bar */}
         <div className="w-full h-1 bg-gradient-to-r from-teal-400 via-teal-500 to-cyan-400"></div>
 
