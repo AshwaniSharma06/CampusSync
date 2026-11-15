@@ -298,14 +298,14 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans antialiased flex flex-col selection:bg-emerald-100 selection:text-emerald-900 relative">
-      {/* 2. AMBIENT BACKGROUND LAYER (LIGHT SHARP BOKEH) */}
+      {/* 2. AMBIENT BACKGROUND LAYER (50% OPACITY) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img 
           src="/assets/campus-bg.jpg" 
           alt="Campus Architecture" 
-          className="w-full h-full object-cover scale-105 filter blur-[8px] opacity-15"
+          className="w-full h-full object-cover scale-105 filter blur-[3px] opacity-50"
         />
-        <div className="absolute inset-0 bg-slate-50/70 backdrop-blur-[2px]"></div>
+        <div className="absolute inset-0 bg-slate-50/35"></div>
       </div>
 
       {/* 1. Top Navigation Bar (h-16, sticky top, bg-white/90 backdrop-blur-md, border-b border-slate-200) */}
