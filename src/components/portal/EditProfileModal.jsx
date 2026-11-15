@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
 
-const AVAILABLE_INTERESTS = [
-  'AI & Machine Learning',
-  'Web Development',
-  'Cloud Computing',
-  'Cybersecurity',
-  'IoT & Embedded Systems',
-  'Data Science & Analytics',
-  'Competitive Programming',
-  'Robotics',
-];
-
 const DEPARTMENTS = [
   'Computer Engineering (CSE)',
   'CSE (Cyber Security)',
@@ -46,22 +35,12 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
         department: currentProfile.department || 'Computer Science & Engineering',
         semester: currentProfile.semester || 7,
         enrollmentYear: currentProfile.enrollment_year || 2023,
-        interests: currentProfile.interests || ['AI & Machine Learning', 'Web Development'],
+        interests: currentProfile.interests || [],
       });
     }
   }, [currentProfile, isOpen]);
 
   if (!isOpen) return null;
-
-  const toggleInterest = (interest) => {
-    setFormData((prev) => {
-      const exists = prev.interests.includes(interest);
-      if (exists) {
-        return { ...prev, interests: prev.interests.filter((i) => i !== interest) };
-      }
-      return { ...prev, interests: [...prev.interests, interest] };
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,7 +60,7 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
       const updated = await apiService.updateStudentProfile(payload);
       if (onProfileUpdated) {
         onProfileUpdated({
-          name: updated.full_name,
+          name: updated.full_name || formData.fullName,
           email: updated.email,
           department: updated.department,
           studentId: updated.student_id,
@@ -104,14 +83,14 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-6 py-5 bg-gradient-to-r from-teal-600 via-indigo-600 to-teal-700 text-white flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-2xl text-teal-200">badge</span>
             <div>
-              <h2 className="text-lg font-bold">Edit Student Profile</h2>
-              <p className="text-xs text-teal-100">Keep your academic records and personalized feed accurate</p>
+              <h2 className="text-lg font-bold">Student Profile Details</h2>
+              <p className="text-xs text-teal-100">Official institutional record details verified with BTU</p>
             </div>
           </div>
           <button
@@ -133,16 +112,20 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Full Name
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                <span>Full Name</span>
+                <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-0.5">
+                  <span className="material-symbols-outlined text-xs">lock</span> Official Record
+                </span>
               </label>
               <input
                 type="text"
                 value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                placeholder="Enter full name"
+                readOnly
+                disabled
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-slate-50 cursor-not-allowed font-medium select-none"
+                placeholder="Registered full name"
+                title="Student name is locked to official college registration records"
               />
             </div>
 
@@ -156,9 +139,10 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
               <input
                 type="text"
                 value={formData.studentId}
-                disabled={Boolean(currentProfile?.studentId || currentProfile?.student_id)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-slate-50 disabled:cursor-not-allowed"
-                placeholder="e.g. ECA2026-8941"
+                readOnly
+                disabled
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-slate-50 cursor-not-allowed font-medium select-none"
+                placeholder="e.g. 22ECA081"
               />
             </div>
           </div>
@@ -173,8 +157,8 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
               </label>
               <select
                 value={formData.department}
-                disabled={Boolean(currentProfile?.department)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-slate-50 disabled:cursor-not-allowed"
+                disabled
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-slate-50 cursor-not-allowed font-medium select-none"
               >
                 {DEPARTMENTS.map((dept) => (
                   <option key={dept} value={dept}>{dept}</option>
@@ -191,8 +175,8 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
               </label>
               <select
                 value={formData.semester}
-                disabled={Boolean(currentProfile?.semester)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 bg-slate-50 disabled:cursor-not-allowed"
+                disabled
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-slate-50 cursor-not-allowed font-medium select-none"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
                   <option key={sem} value={sem}>Semester {sem}</option>
@@ -201,30 +185,11 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-              Academic & Technical Interests
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {AVAILABLE_INTERESTS.map((interest) => {
-                const isSelected = formData.interests.includes(interest);
-                return (
-                  <button
-                    key={interest}
-                    type="button"
-                    onClick={() => toggleInterest(interest)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                      isSelected
-                        ? 'bg-teal-600 text-white shadow-xs'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    {isSelected ? '✓ ' : '+ '}
-                    {interest}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start gap-2.5">
+            <span className="material-symbols-outlined text-teal-600 text-lg shrink-0 mt-0.5">verified_user</span>
+            <p className="leading-relaxed">
+              Student details are synchronized with the Engineering College Ajmer & BTU Student Information System. To request a change in your registered records, contact the IT Helpdesk ECA.
+            </p>
           </div>
 
           <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
@@ -232,14 +197,14 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold uppercase tracking-wider transition-colors"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
             >
-              Cancel
+              Close
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-md flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-md flex items-center gap-2 cursor-pointer"
             >
               {saving ? (
                 <>
@@ -248,8 +213,8 @@ export default function EditProfileModal({ isOpen, onClose, currentProfile, onPr
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-sm">save</span>
-                  Save Profile
+                  <span className="material-symbols-outlined text-sm">check</span>
+                  Confirm & Sync
                 </>
               )}
             </button>
