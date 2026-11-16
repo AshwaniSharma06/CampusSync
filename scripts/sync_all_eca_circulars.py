@@ -147,7 +147,16 @@ for db_path in ['campussync.db', 'backend/campussync.db', '/data/campussync.db']
 
 # Run cohort reconciliation across databases
 try:
-    from scripts.reconcile_cohort_tagging import reconcile_database
+    import sys
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    for p in [script_dir, project_root, os.getcwd()]:
+        if p not in sys.path:
+            sys.path.insert(0, p)
+    try:
+        from reconcile_cohort_tagging import reconcile_database
+    except ImportError:
+        from scripts.reconcile_cohort_tagging import reconcile_database
     for db_path in ['campussync.db', 'backend/campussync.db', '/data/campussync.db']:
         reconcile_database(db_path)
 except Exception as e:

@@ -12,6 +12,7 @@ if [ -d "/data" ]; then
     else
         echo "[CampusSync Docker] Syncing persistent database at /data/campussync.db with release circulars..."
         python scripts/sync_all_eca_circulars.py || true
+        python scripts/reconcile_cohort_tagging.py || true
     fi
 
     # Seed ChromaDB into persistent volume if none exists yet
