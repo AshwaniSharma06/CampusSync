@@ -309,7 +309,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   const sidebarNavItems = [
     { id: 'overview', label: 'Overview', icon: 'dashboard', category: 'Academic Core', badge: null },
     { id: 'notices', label: 'Official Notices', icon: 'campaign', category: 'Academic Core', badge: `${verifiedNoticesCount} Verified` },
-    { id: 'examinations', label: 'Examinations', icon: 'event_available', category: 'Academic Core', badge: `${examinations.length} Active` },
     { id: 'community', label: 'Community', icon: 'forum', category: 'Campus Life', badge: 'Active' },
     { id: 'ai', label: 'CampusSync AI', icon: 'smart_toy', category: 'Intelligence', badge: 'Verified RAG', badgeColor: 'bg-emerald-100 text-emerald-800 border border-emerald-200' },
   ];
@@ -528,8 +527,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       {getGreeting()}, <span className="text-emerald-600 font-extrabold">{firstName}</span>!
                     </h2>
                     <p className="text-sm text-slate-600 mt-1 font-medium leading-relaxed max-w-xl">
-                      You have <span className="text-slate-900 font-bold">{examinations.length} scheduled examinations</span> and{' '}
-                      <span className="text-slate-900 font-bold">{verifiedNoticesCount} verified notices</span> in your cohort.
+                      You have <span className="text-slate-900 font-bold">{verifiedNoticesCount} verified official circulars</span> in your cohort.
                     </p>
 
                     <div className="flex flex-wrap gap-2.5 mt-4">
@@ -541,13 +539,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                         <span>Official Notices</span>
                       </button>
                       <button
-                        onClick={() => setActiveTab('examinations')}
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-xs transition-all cursor-pointer active:scale-[0.99]"
-                      >
-                        <span className="material-symbols-outlined text-base">event_available</span>
-                        <span>Exam Schedule</span>
-                      </button>
-                      <button
                         onClick={() => setActiveTab('ai')}
                         className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs transition-all cursor-pointer active:scale-[0.99]"
                       >
@@ -556,86 +547,11 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       </button>
                     </div>
                   </div>
-
-                  {/* Right Column Callout Card */}
-                  {examinations.length > 0 ? (
-                    <div className="w-full lg:w-auto bg-slate-50/90 rounded-2xl p-4 md:p-5 border border-emerald-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex flex-col items-center justify-center shrink-0 shadow-sm">
-                          <span className="text-[10px] font-extrabold uppercase leading-none">Exam</span>
-                          <span className="text-xs font-extrabold mt-0.5">{examinations[0].start_time ? examinations[0].start_time.slice(0, 5) : 'Active'}</span>
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
-                              {examinations[0].exam_type || 'Examination'}
-                            </span>
-                            <span className="text-xs text-slate-600 font-semibold">{examinations[0].exam_date}</span>
-                          </div>
-                          <h4 className="text-sm font-bold text-slate-900 mt-1">
-                            {examinations[0].course_code ? `${examinations[0].course_code}: ` : ''}{examinations[0].course_name}
-                          </h4>
-                          <p className="text-xs text-slate-500 font-medium">
-                            Hall {examinations[0].hall_number || 'TBA'} • Max Marks: {examinations[0].max_marks || 'N/A'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          if (examinations[0].document_url) {
-                            window.open(examinations[0].document_url, '_blank', 'noopener,noreferrer');
-                          } else {
-                            onActionNotification?.(`Exam details: ${examinations[0].course_name} on ${examinations[0].exam_date}`);
-                          }
-                        }}
-                        className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 self-stretch sm:self-auto justify-center shrink-0 cursor-pointer active:scale-[0.99]"
-                      >
-                        <span>{examinations[0].document_url ? 'View Schedule PDF' : 'Details'}</span>
-                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="w-full lg:w-auto bg-slate-50/80 rounded-2xl p-4 md:p-5 border border-slate-200 shadow-xs flex items-center gap-3.5 shrink-0">
-                      <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
-                        <span className="material-symbols-outlined text-2xl">event_available</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          SCHEDULE CLEAR
-                        </span>
-                        <h4 className="text-sm font-bold text-slate-900 mt-1">
-                          No Immediate Deadlines
-                        </h4>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Semester {studentSemester} • {studentDepartment}
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
 
-              {/* 2. KPI Metric Grid (4 Columns) */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div
-                  onClick={() => setActiveTab('examinations')}
-                  className="bg-white rounded-2xl p-5 border border-slate-200/80 hover:border-amber-300 transition-all shadow-card group cursor-pointer"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Examinations</span>
-                    <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <span className="material-symbols-outlined text-lg">event_available</span>
-                    </div>
-                  </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight">
-                    {examinations.length}
-                  </div>
-                  <p className="text-[11px] text-slate-500 font-medium mt-1 truncate">
-                    {examinations.length > 0 ? `Next: ${examinations[0].exam_date}` : 'Schedule Synchronized'}
-                  </p>
-                </div>
-
+              {/* 2. KPI Metric Grid (3 Columns) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div
                   onClick={() => setActiveTab('notices')}
                   className="bg-white rounded-2xl p-5 border border-slate-200/80 hover:border-emerald-300 transition-all shadow-card group cursor-pointer"
@@ -923,78 +839,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
 
                 {/* RIGHT COLUMN: ~40% (lg:col-span-5) */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
-                  {/* Upcoming Examinations Card */}
-                  <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-card">
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                      <div>
-                        <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                          <span className="material-symbols-outlined text-amber-500">event_available</span>
-                          <span>Upcoming Examinations</span>
-                        </h3>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">
-                          Midterms, end-semester and practical exams
-                        </p>
-                      </div>
-                      <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-                        {examinations.length} Active
-                      </span>
-                    </div>
-
-                    {examinations.length === 0 ? (
-                      <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
-                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">event_available</span>
-                        <h4 className="text-sm font-bold text-slate-700">No scheduled exam deadlines</h4>
-                        <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                          Official examination notices and practical schedules will appear here once published.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {examinations.map((exam) => (
-                          <div
-                            key={`exam-${exam.id}`}
-                            className="p-4 rounded-xl bg-slate-50/80 border border-amber-200 hover:border-amber-400 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
-                          >
-                            <div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                                  {exam.exam_type || 'Examination'}
-                                </span>
-                                <span className="text-xs text-slate-600 font-bold">
-                                  {exam.exam_date} {exam.start_time ? `• ${exam.start_time}` : ''}
-                                </span>
-                                {exam.data_origin === 'VERIFIED_OFFICIAL' && (
-                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                    <span className="material-symbols-outlined text-[12px]">verified</span>
-                                    Official
-                                  </span>
-                                )}
-                              </div>
-                              <h4 className="text-sm font-bold text-slate-900 mt-1.5">
-                                {exam.course_code ? `${exam.course_code}: ` : ''}{exam.course_name}
-                              </h4>
-                              <p className="text-xs text-slate-500 font-medium mt-0.5">
-                                Hall: {exam.hall_number || 'TBA'} • Max Marks: {exam.max_marks || 'N/A'} • {exam.department}
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => {
-                                if (exam.document_url) {
-                                  window.open(exam.document_url, '_blank', 'noopener,noreferrer');
-                                } else {
-                                  onActionNotification?.(`Exam details: ${exam.course_name} on ${exam.exam_date}`);
-                                }
-                              }}
-                              className="border border-amber-300 hover:bg-amber-100 text-amber-900 font-bold text-xs uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shrink-0 self-start sm:self-auto cursor-pointer active:scale-[0.99]"
-                            >
-                              {exam.document_url ? 'Schedule PDF' : 'Details'}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
                   {/* CampusSync AI Copilot Card */}
                   <div className="bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 rounded-2xl p-5 border border-emerald-200/80 shadow-card">
                     <div className="flex items-center gap-3 mb-3">
