@@ -510,6 +510,18 @@ export const apiService = {
       }),
     });
   },
+
+  uploadPdfForRag: async (file, sessionId = null) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (sessionId) {
+      formData.append('session_id', sessionId);
+    }
+    return apiClient('/rag/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  },
 };
 
 /**

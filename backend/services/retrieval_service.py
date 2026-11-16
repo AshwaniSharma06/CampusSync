@@ -86,6 +86,66 @@ def execute_intelligent_retrieval(
             student_context=student_context
         )
 
+    # Intent-aware direct retrieval from ChromaDB (Syllabus, Academic Calendar, Timetable, Campus Guide)
+    from backend.services.vector_service import get_rag_collection
+    try:
+        col = get_rag_collection()
+        q_combined = f"{q_clean} {rewritten_query}".lower()
+        
+        # Check intent
+        is_syllabus = any(w in q_combined for w in ["syllabus", "scheme", "curriculum", "course structure", "unit", "credit"])
+        is_calendar = any(w in q_combined for w in ["calendar", "commencement", "working days", "holiday", "session 2026", "odd semester", "even semester"])
+        is_exam = any(w in q_combined for w in ["mid-term", "mid term", "exam", "timetable", "time table", "practical", "viva", "schedule"])
+        is_campus = any(w in q_combined for w in ["campus", "building", "block", "floor", "map", "library", "sac", "hall"])
+
+        intent_doc_types = []
+        if is_syllabus:
+            intent_doc_types.append("SYLLABUS")
+        if is_calendar:
+            intent_doc_types.append("CALENDAR")
+        if is_exam:
+            intent_doc_types.extend(["TIMETABLE", "EXAMINATION_SCHEDULE"])
+        if is_campus:
+            intent_doc_types.append("CAMPUS_GUIDE")
+
+        if intent_doc_types:
+            for dt in intent_doc_types:
+                direct_matches = col.get(where={"document_type": dt})
+                if direct_matches and direct_matches.get("documents"):
+                    for d, m in zip(direct_matches["documents"], direct_matches["metadatas"]):
+                        # Check student cohort compatibility
+                        if student_context and m.get("scope") == "SEMESTER_SPECIFIC":
+                            s_dept = (student_context.get("department_code") or student_context.get("department") or "").upper()
+                            s_sem = student_context.get("semester")
+                            m_dept = m.get("department_code", "")
+                            m_sem = m.get("target_semester")
+                            # If student is CSE Sem 7, prioritize matching
+                            if "CSE" in s_dept and m_dept not in ["ALL", "CSE"]:
+                                continue
+                            if s_sem and m_sem and m_sem != 0 and m_sem != int(s_sem):
+                                # Check if user explicitly asked for another semester
+                                exp_match = re.search(r'\b(?:sem|semester)\s*([1-8])\b|\b([1-8])(?:st|nd|rd|th)\s*(?:sem|semester)\b', q_combined, re.I)
+                                if not exp_match or int(exp_match.group(1) or exp_match.group(2)) != m_sem:
+                                    continue
+
+                        raw_chunks.append({
+                            "chunk_text": d,
+                            "title": m.get("title", "Official College Record"),
+                            "source_url": m.get("source_url", ""),
+                            "document_url": m.get("document_url", ""),
+                            "published_date": m.get("published_date", ""),
+                            "document_type": m.get("document_type", dt),
+                            "verification_status": m.get("verification_status", "VERIFIED"),
+                            "data_origin": m.get("data_origin", "VERIFIED_OFFICIAL"),
+                            "scope": m.get("scope", "GLOBAL"),
+                            "department_code": m.get("department_code", ""),
+                            "target_semester": m.get("target_semester"),
+                            "page_number": m.get("page_number", 1),
+                            "distance": 0.25 # Artificial high similarity for exact intent match
+                        })
+    except Exception as e:
+        print(f"[RetrievalService] Intent retrieval notice: {e}")
+
     # 3. Hybrid Scoring & Deduplication across document parents
     scored_chunks: List[Dict[str, Any]] = []
     seen_parents = set()
@@ -107,7 +167,6 @@ def execute_intelligent_retrieval(
         if pub_date_str:
             try:
                 pub_dt = datetime.fromisoformat(pub_date_str.replace("Z", "+00:00"))
-                # Documents published within last 90 days get a subtle recency boost
                 days_old = (datetime.utcnow() - pub_dt.replace(tzinfo=None)).days
                 if days_old <= 90:
                     freshness_score = 0.05
@@ -117,7 +176,7 @@ def execute_intelligent_retrieval(
         dist = chunk.get("distance")
         vector_sim = max(0.0, 1.0 - (dist if dist is not None else 0.5))
         # Hybrid formula: vector similarity is primary base; keyword overlap & recency provide controlled rerank adjustment
-        total_score = vector_sim + (kw_score * 0.35) + freshness_score
+        total_score = vector_sim + (kw_score * 0.40) + freshness_score
         chunk["rerank_score"] = total_score
         scored_chunks.append(chunk)
         seen_parents.add(parent_id)
@@ -128,18 +187,20 @@ def execute_intelligent_retrieval(
     # Trim to target top_k
     final_chunks = scored_chunks[:settings.RAG_TOP_K]
 
-    # 4. Construct unique source citations
+    # 4. Construct unique source citations with exact page numbers
     sources: List[Dict[str, Any]] = []
     seen_urls = set()
     for chunk in final_chunks:
         url = chunk.get("document_url") or chunk.get("source_url") or ""
         title = chunk.get("title") or "Official College Notice"
-        key = f"{title}_{url}"
+        page_num = chunk.get("page_number", 1)
+        key = f"{title}_{url}_{page_num}"
         if key not in seen_urls:
             seen_urls.add(key)
             sources.append({
                 "title": title,
                 "url": url,
+                "page": page_num,
                 "published_date": chunk.get("published_date") or "",
                 "scope": chunk.get("scope") or "GLOBAL",
                 "department": chunk.get("department_code") or "All",
@@ -151,12 +212,13 @@ def execute_intelligent_retrieval(
     if final_chunks:
         context_blocks = []
         for idx, chunk in enumerate(final_chunks, 1):
+            page_info = f" | Page: {chunk.get('page_number', 1)}" if chunk.get('page_number') else ""
             block = (
                 f"[Document {idx}]: {chunk['title']}\n"
-                f"Type: {chunk.get('document_type', 'NOTICE')} | Scope: {chunk.get('scope', 'GLOBAL')}\n"
+                f"Type: {chunk.get('document_type', 'NOTICE')} | Scope: {chunk.get('scope', 'GLOBAL')}{page_info}\n"
                 f"Data Origin: {chunk.get('data_origin', 'SCRAPED')} | Status: {chunk.get('verification_status', 'UNVERIFIED')}\n"
                 f"Date: {chunk.get('published_date') or 'Recent Official Notice'}\n"
-                f"Source Link: {chunk.get('source_url') or chunk.get('document_url') or 'ecajmer.ac.in'}\n"
+                f"Source Link: {chunk.get('source_url') or chunk.get('document_url') or 'https://www.ecajmer.ac.in'}\n"
                 f"Content:\n{chunk['chunk_text']}"
             )
             context_blocks.append(block)

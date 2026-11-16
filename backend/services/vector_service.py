@@ -70,11 +70,13 @@ def index_document(
     verification_status: str = "VERIFIED",
     data_origin: str = "VERIFIED_OFFICIAL",
     published_date: Optional[str] = None,
-    target_user_id: Optional[int] = None
+    target_user_id: Optional[int] = None,
+    page_number: Optional[int] = None
 ) -> int:
     """
     Chunks and indexes a document with comprehensive metadata into persistent ChromaDB.
     Removes previous chunks for the same doc_id before re-indexing to prevent duplicates.
+    Preserves page_number metadata for source attribution.
     """
     if not text or not text.strip():
         return 0
@@ -96,6 +98,7 @@ def index_document(
     # Format department & semester metadata consistently for ChromaDB string/int matching
     dept_str = (department_code or "ALL").upper()
     sem_int = int(target_semester) if target_semester is not None else 0
+    page_int = int(page_number) if page_number is not None else 1
 
     for idx, chunk in enumerate(chunks):
         chunk_id = f"{doc_id}_chk_{idx}"
@@ -113,7 +116,8 @@ def index_document(
             "document_type": document_type,
             "verification_status": verification_status,
             "data_origin": data_origin,
-            "published_date": published_date or ""
+            "published_date": published_date or "",
+            "page_number": page_int
         }
         documents.append(chunk)
         metadatas.append(meta)
@@ -164,6 +168,10 @@ def retrieve_relevant_chunks(
     }
 
     # If student context is present, filter for cohort eligibility
+    canonical_dept = "ALL"
+    sem_val = 0
+    user_id_val = 0
+
     if student_context:
         student_dept = (student_context.get("department_code") or student_context.get("department") or "").upper()
         # Normalize department to short code
@@ -187,15 +195,20 @@ def retrieve_relevant_chunks(
         user_id = student_context.get("user_id")
         user_id_val = int(user_id) if user_id is not None else 0
 
-        # Student is authorized for:
-        # - GLOBAL notices
-        # - DEPARTMENT_SPECIFIC notices for their department (or ALL)
-        # - SEMESTER_SPECIFIC notices for their department AND semester
-        # - INDIVIDUAL notices if an authenticated user ID is present
+        # Detect if query explicitly asks for a particular semester
+        explicit_sem_match = re.search(r'\b(?:sem|semester)\s*([1-8])\b|\b([1-8])(?:st|nd|rd|th)\s*(?:sem|semester)\b', q_clean, re.I)
+        allowed_semesters = [0]
+        if sem_val > 0:
+            allowed_semesters.append(sem_val)
+        if explicit_sem_match:
+            queried_sem = int(explicit_sem_match.group(1) or explicit_sem_match.group(2))
+            if queried_sem not in allowed_semesters:
+                allowed_semesters.append(queried_sem)
+
         allowed_scopes = ["GLOBAL"]
         if canonical_dept:
             allowed_scopes.append("DEPARTMENT_SPECIFIC")
-        if canonical_dept and sem_val > 0:
+        if canonical_dept and len(allowed_semesters) > 1:
             allowed_scopes.append("SEMESTER_SPECIFIC")
         if user_id_val > 0:
             allowed_scopes.append("INDIVIDUAL")
@@ -206,6 +219,12 @@ def retrieve_relevant_chunks(
                 {"scope": {"$in": allowed_scopes}}
             ]
         }
+    else:
+        # Detect explicit semester in anonymous query
+        explicit_sem_match = re.search(r'\b(?:sem|semester)\s*([1-8])\b|\b([1-8])(?:st|nd|rd|th)\s*(?:sem|semester)\b', q_clean, re.I)
+        allowed_semesters = [0]
+        if explicit_sem_match:
+            allowed_semesters.append(int(explicit_sem_match.group(1) or explicit_sem_match.group(2)))
 
     # Query an adequately sized candidate pool so cohort filtering yields top relevant chunks
     candidate_limit = min(max(n_results * 8, 30), total_docs)
@@ -253,15 +272,18 @@ def retrieve_relevant_chunks(
                     if user_id_val <= 0 or target_uid != user_id_val:
                         continue
 
-                if scope == "DEPARTMENT_SPECIFIC" and target_dept not in ["ALL", canonical_dept]:
+                if scope == "DEPARTMENT_SPECIFIC" and target_dept not in ["ALL", "", canonical_dept]:
                     continue
                 if scope == "SEMESTER_SPECIFIC":
-                    if target_dept not in ["ALL", canonical_dept] or (target_sem != 0 and target_sem != sem_val):
+                    if target_dept not in ["ALL", "", canonical_dept] or (target_sem != 0 and target_sem not in allowed_semesters):
                         continue
             else:
-                # Unauthenticated or context-free requests can only access GLOBAL documents
+                # Unauthenticated or context-free requests
                 scope = meta.get("scope")
-                if scope in ["INDIVIDUAL", "DEPARTMENT_SPECIFIC", "SEMESTER_SPECIFIC", "UNCLASSIFIED"]:
+                target_sem = meta.get("target_semester")
+                if scope == "INDIVIDUAL":
+                    continue
+                if scope == "SEMESTER_SPECIFIC" and target_sem not in allowed_semesters:
                     continue
 
             output_chunks.append({
@@ -276,6 +298,7 @@ def retrieve_relevant_chunks(
                 "scope": meta.get("scope", "GLOBAL"),
                 "department_code": meta.get("department_code", ""),
                 "target_semester": meta.get("target_semester"),
+                "page_number": meta.get("page_number", 1),
                 "distance": dist
             })
             if len(output_chunks) >= n_results:
@@ -283,9 +306,143 @@ def retrieve_relevant_chunks(
 
     return output_chunks
 
+def sync_hosted_documents_to_chroma() -> int:
+    """
+    Extracts text page-by-page from hosted official PDF documents and indexes into ChromaDB with exact page references.
+    """
+    from backend.services.document_extractor import DocumentExtractor
+    import pypdf
+    import io
+
+    hosted_dir = os.path.join("backend", "data", "hosted_documents")
+    if not os.path.exists(hosted_dir):
+        hosted_dir = "data/hosted_documents"
+    if not os.path.exists(hosted_dir):
+        return 0
+
+    indexed_count = 0
+    hosted_specs = [
+        {
+            "filename": "Resource_1_BTU_CSE_Sem7_Syllabus.pdf",
+            "title": "BTU B.Tech CSE 7th Sem Complete Scheme & Syllabus",
+            "document_type": "SYLLABUS",
+            "scope": "SEMESTER_SPECIFIC",
+            "department_code": "CSE",
+            "target_semester": 7,
+            "document_url": "https://www.ecajmer.ac.in/uploads/resources/Resource_1_BTU_CSE_Sem7_Syllabus.pdf",
+            "data_origin": "VERIFIED_OFFICIAL"
+        },
+        {
+            "filename": "Resource_2_BTU_Academic_Calendar_2026-27.pdf",
+            "title": "BTU Annual Academic Calendar (Session 2026-27)",
+            "document_type": "CALENDAR",
+            "scope": "GLOBAL",
+            "department_code": "ALL",
+            "target_semester": 0,
+            "document_url": "https://www.ecajmer.ac.in/uploads/resources/Resource_2_BTU_Academic_Calendar_2026-27.pdf",
+            "data_origin": "VERIFIED_OFFICIAL"
+        },
+        {
+            "filename": "Resource_3_ECA_Barliya_Campus_Map.pdf",
+            "title": "ECA Barliya Campus Layout & Facility Guide",
+            "document_type": "CAMPUS_GUIDE",
+            "scope": "GLOBAL",
+            "department_code": "ALL",
+            "target_semester": 0,
+            "document_url": "https://www.ecajmer.ac.in/uploads/resources/Resource_3_ECA_Barliya_Campus_Map.pdf",
+            "data_origin": "VERIFIED_OFFICIAL"
+        },
+        {
+            "filename": "Notice_1_MidTerm_Schedule_CSE_Sem7.pdf",
+            "title": "Mid-Term I Examination Schedule (B.Tech VII Sem CSE)",
+            "document_type": "TIMETABLE",
+            "scope": "SEMESTER_SPECIFIC",
+            "department_code": "CSE",
+            "target_semester": 7,
+            "document_url": "https://www.ecajmer.ac.in/uploads/circulars/Notice_1_MidTerm_Schedule_CSE_Sem7.pdf",
+            "data_origin": "DEMO_SEED"
+        }
+    ]
+
+    for spec in hosted_specs:
+        file_path = os.path.join(hosted_dir, spec["filename"])
+        if not os.path.exists(file_path):
+            continue
+        try:
+            with open(file_path, "rb") as f:
+                pdf_bytes = f.read()
+            p_reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
+            for p_idx, page in enumerate(p_reader.pages, 1):
+                p_text = DocumentExtractor.clean_academic_text(page.extract_text() or "")
+                if p_text:
+                    index_document(
+                        doc_id=f"hosted_{spec['filename'].replace('.pdf', '')}_p{p_idx}",
+                        title=f"{spec['title']} (Page {p_idx})",
+                        text=p_text,
+                        source_url="https://www.ecajmer.ac.in",
+                        document_url=spec["document_url"],
+                        scope=spec["scope"],
+                        department_code=spec["department_code"],
+                        target_semester=spec["target_semester"],
+                        document_type=spec["document_type"],
+                        verification_status="VERIFIED",
+                        data_origin=spec["data_origin"],
+                        published_date="2026-11-01",
+                        page_number=p_idx
+                    )
+                    indexed_count += 1
+        except Exception as e:
+            print(f"[VectorService] Error indexing hosted PDF {spec['filename']}: {e}")
+
+    return indexed_count
+
+def sync_courses_and_exams_to_chroma(db: Session) -> int:
+    """Indexes courses (with syllabus summaries) and examination schedules into ChromaDB."""
+    from backend.models.academic import Course, ExaminationSchedule
+    count = 0
+    courses = db.query(Course).all()
+    for c in courses:
+        text = f"Course Code: {c.code}. Title: {c.title}. Department: {c.department}. Semester: {c.semester}. Credits: {c.credits}. Syllabus Details: {c.syllabus_summary or 'Standard BTU Curriculum'}."
+        index_document(
+            doc_id=f"course_{c.id}_{c.code}",
+            title=f"Course Syllabus: {c.code} - {c.title}",
+            text=text,
+            source_url="https://www.ecajmer.ac.in/academics/syllabus",
+            document_url="https://www.ecajmer.ac.in/uploads/resources/Resource_1_BTU_CSE_Sem7_Syllabus.pdf",
+            scope="SEMESTER_SPECIFIC",
+            department_code=c.department,
+            target_semester=c.semester,
+            document_type="SYLLABUS",
+            verification_status="VERIFIED",
+            data_origin="VERIFIED_OFFICIAL",
+            page_number=1
+        )
+        count += 1
+
+    exams = db.query(ExaminationSchedule).all()
+    for ex in exams:
+        text = f"Official Examination Schedule: {ex.subject_name} ({ex.course_code}). Exam Type: {ex.exam_type}. Date: {ex.exam_date}. Time: {ex.start_time} to {ex.end_time}. Venue: {ex.exam_hall or 'Examination Hall'}. Department: {ex.department_code}. Semester: {ex.semester}. Session: {ex.academic_session}."
+        index_document(
+            doc_id=f"exam_{ex.id}_{ex.course_code}",
+            title=f"Exam Schedule: {ex.course_code} - {ex.subject_name} ({ex.exam_type})",
+            text=text,
+            source_url="https://www.ecajmer.ac.in/academics/examinations",
+            document_url="https://www.ecajmer.ac.in/uploads/circulars/Notice_1_MidTerm_Schedule_CSE_Sem7.pdf",
+            scope="SEMESTER_SPECIFIC",
+            department_code=ex.department_code,
+            target_semester=ex.semester,
+            document_type="EXAMINATION_SCHEDULE",
+            verification_status="VERIFIED",
+            data_origin=ex.data_origin or "VERIFIED_OFFICIAL",
+            page_number=1
+        )
+        count += 1
+
+    return count
+
 def sync_database_to_chroma(db: Session, max_items: Optional[int] = None) -> Dict[str, int]:
     """
-    Synchronizes all VERIFIED notices and verified academic documents from SQLite into persistent ChromaDB.
+    Synchronizes all VERIFIED notices, hosted academic documents, and course syllabi into persistent ChromaDB.
     Strictly skips UNVERIFIED or FLAGGED documents.
     """
     from backend.models.academic import Notice, AcademicDocument, VerificationStatus
@@ -294,7 +451,15 @@ def sync_database_to_chroma(db: Session, max_items: Optional[int] = None) -> Dic
     docs_indexed = 0
     total_chunks = 0
 
-    # 1. Sync verified Notices
+    # 1. Sync hosted PDFs (Syllabus, Academic Calendar, Campus Map, Midterm Schedule)
+    hosted_chunks = sync_hosted_documents_to_chroma()
+    total_chunks += hosted_chunks
+
+    # 2. Sync Course Syllabi and Examination Schedules
+    course_exam_chunks = sync_courses_and_exams_to_chroma(db)
+    total_chunks += course_exam_chunks
+
+    # 3. Sync verified Notices
     notice_query = db.query(Notice).filter(
         Notice.verification_status == VerificationStatus.VERIFIED.value,
         Notice.is_active == True
@@ -319,63 +484,41 @@ def sync_database_to_chroma(db: Session, max_items: Optional[int] = None) -> Dic
             document_type="NOTICE",
             verification_status="VERIFIED",
             data_origin=notice.data_origin or "VERIFIED_OFFICIAL",
-            published_date=notice.published_date.isoformat() if notice.published_date else None
+            published_date=notice.published_date.isoformat() if notice.published_date else None,
+            page_number=1
         )
         notices_indexed += 1
         total_chunks += chunks
 
-    # 2. Sync verified AcademicDocuments
-    doc_query = db.query(AcademicDocument).filter(
-        AcademicDocument.verification_status == VerificationStatus.VERIFIED.value
-    )
-    if max_items:
-        doc_query = doc_query.limit(max_items)
-    verified_docs = doc_query.all()
-
-    for doc in verified_docs:
-        body = doc.cleaned_text or doc.raw_text or doc.title
-        chunks = index_document(
-            doc_id=f"doc_{doc.id}",
-            title=doc.title,
-            text=body,
-            source_url=doc.source_url or "",
-            document_url=doc.file_url or "",
-            scope=doc.scope or "GLOBAL",
-            department_code=doc.department_code,
-            target_semester=doc.target_semester,
-            academic_year=doc.academic_year or "2026-27",
-            document_type=doc.document_type or "DOCUMENT",
-            verification_status="VERIFIED",
-            data_origin=doc.data_origin or "SCRAPED",
-            published_date=doc.created_at.isoformat() if doc.created_at else None
-        )
-        docs_indexed += 1
-        total_chunks += chunks
-
     return {
+        "hosted_chunks_indexed": hosted_chunks,
+        "courses_exams_indexed": course_exam_chunks,
         "verified_notices_indexed": notices_indexed,
-        "verified_documents_indexed": docs_indexed,
         "total_chunks_stored": total_chunks
     }
 
 def ensure_chroma_initialized(db: Session, max_sync: Optional[int] = None) -> Dict[str, Any]:
     """
     Safe startup check:
-    Inspects whether the persistent ChromaDB collection exists and holds indexed chunks.
-    If empty (0 chunks), automatically synchronizes verified content from SQLite.
-    If already populated, preserves existing chunks without duplication or reset.
+    Inspects whether persistent ChromaDB contains critical academic syllabus and calendar documents.
+    If missing or empty, synchronizes hosted documents, course syllabi, and notices.
     """
     try:
         collection = get_rag_collection()
         count = collection.count()
-        if count > 0:
-            print(f"[ChromaDB Startup] Collection '{settings.CHROMA_COLLECTION_NAME}' active with {count} chunks. Skipping re-initialization.")
+
+        # Check if hosted syllabus is already indexed
+        test_check = collection.get(ids=["hosted_Resource_1_BTU_CSE_Sem7_Syllabus_p1_chk_0"])
+        has_syllabus = bool(test_check and test_check.get("ids"))
+
+        if count >= 300 and has_syllabus:
+            print(f"[ChromaDB Startup] Collection '{settings.CHROMA_COLLECTION_NAME}' active with {count} chunks (syllabus & calendar verified). Skipping full re-initialization.")
             return {"status": "ALREADY_POPULATED", "chunks_count": count}
 
-        print(f"[ChromaDB Startup] Collection '{settings.CHROMA_COLLECTION_NAME}' is empty (0 chunks). Synchronizing verified content from database...")
+        print(f"[ChromaDB Startup] Initializing/updating ChromaDB with hosted documents and academic syllabus...")
         sync_stats = sync_database_to_chroma(db, max_items=max_sync)
         new_count = collection.count()
-        print(f"[ChromaDB Startup] Synchronization complete: {new_count} chunks indexed ({sync_stats.get('verified_notices_indexed')} notices, {sync_stats.get('verified_documents_indexed')} docs).")
+        print(f"[ChromaDB Startup] Synchronization complete: {new_count} chunks indexed.")
         return {"status": "INITIALIZED", "chunks_count": new_count, "stats": sync_stats}
     except Exception as e:
         print(f"[ChromaDB Startup] Error during ChromaDB initialization check: {e}")

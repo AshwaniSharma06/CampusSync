@@ -4,10 +4,13 @@ Supports multi-turn persistent conversation sessions, session restoration,
 renaming, deletion, and cohort-scoped dynamic AI generation.
 """
 
+import io
 import json
+import uuid
+import pypdf
 from datetime import datetime
 from typing import Any, Optional, List, Dict
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -15,6 +18,8 @@ from backend.api.deps import get_db, get_current_user, get_optional_current_user
 from backend.models.user import User
 from backend.models.system import ChatSession, ChatMessage
 from backend.services.rag_service import query_rag
+from backend.services.vector_service import index_document
+from backend.services.document_extractor import DocumentExtractor
 
 router = APIRouter()
 
@@ -355,4 +360,104 @@ def chat_with_ai(
         "answer": response["answer"],
         "sources": response["sources"],
         "rewritten_query": response.get("rewritten_query", "")
+    }
+
+# -------------------------------------------------------------------------
+# Optional Student PDF Upload Endpoint
+# -------------------------------------------------------------------------
+
+@router.post("/upload")
+async def upload_pdf_for_rag(
+    file: UploadFile = File(...),
+    session_id: Optional[int] = Form(None),
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user)
+) -> Dict[str, Any]:
+    """
+    Processes student-uploaded PDF ONLY when explicitly submitted via this endpoint.
+    Extracts text page-by-page, chunks it, and indexes it into ChromaDB with page references.
+    Does NOT automatically scan PDFs on chat open or during standard queries.
+    """
+    filename = file.filename or "uploaded_document.pdf"
+    if not filename.lower().endswith(".pdf"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only PDF documents (.pdf) are supported for analysis."
+        )
+
+    content_bytes = await file.read()
+    if not content_bytes or len(content_bytes) < 10:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded PDF file is empty or unreadable."
+        )
+
+    try:
+        p_reader = pypdf.PdfReader(io.BytesIO(content_bytes))
+        page_count = len(p_reader.pages)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Unable to parse PDF: {str(e)}"
+        )
+
+    user_id = current_user.id if current_user else 0
+    doc_uuid = uuid.uuid4().hex[:8]
+    doc_id = f"user_doc_{user_id}_{doc_uuid}"
+    title = filename
+
+    total_chunks = 0
+    for p_idx, page in enumerate(p_reader.pages, 1):
+        raw_page_text = page.extract_text() or ""
+        cleaned = DocumentExtractor.clean_academic_text(raw_page_text)
+        if cleaned:
+            chunks = index_document(
+                doc_id=f"{doc_id}_p{p_idx}",
+                title=f"{title} (Page {p_idx})",
+                text=cleaned,
+                source_url=f"/uploads/user/{filename}",
+                document_url=f"/uploads/user/{filename}",
+                scope="INDIVIDUAL" if user_id > 0 else "GLOBAL",
+                target_user_id=user_id if user_id > 0 else None,
+                document_type="USER_UPLOADED_PDF",
+                verification_status="VERIFIED",
+                data_origin="USER_UPLOADED",
+                published_date=datetime.utcnow().strftime("%Y-%m-%d"),
+                page_number=p_idx
+            )
+            total_chunks += chunks
+
+    # If associated with an active chat session, append confirmation
+    if session_id and current_user:
+        active_sess = db.query(ChatSession).filter(
+            ChatSession.id == session_id,
+            ChatSession.user_id == current_user.id,
+            ChatSession.is_active == True
+        ).first()
+        if active_sess:
+            now = datetime.utcnow()
+            conf_msg = ChatMessage(
+                session_id=active_sess.id,
+                role="assistant",
+                content=f"📄 I have processed your uploaded document **{title}** ({page_count} pages). You can now ask questions about its content!",
+                sources=json.dumps([{
+                    "title": title,
+                    "url": f"/uploads/user/{filename}",
+                    "page": 1,
+                    "scope": "INDIVIDUAL",
+                    "data_origin": "USER_UPLOADED",
+                    "verification_status": "VERIFIED"
+                }]),
+                created_at=now
+            )
+            db.add(conf_msg)
+            active_sess.updated_at = now
+            db.commit()
+
+    return {
+        "status": "success",
+        "filename": title,
+        "page_count": page_count,
+        "chunks_indexed": total_chunks,
+        "message": f"Successfully processed {title} ({page_count} pages). You can now ask questions about it!"
     }
