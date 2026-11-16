@@ -187,7 +187,7 @@ def run_audit_and_fix():
         elif n_id == 11:
             # Synthetic Notice 11: Fake URL 'untrusted-external-site.com'. Flag and deactivate
             new_doc_url = None
-            new_off_url = "https://www.ecajmer.ac.in/circulars"
+            new_off_url = "https://www.ecajmer.ac.in/latestfromeca"
             new_ver_status = "FLAGGED"
             new_is_active = False
             synthetic_seeds_fixed += 1
@@ -203,7 +203,7 @@ def run_audit_and_fix():
             is_legacy_dead = ('/./Content/' in doc_url or '/../Content/' in doc_url or '/Content/Orders/' in doc_url or '/Content/Upload/' in doc_url)
             if is_legacy_dead:
                 new_doc_url = None
-                new_off_url = "https://www.ecajmer.ac.in/circulars" if "circular" in (title or "").lower() else "https://www.ecajmer.ac.in/announcements"
+                new_off_url = "https://www.ecajmer.ac.in/latestfromeca" if "circular" in (title or "").lower() else "https://www.ecajmer.ac.in/announcements"
                 legacy_dead_urls_fixed += 1
                 needs_update = True
             else:
@@ -226,7 +226,7 @@ def run_audit_and_fix():
                 elif "library" in (title or "").lower():
                     new_off_url = "https://www.ecajmer.ac.in/facilities/library"
                 else:
-                    new_off_url = "https://www.ecajmer.ac.in/circulars"
+                    new_off_url = "https://www.ecajmer.ac.in/latestfromeca"
                 needs_update = True
 
         # Count destination categories

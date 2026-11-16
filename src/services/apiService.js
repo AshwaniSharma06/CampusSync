@@ -278,7 +278,7 @@ export const apiService = {
                 is_important: n.is_important || false,
                 has_pdf: n.has_pdf || false,
                 published_date: n.published_date || n.formatted_date || new Date().toISOString(),
-                target_url: n.action_url || n.document_url || n.source_url || 'https://www.ecajmer.ac.in',
+                target_url: n.action_url || n.document_url || n.source_url || 'https://www.ecajmer.ac.in/latestfromeca',
                 action_label: n.action_label || 'View Verified Document',
                 is_saved: false,
               };
@@ -492,12 +492,12 @@ export const openOfficialLink = (
   onActionNotification,
   unavailableFallback = 'Opening Govt. Engineering College Ajmer official circulars...'
 ) => {
-  const SAFE_CIRCULARS_URL = 'https://www.ecajmer.ac.in/circulars';
+  const SAFE_CIRCULARS_URL = 'https://www.ecajmer.ac.in/latestfromeca';
 
   // If targetUrl is missing or invalid, redirect to verified circulars directory (never bare homepage)
   if (!targetUrl || targetUrl === '#' || targetUrl === 'javascript:void(0)') {
     window.open(SAFE_CIRCULARS_URL, '_blank', 'noopener,noreferrer');
-    if (onActionNotification) onActionNotification('Opening ECA official circulars directory...');
+    if (onActionNotification) onActionNotification('Opening ECA latest circulars directory...');
     return true;
   }
 
@@ -529,15 +529,21 @@ export const openOfficialLink = (
       lower === 'https://www.ecajmer.ac.in' ||
       lower === 'http://www.ecajmer.ac.in' ||
       lower === 'https://ecajmer.ac.in' ||
-      lower === 'http://ecajmer.ac.in'
+      lower === 'http://ecajmer.ac.in' ||
+      lower === 'https://www.ecajmer.ac.in/circulars' ||
+      lower === 'http://www.ecajmer.ac.in/circulars' ||
+      lower === 'https://ecajmer.ac.in/circulars' ||
+      lower === 'http://ecajmer.ac.in/circulars'
     ) {
       cleanUrl = SAFE_CIRCULARS_URL;
     }
 
     // Intercept and prevent 404 routes (/departments/cse, /facilities/library, etc.)
     const brokenRoutes = [
+      '/circulars',
       '/departments/cse',
       '/departments/',
+      '/department/',
       '/facilities/library',
       '/facilities/',
       '/academics/examinations',
@@ -546,7 +552,7 @@ export const openOfficialLink = (
       '/events/technotsav',
       '/notices/unclassified'
     ];
-    if (brokenRoutes.some(route => lower.includes(route))) {
+    if (brokenRoutes.some(route => lower.includes(route) && !lower.includes('.pdf'))) {
       cleanUrl = SAFE_CIRCULARS_URL;
     }
 

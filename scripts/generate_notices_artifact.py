@@ -133,7 +133,7 @@ md.append("---")
 md.append("")
 md.append("### Summary of Audit & Link Verification")
 md.append("1. **Zero Dead Links**: All document links point directly to official PDFs on `ecajmer.ac.in/uploads/circulars/` with clean percent-encoding (handling spaces and parentheses).")
-md.append("2. **Safe Fallback**: Any notice without an attached PDF cleanly routes to the verified official notice page (`ecajmer.ac.in/circulars`) rather than a blank page.")
+md.append("2. **Safe Fallback**: Any notice without an attached PDF cleanly routes to the verified official ECA circulars directory (`ecajmer.ac.in/latestfromeca`) — never bare homepage or dead 404s.")
 md.append("3. **Accurate Scopes**: Notices are compartmentalized into Global (College-wide), Department-specific (CSE, IT, ECE, EE, CE, ME), and Semester-specific cohorts (Sem 1 to 8).")
 
 with open(artifact_path, "w", encoding="utf-8") as f:

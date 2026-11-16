@@ -66,7 +66,7 @@ if __name__ == "__main__":
         "https://www.ecajmer.ac.in/api/announcements/public/all/",
         "https://www.ecajmer.ac.in/api/circulars/public/all",
         "https://www.ecajmer.ac.in/api/circulars",
-        "https://www.ecajmer.ac.in/circulars",
+        "https://www.ecajmer.ac.in/latestfromeca",
         "https://www.ecajmer.ac.in/notices",
         "https://www.ecajmer.ac.in/departments",
         "https://www.ecajmer.ac.in/academics/academic-calendar",

@@ -18,18 +18,18 @@ def fix_database():
 
     # Known authentic real replacements for demo seeds 1-7
     demo_replacements = {
-        1: ("https://www.ecajmer.ac.in/uploads/circulars/1793693243432-DOC-20261103-WA0012.pdf", "https://www.ecajmer.ac.in/circulars"),
-        2: (None, "https://www.ecajmer.ac.in/circulars"),
-        3: (None, "https://www.ecajmer.ac.in/circulars"),
-        4: ("https://www.ecajmer.ac.in/uploads/circulars/1792744602711-Document%206.pdf", "https://www.ecajmer.ac.in/circulars"), # PCC coding club
-        5: ("https://www.ecajmer.ac.in/uploads/circulars/1793247267504-BTU%20-%20Circular%20for%20B.Tech.%20III%20Sem%20(Main%20and%20Back%20Exam)%20Session%202026-27%20(Last%20date%2001.11.2026%20with%20single%20fee).pdf", "https://www.ecajmer.ac.in/circulars"),
-        6: ("https://www.ecajmer.ac.in/uploads/circulars/1792051462442-Document%20275_compressed.pdf", "https://www.ecajmer.ac.in/circulars"),
-        7: ("https://www.ecajmer.ac.in/uploads/circulars/1791965057390-Document%20274.pdf", "https://www.ecajmer.ac.in/circulars"), # 7th sem project demonstration
-        8: (None, "https://www.ecajmer.ac.in/circulars"),
-        9: (None, "https://www.ecajmer.ac.in/circulars"),
-        10: (None, "https://www.ecajmer.ac.in/circulars"),
-        11: (None, "https://www.ecajmer.ac.in/circulars"),
-        12: (None, "https://www.ecajmer.ac.in/circulars"),
+        1: ("https://www.ecajmer.ac.in/uploads/circulars/1793693243432-DOC-20261103-WA0012.pdf", "https://www.ecajmer.ac.in/latestfromeca"),
+        2: (None, "https://www.ecajmer.ac.in/latestfromeca"),
+        3: (None, "https://www.ecajmer.ac.in/latestfromeca"),
+        4: ("https://www.ecajmer.ac.in/uploads/circulars/1792744602711-Document%206.pdf", "https://www.ecajmer.ac.in/latestfromeca"), # PCC coding club
+        5: ("https://www.ecajmer.ac.in/uploads/circulars/1793247267504-BTU%20-%20Circular%20for%20B.Tech.%20III%20Sem%20(Main%20and%20Back%20Exam)%20Session%202026-27%20(Last%20date%2001.11.2026%20with%20single%20fee).pdf", "https://www.ecajmer.ac.in/latestfromeca"),
+        6: ("https://www.ecajmer.ac.in/uploads/circulars/1792051462442-Document%20275_compressed.pdf", "https://www.ecajmer.ac.in/latestfromeca"),
+        7: ("https://www.ecajmer.ac.in/uploads/circulars/1791965057390-Document%20274.pdf", "https://www.ecajmer.ac.in/latestfromeca"), # 7th sem project demonstration
+        8: (None, "https://www.ecajmer.ac.in/latestfromeca"),
+        9: (None, "https://www.ecajmer.ac.in/latestfromeca"),
+        10: (None, "https://www.ecajmer.ac.in/latestfromeca"),
+        11: (None, "https://www.ecajmer.ac.in/latestfromeca"),
+        12: (None, "https://www.ecajmer.ac.in/latestfromeca"),
     }
 
     def is_bad_url(u):
@@ -64,7 +64,7 @@ def fix_database():
             rep_doc, rep_page = demo_replacements[nid]
             new_doc = rep_doc
             new_page = rep_page
-            new_src = "https://www.ecajmer.ac.in/circulars"
+            new_src = "https://www.ecajmer.ac.in/latestfromeca"
             demo_fixed += 1
         else:
             # 1. Normalize existing document_url
@@ -92,9 +92,9 @@ def fix_database():
 
             # 3. Clean up bad page/source URLs
             if is_bad_url(new_page):
-                new_page = "https://www.ecajmer.ac.in/circulars"
+                new_page = "https://www.ecajmer.ac.in/latestfromeca"
             if is_bad_url(new_src):
-                new_src = "https://www.ecajmer.ac.in/circulars"
+                new_src = "https://www.ecajmer.ac.in/latestfromeca"
 
         if (new_doc != doc) or (new_page != page) or (new_src != src):
             c.execute("""
@@ -115,3 +115,4 @@ def fix_database():
 
 if __name__ == '__main__':
     fix_database()
+

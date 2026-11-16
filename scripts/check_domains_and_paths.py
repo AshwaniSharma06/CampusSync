@@ -26,3 +26,4 @@ for r in rows:
 
 print("Domains found:", domains.most_common(10))
 print("ECA path prefixes:", Counter(paths).most_common(20))
+

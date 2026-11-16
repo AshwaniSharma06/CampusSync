@@ -110,8 +110,12 @@ def is_legacy_dead_url(url: Optional[str]) -> bool:
     clean = lower.rstrip("/")
     if clean in ("https://www.ecajmer.ac.in", "http://www.ecajmer.ac.in", "https://ecajmer.ac.in", "http://ecajmer.ac.in"):
         return True
+    # /circulars without a file extension returns 404 on the React SPA
+    if clean.endswith("/circulars") or "/circulars?" in clean:
+        return True
     return (
         "/departments/" in lower or
+        "/department/" in lower or
         "/facilities/" in lower or
         "/academics/examinations" in lower or
         "/academics/sem" in lower or
@@ -183,7 +187,7 @@ def resolve_notice_destination(
     # 4. Safe Official College Directory Fallback (Never 404, never blank, never bare homepage)
     return (
         DestinationType.OFFICIAL_PAGE,
-        "https://www.ecajmer.ac.in/circulars",
+        "https://www.ecajmer.ac.in/latestfromeca",
         "Open Official College Circulars Directory"
     )
 

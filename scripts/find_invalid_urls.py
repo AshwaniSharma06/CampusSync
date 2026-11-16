@@ -44,3 +44,4 @@ print(f"Notices with known 404 fake page URLs: {len(invalid_urls)}")
 
 for inv in invalid_urls[:20]:
     print(f"Notice #{inv[0]}: {inv[1]} -> URL: {inv[2]}")
+

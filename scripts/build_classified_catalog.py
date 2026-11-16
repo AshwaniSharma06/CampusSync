@@ -40,8 +40,8 @@ def generate_catalog():
                 clean = "https://www.ecajmer.ac.in/" + clean.lstrip("/")
             return clean, "Official Notice Webpage"
 
-        # Priority 4: College circulars fallback
-        return "https://www.ecajmer.ac.in/circulars", "Official Circulars Directory"
+        # Priority 4: College circulars fallback (ECA Latest Circulars Portal)
+        return "https://www.ecajmer.ac.in/latestfromeca", "Official Circulars Directory"
 
     classified = {
         "global": [],

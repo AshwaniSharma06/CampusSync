@@ -757,7 +757,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                                     n.target_url ||
                                     n.download_url ||
                                     n.document_url ||
-                                    'https://www.ecajmer.ac.in/circulars',
+                                    'https://www.ecajmer.ac.in/latestfromeca',
                                     onActionNotification,
                                     'Official notice link is currently unavailable.'
                                   )
@@ -1133,7 +1133,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               n.target_url ||
                               n.download_url ||
                               n.document_url ||
-                              'https://www.ecajmer.ac.in/circulars',
+                              'https://www.ecajmer.ac.in/latestfromeca',
                               onActionNotification,
                               'Official notice link is currently unavailable.'
                             )

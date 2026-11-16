@@ -137,8 +137,8 @@ def migrate():
             UPDATE notices SET 
                 download_url = '/api/v1/notices/1/download',
                 document_url = 'https://www.ecajmer.ac.in/uploads/circulars/1793247267504-BTU - Circular for B.Tech. III Sem (Main and Back Exam) Session 2026-27 (Last date 01.11.2026 with single fee).pdf',
-                source_url = 'https://www.ecajmer.ac.in/circulars',
-                official_page_url = 'https://www.ecajmer.ac.in/circulars'
+                source_url = 'https://www.ecajmer.ac.in/latestfromeca',
+                official_page_url = 'https://www.ecajmer.ac.in/latestfromeca'
             WHERE id = 1
         """)
 

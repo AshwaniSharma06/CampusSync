@@ -47,3 +47,4 @@ for rec in recovered_pdfs[:10]:
 print("\n--- Samples of notices with NO PDF ---")
 for np in no_pdf_rows[:15]:
     print(f"Notice #{np[0]}: {np[1]} | Page: {np[2]} | Src: {np[3]}")
+
