@@ -55,20 +55,64 @@ def get_dashboard_summary(
     subject_condition = Notice.course_id.in_(student_course_ids) if student_course_ids else false()
     
     # 4. Relevant active verified notices
+    dept_code = student_ctx.department_code
+    semester = student_ctx.semester
+    COMPUTING_DEPTS = ["CSE", "IT", "CYBER", "CE"]
+    is_computing = dept_code in COMPUTING_DEPTS
+
+    dept_conditions = [
+        Notice.department_code == dept_code,
+        Notice.department_code == None
+    ]
+    if is_computing:
+        dept_conditions.extend([
+            Notice.department_code.in_(COMPUTING_DEPTS),
+            Notice.title.ilike("%CS%"),
+            Notice.title.ilike("%Computer%"),
+            Notice.title.ilike("%Cyber%"),
+            Notice.title.ilike("%CE, IT%"),
+            Notice.title.ilike("%CS, IT%"),
+            Notice.title.ilike("%Information Technology%")
+        ])
+    dept_match = or_(*dept_conditions)
+
+    ROMAN_MAP = {
+        1: ["1st", "I Sem", "Sem I", "First Sem"],
+        2: ["2nd", "II Sem", "Sem II", "Second Sem"],
+        3: ["3rd", "III Sem", "Sem III", "Third Sem"],
+        4: ["4th", "IV Sem", "Sem IV", "Fourth Sem"],
+        5: ["5th", "V Sem", "Sem V", "Fifth Sem"],
+        6: ["6th", "VI Sem", "Sem VI", "Sixth Sem"],
+        7: ["7th", "VII Sem", "Sem VII", "Seventh Sem", "VIIth Sem"],
+        8: ["8th", "VIII Sem", "Sem VIII", "Eighth Sem", "VIIIth Sem"]
+    }
+    sem_tokens = ROMAN_MAP.get(semester, [f"{semester}th"])
+    sem_title_conditions = [Notice.title.ilike(f"%{tok}%") for tok in sem_tokens]
+    sem_match = or_(
+        Notice.target_semester == semester,
+        *sem_title_conditions
+    )
+
     relevant_notices_count = db.query(Notice).filter(
         Notice.is_active == True,
+        Notice.id > 12,
+        Notice.data_origin != 'DEMO_SEED',
         Notice.verification_status == VerificationStatus.VERIFIED.value,
-        Notice.scope != ClassificationScope.UNCLASSIFIED.value,
+        Notice.scope != 'FLAGGED',
         or_(
             Notice.scope == ClassificationScope.GLOBAL.value,
             and_(
                 Notice.scope == ClassificationScope.DEPARTMENT_SPECIFIC.value,
-                Notice.department_code == student_ctx.department_code
+                dept_match
             ),
             and_(
                 Notice.scope == ClassificationScope.SEMESTER_SPECIFIC.value,
-                Notice.department_code == student_ctx.department_code,
-                Notice.target_semester == student_ctx.semester
+                dept_match,
+                sem_match
+            ),
+            and_(
+                dept_match,
+                sem_match
             ),
             and_(
                 Notice.scope == ClassificationScope.SUBJECT_SPECIFIC.value,

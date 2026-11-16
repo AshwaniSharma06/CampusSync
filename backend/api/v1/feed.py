@@ -223,11 +223,13 @@ def get_intelligent_feed(
         ).all()
         saved_notice_ids = {s[0] for s in saved_items}
 
-    # 2. Base Security Filter: Always active and verified, never unclassified or individual
+    # 2. Base Security Filter: Always active and verified, never demo seeds or flagged
     base_notice_filter = and_(
         Notice.is_active == True,
+        Notice.id > 12,
+        Notice.data_origin != 'DEMO_SEED',
         Notice.verification_status == VerificationStatus.VERIFIED.value,
-        Notice.scope != ClassificationScope.UNCLASSIFIED.value,
+        Notice.scope != 'FLAGGED',
         Notice.scope != ClassificationScope.INDIVIDUAL.value
     )
 
@@ -244,6 +246,42 @@ def get_intelligent_feed(
     # CASE A: LOGGED-IN STUDENT WITH COMPLETE PROFILE
     # -------------------------------------------------------------
     if is_authenticated and dept_code and semester:
+        COMPUTING_DEPTS = ["CSE", "IT", "CYBER", "CE"]
+        is_computing = dept_code in COMPUTING_DEPTS
+
+        dept_conditions = [
+            Notice.department_code == dept_code,
+            Notice.department_code == None
+        ]
+        if is_computing:
+            dept_conditions.extend([
+                Notice.department_code.in_(COMPUTING_DEPTS),
+                Notice.title.ilike("%CS%"),
+                Notice.title.ilike("%Computer%"),
+                Notice.title.ilike("%Cyber%"),
+                Notice.title.ilike("%CE, IT%"),
+                Notice.title.ilike("%CS, IT%"),
+                Notice.title.ilike("%Information Technology%")
+            ])
+        dept_match = or_(*dept_conditions)
+
+        ROMAN_MAP = {
+            1: ["1st", "I Sem", "Sem I", "First Sem"],
+            2: ["2nd", "II Sem", "Sem II", "Second Sem"],
+            3: ["3rd", "III Sem", "Sem III", "Third Sem"],
+            4: ["4th", "IV Sem", "Sem IV", "Fourth Sem"],
+            5: ["5th", "V Sem", "Sem V", "Fifth Sem"],
+            6: ["6th", "VI Sem", "Sem VI", "Sixth Sem"],
+            7: ["7th", "VII Sem", "Sem VII", "Seventh Sem", "VIIth Sem"],
+            8: ["8th", "VIII Sem", "Sem VIII", "Eighth Sem", "VIIIth Sem"]
+        }
+        sem_tokens = ROMAN_MAP.get(semester, [f"{semester}th"])
+        sem_title_conditions = [Notice.title.ilike(f"%{tok}%") for tok in sem_tokens]
+        sem_match = or_(
+            Notice.target_semester == semester,
+            *sem_title_conditions
+        )
+
         # Category 1: For Your Semester
         # Notices targeting this exact semester + department OR semester-specific with exam keyword
         sem_notices = db.query(Notice).filter(
@@ -251,18 +289,15 @@ def get_intelligent_feed(
             or_(
                 and_(
                     Notice.scope == ClassificationScope.SEMESTER_SPECIFIC.value,
-                    Notice.department_code == dept_code,
-                    Notice.target_semester == semester
+                    dept_match,
+                    sem_match
                 ),
                 and_(
-                    Notice.target_semester == semester,
-                    or_(
-                        Notice.department_code == dept_code,
-                        Notice.department_code == None
-                    )
+                    dept_match,
+                    sem_match
                 )
             )
-        ).order_by(Notice.published_date.desc()).limit(15).all()
+        ).order_by(Notice.published_date.desc()).limit(20).all()
 
         for n in sem_notices:
             if n.id not in seen_notice_ids:

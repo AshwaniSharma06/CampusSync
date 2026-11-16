@@ -174,7 +174,7 @@ def get_notices(
         Notice.id > 12,
         Notice.data_origin != 'DEMO_SEED',
         Notice.verification_status == VerificationStatus.VERIFIED.value,
-        Notice.scope != ClassificationScope.UNCLASSIFIED.value
+        Notice.scope != 'FLAGGED'
     )
     
     # 2. Retrieve student's authorized course IDs for SUBJECT_SPECIFIC access
@@ -186,23 +186,68 @@ def get_notices(
     ]
     
     subject_condition = Notice.course_id.in_(student_course_ids) if student_course_ids else false()
+
+    # 3. Dynamic cohort matching for computing sister departments & semester indicators
+    dept_code = student_ctx.department_code
+    semester = student_ctx.semester
+    COMPUTING_DEPTS = ["CSE", "IT", "CYBER", "CE"]
+    is_computing = dept_code in COMPUTING_DEPTS
+
+    dept_conditions = [
+        Notice.department_code == dept_code,
+        Notice.department_code == None
+    ]
+    if is_computing:
+        dept_conditions.extend([
+            Notice.department_code.in_(COMPUTING_DEPTS),
+            Notice.title.ilike("%CS%"),
+            Notice.title.ilike("%Computer%"),
+            Notice.title.ilike("%Cyber%"),
+            Notice.title.ilike("%CE, IT%"),
+            Notice.title.ilike("%CS, IT%"),
+            Notice.title.ilike("%Information Technology%")
+        ])
+    dept_match = or_(*dept_conditions)
+
+    ROMAN_MAP = {
+        1: ["1st", "I Sem", "Sem I", "First Sem"],
+        2: ["2nd", "II Sem", "Sem II", "Second Sem"],
+        3: ["3rd", "III Sem", "Sem III", "Third Sem"],
+        4: ["4th", "IV Sem", "Sem IV", "Fourth Sem"],
+        5: ["5th", "V Sem", "Sem V", "Fifth Sem"],
+        6: ["6th", "VI Sem", "Sem VI", "Sixth Sem"],
+        7: ["7th", "VII Sem", "Sem VII", "Seventh Sem", "VIIth Sem"],
+        8: ["8th", "VIII Sem", "Sem VIII", "Eighth Sem", "VIIIth Sem"]
+    }
+    sem_tokens = ROMAN_MAP.get(semester, [f"{semester}th"])
+    sem_title_conditions = [Notice.title.ilike(f"%{tok}%") for tok in sem_tokens]
+    sem_match = or_(
+        Notice.target_semester == semester,
+        *sem_title_conditions
+    )
     
-    # 3. Construct scope authorization rules
+    # 4. Construct comprehensive scope authorization rules
     scope_filter = or_(
-        # GLOBAL notices
+        # GLOBAL notices (institution-wide, BTU, registrar, etc.)
         Notice.scope == ClassificationScope.GLOBAL.value,
         
         # DEPARTMENT_SPECIFIC notices (e.g. CSE departmental announcements)
         and_(
             Notice.scope == ClassificationScope.DEPARTMENT_SPECIFIC.value,
-            Notice.department_code == student_ctx.department_code
+            dept_match
         ),
         
-        # SEMESTER_SPECIFIC notices (must match BOTH department and current semester)
+        # SEMESTER_SPECIFIC notices (matching department and student's semester or semester title)
         and_(
             Notice.scope == ClassificationScope.SEMESTER_SPECIFIC.value,
-            Notice.department_code == student_ctx.department_code,
-            Notice.target_semester == student_ctx.semester
+            dept_match,
+            sem_match
+        ),
+        
+        # Notices whose title specifically matches the student's semester and department
+        and_(
+            dept_match,
+            sem_match
         ),
         
         # SUBJECT_SPECIFIC notices (must belong to authorized enrolled courses)

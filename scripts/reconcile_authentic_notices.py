@@ -86,3 +86,4 @@ with open('src/services/noticePdfMap.json', 'w', encoding='utf-8') as f:
     json.dump(pdf_map, f, indent=2)
 
 print(f"\nRegenerated src/services/noticePdfMap.json with {len(pdf_map)} authentic mappings (0 demo seeds).")
+

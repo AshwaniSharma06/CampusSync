@@ -236,11 +236,31 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   const filteredNotices = useMemo(() => {
     let result = (notices || []).filter(n => n.id > 12 && n.data_origin !== 'DEMO_SEED');
     if (noticeFilter === 'Official') {
-      result = result.filter(n => n.data_origin === 'VERIFIED_OFFICIAL' || n.notice_type === 'Official');
+      result = result.filter(n => n.data_origin === 'VERIFIED_OFFICIAL' || n.notice_type === 'Official' || n.notice_type === 'Examination');
     } else if (noticeFilter === 'Department') {
-      result = result.filter(n => n.scope === 'DEPARTMENT_SPECIFIC' || n.classification_scope === 'DEPARTMENT_SPECIFIC' || n.notice_type === 'Department');
+      const isComputing = ['CSE', 'IT', 'CYBER', 'CE'].includes((studentDepartment || '').toUpperCase());
+      result = result.filter(n => {
+        if (n.department_code && n.department_code.toUpperCase() === (studentDepartment || '').toUpperCase()) return true;
+        if (isComputing && /\b(CS|CSE|IT|Cyber|Computer|CE,?\s*IT)\b/i.test(n.title || '')) return true;
+        if (n.scope === 'DEPARTMENT_SPECIFIC') return true;
+        return false;
+      });
     } else if (noticeFilter === 'Semester') {
-      result = result.filter(n => n.scope === 'SEMESTER_SPECIFIC' || n.classification_scope === 'SEMESTER_SPECIFIC' || n.target_semester != null || n.semester != null);
+      const romanMap = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+      const romanSem = romanMap[(studentSemester || 7) - 1] || 'VII';
+      const semRegex = new RegExp(`\\b(${studentSemester}(?:st|nd|rd|th)?|${romanSem}\\s*(?:sem|semester)|sem(?:ester)?\\s*${studentSemester})\\b`, 'i');
+      result = result.filter(n => {
+        if (n.target_semester != null && Number(n.target_semester) === Number(studentSemester)) return true;
+        if (n.semester != null && Number(n.semester) === Number(studentSemester)) return true;
+        if (n.title && semRegex.test(n.title)) return true;
+        if (n.scope === 'SEMESTER_SPECIFIC' && (n.target_semester == null || Number(n.target_semester) === Number(studentSemester))) return true;
+        return false;
+      });
+    } else if (noticeFilter === 'Examinations') {
+      result = result.filter(n => 
+        n.notice_type === 'Examination' ||
+        /\b(exam|examination|mid-?term|practical|viva|time\s*table|admit\s*card|back\s*exam)\b/i.test(n.title || '')
+      );
     }
 
     if (searchQuery.trim()) {
@@ -251,7 +271,31 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       );
     }
     return result;
-  }, [notices, noticeFilter, searchQuery]);
+  }, [notices, noticeFilter, searchQuery, studentDepartment, studentSemester]);
+
+  // Cohort-specific examination, mid-term and practical notices for the Examinations tab
+  const cohortExamNotices = useMemo(() => {
+    const isComputing = ['CSE', 'IT', 'CYBER', 'CE'].includes((studentDepartment || '').toUpperCase());
+    const romanMap = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+    const romanSem = romanMap[(studentSemester || 7) - 1] || 'VII';
+    const semRegex = new RegExp(`\\b(${studentSemester}(?:st|nd|rd|th)?|${romanSem}\\s*(?:sem|semester)|sem(?:ester)?\\s*${studentSemester})\\b`, 'i');
+
+    return (notices || []).filter(n => {
+      if (n.id <= 12 || n.data_origin === 'DEMO_SEED') return false;
+      const isExam = n.notice_type === 'Examination' || /\b(exam|examination|mid-?term|practical|viva|time\s*table|admit\s*card|back\s*exam)\b/i.test(n.title || '');
+      if (!isExam) return false;
+
+      const semMatch = (n.target_semester != null && Number(n.target_semester) === Number(studentSemester)) ||
+                       (n.semester != null && Number(n.semester) === Number(studentSemester)) ||
+                       semRegex.test(n.title || '');
+      if (!semMatch) return false;
+
+      if (!n.department_code) return true;
+      if (n.department_code.toUpperCase() === (studentDepartment || '').toUpperCase()) return true;
+      if (isComputing && /\b(CS|CSE|IT|Cyber|Computer|CE,?\s*IT)\b/i.test(n.title || '')) return true;
+      return false;
+    });
+  }, [notices, studentDepartment, studentSemester]);
 
   const paginatedNotices = useMemo(() => {
     const start = (noticePage - 1) * NOTICES_PER_PAGE;
@@ -666,7 +710,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                       {/* Filter Pills */}
                       <div className="flex gap-1.5 overflow-x-auto hide-scrollbar pb-1">
-                        {['All', 'Official', 'Department', 'Semester'].map((f) => (
+                        {['All', 'Official', 'Department', 'Semester', 'Examinations'].map((f) => (
                           <button
                             key={f}
                             onClick={() => {
@@ -1038,7 +1082,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
               {/* Notice Controls: Filter Pills & Search */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex gap-1.5 overflow-x-auto hide-scrollbar pb-1">
-                  {['All', 'Official', 'Department', 'Semester'].map((f) => (
+                  {['All', 'Official', 'Department', 'Semester', 'Examinations'].map((f) => (
                     <button
                       key={f}
                       onClick={() => {
@@ -1259,6 +1303,78 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   ))}
                 </div>
               )}
+
+              {/* Cohort Official Examination Circulars, Midterms & Practical Schedules */}
+              <div className="pt-6 border-t border-slate-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-2">
+                  <div>
+                    <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-emerald-600">description</span>
+                      <span>Official Examination Circulars & Practical Schedules</span>
+                    </h4>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Direct verified circulars for Semester {studentSemester} {studentDepartment} (Midterms, Practicals, and Timetables)
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
+                    {cohortExamNotices.length} Verified Circulars
+                  </span>
+                </div>
+
+                {cohortExamNotices.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic py-3">No specific examination circulars published for this cohort.</p>
+                ) : (
+                  <div className="space-y-3 mt-3">
+                    {cohortExamNotices.map((n) => {
+                      const directPdfUrl = resolveNoticePdf(n);
+                      const isPdf = Boolean(directPdfUrl && (directPdfUrl.includes('/uploads/circulars/') || directPdfUrl.toLowerCase().includes('.pdf') || directPdfUrl.toLowerCase().includes('/content/')));
+                      return (
+                        <div
+                          key={`exam-notice-${n.id}`}
+                          className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:border-emerald-300 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs group"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 uppercase border border-amber-200">
+                                {n.notice_type || 'EXAMINATION'}
+                              </span>
+                              <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                <span className="material-symbols-outlined text-[12px]">verified</span>
+                                Official
+                              </span>
+                              <span className="text-[11px] text-slate-500 font-medium">
+                                {n.date || (n.published_date ? new Date(n.published_date).toLocaleDateString() : 'Active')}
+                              </span>
+                            </div>
+                            <h5 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                              {n.title}
+                            </h5>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              onClick={() =>
+                                openOfficialLink(
+                                  directPdfUrl ||
+                                  n.document_url ||
+                                  n.action_url ||
+                                  n.official_page_url ||
+                                  'https://www.ecajmer.ac.in/latestfromeca'
+                                )
+                              }
+                              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.99] transition-all"
+                            >
+                              <span>{isPdf ? 'Download PDF' : 'View Circular'}</span>
+                              <span className="material-symbols-outlined text-sm">
+                                {isPdf ? 'download' : 'open_in_new'}
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

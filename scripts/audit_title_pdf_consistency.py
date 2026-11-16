@@ -64,3 +64,4 @@ if mismatches:
         print(f"   File:           {fn}")
 
 conn.close()
+

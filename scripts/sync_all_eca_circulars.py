@@ -144,3 +144,12 @@ for db_path in ['campussync.db', 'backend/campussync.db', '/data/campussync.db']
     print(f"  Notices with broken /circulars: {broken_circ} (should be 0)")
     print(f"  Notices routed to /latestfromeca: {latest_fallbacks}")
     conn.close()
+
+# Run cohort reconciliation across databases
+try:
+    from scripts.reconcile_cohort_tagging import reconcile_database
+    for db_path in ['campussync.db', 'backend/campussync.db', '/data/campussync.db']:
+        reconcile_database(db_path)
+except Exception as e:
+    print(f"Notice cohort reconciliation note: {e}")
+
