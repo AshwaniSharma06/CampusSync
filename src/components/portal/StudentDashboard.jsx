@@ -751,44 +751,38 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               <button
                                 onClick={() =>
                                   openOfficialLink(
-                                    (n.document_url && n.document_url.includes('.pdf') ? n.document_url : null) ||
-                                    (n.action_url && n.action_url.includes('.pdf') ? n.action_url : null) ||
+                                    (n.document_url && (n.document_url.toLowerCase().includes('.pdf') || n.document_url.toLowerCase().includes('/uploads/circulars/') || n.document_url.toLowerCase().includes('/content/')) ? n.document_url : null) ||
+                                    (n.action_url && (n.action_url.toLowerCase().includes('.pdf') || n.action_url.toLowerCase().includes('/uploads/circulars/') || n.action_url.toLowerCase().includes('/content/')) ? n.action_url : null) ||
+                                    n.document_url ||
                                     n.action_url ||
                                     n.target_url ||
                                     n.download_url ||
-                                    n.document_url ||
                                     'https://www.ecajmer.ac.in/latestfromeca',
                                     onActionNotification,
                                     'Official notice link is currently unavailable.'
                                   )
                                 }
                                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                                  n.destination_type === 'HOSTED_DOWNLOAD'
+                                  n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT'
                                     ? 'text-emerald-600 hover:bg-emerald-50'
-                                    : n.destination_type === 'OFFICIAL_DOCUMENT'
-                                      ? 'text-emerald-600 hover:bg-emerald-50'
-                                      : n.destination_type === 'OFFICIAL_PAGE'
-                                        ? 'text-blue-600 hover:bg-blue-50'
-                                        : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                                    : n.destination_type === 'OFFICIAL_PAGE'
+                                      ? 'text-blue-600 hover:bg-blue-50'
+                                      : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                                 }`}
                                 title={
-                                  n.destination_type === 'HOSTED_DOWNLOAD'
-                                    ? 'Download CampusSync-Hosted Document'
-                                    : n.destination_type === 'OFFICIAL_DOCUMENT'
-                                      ? 'Open Verified Official Notice Document'
-                                      : n.destination_type === 'OFFICIAL_PAGE'
-                                        ? 'Open Official Notice Webpage'
-                                        : 'Official notice link is currently unavailable'
+                                  n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT'
+                                    ? 'Download Verified Notice PDF'
+                                    : n.destination_type === 'OFFICIAL_PAGE'
+                                      ? 'Open Official Notice Webpage'
+                                      : 'Official notice link is currently unavailable'
                                 }
                               >
                                 <span className="material-symbols-outlined text-base">
-                                  {n.destination_type === 'HOSTED_DOWNLOAD'
+                                  {n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT'
                                     ? 'download'
-                                    : n.destination_type === 'OFFICIAL_DOCUMENT'
-                                      ? 'description'
-                                      : n.destination_type === 'OFFICIAL_PAGE'
-                                        ? 'open_in_new'
-                                        : 'link_off'}
+                                    : n.destination_type === 'OFFICIAL_PAGE'
+                                      ? 'open_in_new'
+                                      : 'link_off'}
                                 </span>
                               </button>
                             </div>
@@ -1127,12 +1121,12 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                         <button
                           onClick={() =>
                             openOfficialLink(
-                              (n.document_url && n.document_url.includes('.pdf') ? n.document_url : null) ||
-                              (n.action_url && n.action_url.includes('.pdf') ? n.action_url : null) ||
+                              (n.document_url && (n.document_url.toLowerCase().includes('.pdf') || n.document_url.toLowerCase().includes('/uploads/circulars/') || n.document_url.toLowerCase().includes('/content/')) ? n.document_url : null) ||
+                              (n.action_url && (n.action_url.toLowerCase().includes('.pdf') || n.action_url.toLowerCase().includes('/uploads/circulars/') || n.action_url.toLowerCase().includes('/content/')) ? n.action_url : null) ||
+                              n.document_url ||
                               n.action_url ||
                               n.target_url ||
                               n.download_url ||
-                              n.document_url ||
                               'https://www.ecajmer.ac.in/latestfromeca',
                               onActionNotification,
                               'Official notice link is currently unavailable.'
@@ -1140,9 +1134,15 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                           }
                           className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-500 text-emerald-700 hover:text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.99]"
                         >
-                          <span>{n.destination_type === 'HOSTED_DOWNLOAD' ? 'Download PDF' : 'View Circular'}</span>
+                          <span>
+                            {n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT' || (n.document_url && (n.document_url.toLowerCase().includes('.pdf') || n.document_url.toLowerCase().includes('/uploads/circulars/')))
+                              ? 'Download PDF'
+                              : 'View Circular'}
+                          </span>
                           <span className="material-symbols-outlined text-sm">
-                            {n.destination_type === 'HOSTED_DOWNLOAD' ? 'download' : 'open_in_new'}
+                            {n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT' || (n.document_url && (n.document_url.toLowerCase().includes('.pdf') || n.document_url.toLowerCase().includes('/uploads/circulars/')))
+                              ? 'download'
+                              : 'open_in_new'}
                           </span>
                         </button>
                       </div>

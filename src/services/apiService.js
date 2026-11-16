@@ -538,9 +538,13 @@ export const openOfficialLink = (
       cleanUrl = SAFE_CIRCULARS_URL;
     }
 
-    // Intercept and prevent 404 routes (/departments/cse, /facilities/library, etc.)
+    // Intercept and prevent 404 routes (/departments/cse, /facilities/library, bare /circulars, etc.)
+    const isBareCirculars = 
+      lower.endsWith('/circulars') || 
+      lower.endsWith('/circulars/') || 
+      lower.includes('/circulars?');
+
     const brokenRoutes = [
-      '/circulars',
       '/departments/cse',
       '/departments/',
       '/department/',
@@ -552,7 +556,7 @@ export const openOfficialLink = (
       '/events/technotsav',
       '/notices/unclassified'
     ];
-    if (brokenRoutes.some(route => lower.includes(route) && !lower.includes('.pdf'))) {
+    if (isBareCirculars || brokenRoutes.some(route => lower.includes(route))) {
       cleanUrl = SAFE_CIRCULARS_URL;
     }
 
@@ -560,6 +564,9 @@ export const openOfficialLink = (
     cleanUrl = cleanUrl
       .replace(/ecajmer\.ac\.in\/\.\.\/content\//i, 'ecajmer.ac.in/Content/')
       .replace(/ecajmer\.ac\.in\/\.\/content\//i, 'ecajmer.ac.in/Content/');
+
+    // Ensure percent-encoding so URLs with spaces open reliably across all browsers
+    cleanUrl = encodeURI(decodeURI(cleanUrl));
 
     const urlObj = new URL(cleanUrl);
     if (onActionNotification) {
