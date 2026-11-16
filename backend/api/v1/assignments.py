@@ -7,6 +7,7 @@ from backend.models.academic import Assignment, Course
 
 router = APIRouter()
 
+@router.get("", include_in_schema=False)
 @router.get("/")
 def get_assignments(
     student_ctx: StudentContext = Depends(get_current_student_context),

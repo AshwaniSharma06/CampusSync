@@ -190,6 +190,7 @@ def serialize_post(post: CommunityPost, current_user: Optional[User] = None) -> 
     )
 
 
+@router.get("", response_model=List[CommunityPostResponse], include_in_schema=False)
 @router.get("/", response_model=List[CommunityPostResponse])
 def get_community_posts(
     limit: int = Query(50, ge=1, le=100),
@@ -224,6 +225,7 @@ def get_community_posts(
     return [serialize_post(p, current_user=current_user) for p in posts]
 
 
+@router.post("", response_model=CommunityPostResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @router.post("/", response_model=CommunityPostResponse, status_code=status.HTTP_201_CREATED)
 def create_community_post(
     post_in: CommunityPostCreate,

@@ -7,6 +7,7 @@ from backend.models.academic import ExaminationSchedule
 
 router = APIRouter()
 
+@router.get("", include_in_schema=False)
 @router.get("/")
 def get_examination_schedules(
     student_ctx: StudentContext = Depends(get_current_student_context),

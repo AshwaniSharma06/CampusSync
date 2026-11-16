@@ -8,6 +8,7 @@ from backend.schemas.profile import StudentProfileUpdate, StudentProfileResponse
 
 router = APIRouter()
 
+@router.get("", response_model=StudentProfileResponse, include_in_schema=False)
 @router.get("/", response_model=StudentProfileResponse)
 def get_profile(
     current_user: User = Depends(get_current_user),
@@ -37,6 +38,7 @@ def get_profile(
         profile_complete=bool(profile.department and profile.semester)
     )
 
+@router.put("", response_model=StudentProfileResponse, include_in_schema=False)
 @router.put("/", response_model=StudentProfileResponse)
 def update_profile(
     profile_in: StudentProfileUpdate,

@@ -21,6 +21,7 @@ router = APIRouter()
 
 HOSTED_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "hosted_documents"
 
+@router.get("", include_in_schema=False)
 @router.get("/")
 def get_academic_resources(
     student_ctx: StudentContext = Depends(get_current_student_context),

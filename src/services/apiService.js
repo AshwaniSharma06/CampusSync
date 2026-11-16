@@ -55,21 +55,15 @@ export const getAuthHeaders = () => {
 };
 
 export const apiClient = async (endpoint, options = {}) => {
-  // Defensive normalization: remove trailing slash before query string
-  // (e.g. '/notices/' -> '/notices', '/courses/' -> '/courses')
-  // This guarantees clean proxying across Vercel and production CDNs without HTML fallback.
-  let cleanEndpoint = endpoint;
-  const qIndex = cleanEndpoint.indexOf('?');
-  if (qIndex !== -1) {
-    const pathPart = cleanEndpoint.slice(0, qIndex).replace(/\/+$/, '');
-    const queryPart = cleanEndpoint.slice(qIndex);
-    cleanEndpoint = `${pathPart}${queryPart}`;
-  } else if (cleanEndpoint.length > 1) {
-    cleanEndpoint = cleanEndpoint.replace(/\/+$/, '');
-  }
+  // Preserve exact route path with leading slash, avoiding double slashes
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
-  let url = `${API_BASE_URL}${cleanEndpoint}`;
-  const timeoutMs = options.timeout || 35000;
+  const base = (API_BASE_URL || '').replace(/\/+$/, '');
+  let url = `${base}${cleanEndpoint}`;
+
+  // Use a nimble timeout on localhost so an unstarted local server fails over to Railway in seconds
+  const isLocal = url.includes('localhost') || url.includes('127.0.0.1');
+  const timeoutMs = options.timeout || (isLocal ? 3500 : 25000);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -90,12 +84,12 @@ export const apiClient = async (endpoint, options = {}) => {
   } catch (networkErr) {
     clearTimeout(timeoutId);
 
-    // If local dev server is unreachable on localhost:8000, seamlessly fail over to live Railway API
-    if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
-      const fallbackUrl = `${LIVE_FALLBACK_URL}${cleanEndpoint}`;
+    // Failover: If current server is unreachable (local or proxy), seamlessly fail over to live Railway API
+    if (!url.startsWith(LIVE_FALLBACK_URL)) {
+      const fallbackUrl = `${LIVE_FALLBACK_URL.replace(/\/+$/, '')}${cleanEndpoint}`;
       try {
         const fallbackCtrl = new AbortController();
-        const fallbackTimeout = setTimeout(() => fallbackCtrl.abort(), 20000);
+        const fallbackTimeout = setTimeout(() => fallbackCtrl.abort(), 15000);
         const fallbackResponse = await fetch(fallbackUrl, {
           ...options,
           headers,
@@ -110,7 +104,7 @@ export const apiClient = async (endpoint, options = {}) => {
           response = fallbackResponse;
         }
       } catch (fallbackErr) {
-        // Fallback also failed, report structured error
+        console.warn('Fallback to live Railway backend failed:', fallbackErr);
       }
     }
 
@@ -122,7 +116,6 @@ export const apiClient = async (endpoint, options = {}) => {
         );
       }
 
-      const currentOrigin = typeof window !== 'undefined' ? window.location?.origin : 'frontend';
       throw new ApiError(
         `Backend server unreachable at ${API_BASE_URL}. Ensure the FastAPI server is running on port 8000 (uvicorn backend.main:app --reload --port 8000) or verify internet connection to ${LIVE_FALLBACK_URL}.`,
         { code: 'NETWORK_ERROR', detail: networkErr.message, url }
@@ -130,6 +123,22 @@ export const apiClient = async (endpoint, options = {}) => {
     }
   } finally {
     clearTimeout(timeoutId);
+  }
+
+  // Intercept proxy gateway errors (502/503/504) and route directly to live backend
+  if (response && (response.status === 502 || response.status === 503 || response.status === 504) && !url.startsWith(LIVE_FALLBACK_URL)) {
+    const directUrl = `${LIVE_FALLBACK_URL.replace(/\/+$/, '')}${cleanEndpoint}`;
+    try {
+      const directResponse = await fetch(directUrl, {
+        ...options,
+        headers,
+      });
+      if (directResponse && directResponse.status < 500) {
+        API_BASE_URL = LIVE_FALLBACK_URL;
+        url = directUrl;
+        response = directResponse;
+      }
+    } catch (_) {}
   }
 
   if (!response.ok) {

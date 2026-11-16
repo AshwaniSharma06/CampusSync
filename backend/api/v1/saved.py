@@ -13,6 +13,7 @@ class SavedItemCreate(BaseModel):
     item_type: str = "notice"
     item_id: int
 
+@router.get("", include_in_schema=False)
 @router.get("/")
 def get_saved_items(
     current_user: User = Depends(get_current_user),
@@ -32,6 +33,7 @@ def get_saved_items(
         for s in items
     ]
 
+@router.post("", include_in_schema=False)
 @router.post("/")
 def toggle_saved_item(
     item_in: SavedItemCreate,

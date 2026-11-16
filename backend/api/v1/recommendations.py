@@ -8,6 +8,7 @@ from backend.services.recommendation_service import RecommendationEngine
 
 router = APIRouter()
 
+@router.get("", include_in_schema=False)
 @router.get("/")
 def get_recommendations(
     department: Optional[str] = Query(None, description="Student branch/department"),

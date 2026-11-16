@@ -147,6 +147,7 @@ def get_public_notices(
 
     return results
 
+@router.get("", include_in_schema=False)
 @router.get("/")
 def get_notices(
     q: Optional[str] = Query(None, description="Search query for notice title or content"),

@@ -17,6 +17,7 @@ from backend.services.url_validator import resolve_club_destination, is_trusted_
 
 router = APIRouter()
 
+@router.get("", include_in_schema=False)
 @router.get("/")
 def get_events(
     current_user: Optional[User] = Depends(get_optional_current_user),
