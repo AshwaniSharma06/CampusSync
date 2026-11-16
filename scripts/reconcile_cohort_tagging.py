@@ -169,3 +169,4 @@ def reconcile_database(db_path):
 if __name__ == '__main__':
     for p in DB_PATHS:
         reconcile_database(p)
+
