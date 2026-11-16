@@ -41,6 +41,8 @@ def get_public_notices(
 
     base_filter = and_(
         Notice.is_active == True,
+        Notice.id > 12,
+        Notice.data_origin != 'DEMO_SEED',
         Notice.verification_status == VerificationStatus.VERIFIED.value,
         Notice.scope.in_([
             ClassificationScope.GLOBAL.value,
@@ -166,9 +168,11 @@ def get_notices(
     Excludes UNCLASSIFIED, FLAGGED, unverified, and inactive notices.
     Never trusts client-supplied semester or department query parameters.
     """
-    # 1. Base security filter: Active and Verified only
+    # 1. Base security filter: Active, Authentic, and Verified only (excludes demo seeds)
     base_filter = and_(
         Notice.is_active == True,
+        Notice.id > 12,
+        Notice.data_origin != 'DEMO_SEED',
         Notice.verification_status == VerificationStatus.VERIFIED.value,
         Notice.scope != ClassificationScope.UNCLASSIFIED.value
     )

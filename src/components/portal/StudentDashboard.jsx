@@ -232,9 +232,9 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     }
   };
 
-  // Filtered notices based on active category pill and search
+  // Filtered notices based on active category pill and search (strictly authentic official notices only)
   const filteredNotices = useMemo(() => {
-    let result = notices;
+    let result = (notices || []).filter(n => n.id > 12 && n.data_origin !== 'DEMO_SEED');
     if (noticeFilter === 'Official') {
       result = result.filter(n => n.data_origin === 'VERIFIED_OFFICIAL' || n.notice_type === 'Official');
     } else if (noticeFilter === 'Department') {
@@ -259,7 +259,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
   }, [filteredNotices, noticePage]);
 
   const totalNoticePages = Math.max(1, Math.ceil(filteredNotices.length / NOTICES_PER_PAGE));
-  const verifiedNoticesCount = notices.filter(n => n.data_origin === 'VERIFIED_OFFICIAL').length;
+  const verifiedNoticesCount = (notices || []).filter(n => n.id > 12 && n.data_origin !== 'DEMO_SEED').length;
 
   // Navigation sidebar configuration
   const sidebarNavItems = [

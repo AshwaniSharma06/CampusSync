@@ -1,28 +1,6 @@
 {
   "global": [
     {
-      "id": 3,
-      "title": "Technotsav 2026 Annual Technical Fest Event Registration",
-      "date": "2026-11-02",
-      "type": "Events",
-      "scope": "GLOBAL",
-      "dept": "All",
-      "sem": "All",
-      "link": "https://www.ecajmer.ac.in/uploads/circulars/1788504608183-Notice for Internal Hackathon for SIH-2026.pdf",
-      "link_type": "Direct PDF Document"
-    },
-    {
-      "id": 2,
-      "title": "Central Library Extended Night Reading Hours for Mid-Terms",
-      "date": "2026-11-02",
-      "type": "Official",
-      "scope": "GLOBAL",
-      "dept": "All",
-      "sem": "All",
-      "link": "https://www.ecajmer.ac.in/uploads/circulars/1792744602711-Document 6.pdf",
-      "link_type": "Direct PDF Document"
-    },
-    {
       "id": 217,
       "title": "Sports Coordinator Selection for COMBAT 2K25 - 26",
       "date": "2026-02-03",
@@ -52,8 +30,8 @@
       "scope": "GLOBAL",
       "dept": "All",
       "sem": "All",
-      "link": "https://www.ecajmer.ac.in/latestfromeca",
-      "link_type": "Official Notice Webpage"
+      "link": "https://www.ecajmer.ac.in/uploads/circulars/1767345976249-IMG_20260102_145209.jpg",
+      "link_type": "Direct PDF Document"
     },
     {
       "id": 289,
@@ -264,50 +242,6 @@
       "dept": "CSE",
       "sem": 7,
       "link": "https://www.ecajmer.ac.in/uploads/circulars/1793693243432-DOC-20261103-WA0012.pdf",
-      "link_type": "Direct PDF Document"
-    },
-    {
-      "id": 7,
-      "title": "BTU Semester 7 Final Major Project Phase-1 Lab Evaluations",
-      "date": "2026-11-02",
-      "type": "Examination",
-      "scope": "SEMESTER_SPECIFIC",
-      "dept": "CSE",
-      "sem": 7,
-      "link": "https://www.ecajmer.ac.in/uploads/circulars/1791965057390-Document%20274.pdf",
-      "link_type": "Direct PDF Document"
-    },
-    {
-      "id": 6,
-      "title": "Semester 5 Operating Systems Mini-Project Synopsis Due Date",
-      "date": "2026-11-02",
-      "type": "Academic",
-      "scope": "SEMESTER_SPECIFIC",
-      "dept": "CSE",
-      "sem": 5,
-      "link": "https://www.ecajmer.ac.in/uploads/circulars/1792051462442-Document%20275_compressed.pdf",
-      "link_type": "Direct PDF Document"
-    },
-    {
-      "id": 5,
-      "title": "Semester 3 Data Structures Lab Assessment & Viva Schedule",
-      "date": "2026-11-02",
-      "type": "Academic",
-      "scope": "SEMESTER_SPECIFIC",
-      "dept": "CSE",
-      "sem": 3,
-      "link": "https://www.ecajmer.ac.in/uploads/circulars/1793247267504-BTU%20-%20Circular%20for%20B.Tech.%20III%20Sem%20(Main%20and%20Back%20Exam)%20Session%202026-27%20(Last%20date%2001.11.2026%20with%20single%20fee).pdf",
-      "link_type": "Direct PDF Document"
-    },
-    {
-      "id": 4,
-      "title": "CSE Department Research & Coding Cell Induction",
-      "date": "2026-11-02",
-      "type": "Department",
-      "scope": "DEPARTMENT_SPECIFIC",
-      "dept": "CSE",
-      "sem": "All",
-      "link": "https://www.ecajmer.ac.in/uploads/circulars/1792744602711-Document%206.pdf",
       "link_type": "Direct PDF Document"
     },
     {
@@ -1533,17 +1467,6 @@
     }
   ],
   "it": [
-    {
-      "id": 9,
-      "title": "IT Department Cloud Lab Access Schedule",
-      "date": "2026-11-02",
-      "type": "Official",
-      "scope": "DEPARTMENT_SPECIFIC",
-      "dept": "IT",
-      "sem": "All",
-      "link": "https://www.ecajmer.ac.in/uploads/circulars/1788594425530-ce_compressed (1).pdf",
-      "link_type": "Direct PDF Document"
-    },
     {
       "id": 24,
       "title": "B.Tech 3rd and 5th Sem (CS-A & CS-B), IT and Cyber 2nd Mid-Term Exam 2026 MAIN",
@@ -3571,17 +3494,6 @@
         "link_type": "Direct PDF Document"
       },
       {
-        "id": 7,
-        "title": "BTU Semester 7 Final Major Project Phase-1 Lab Evaluations",
-        "date": "2026-11-02",
-        "type": "Examination",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "CSE",
-        "sem": 7,
-        "link": "https://www.ecajmer.ac.in/uploads/circulars/1791965057390-Document%20274.pdf",
-        "link_type": "Direct PDF Document"
-      },
-      {
         "id": 25,
         "title": "7th Semester CE, IT and Cyber Mid Term (Mercy/Back Improvement) 2026-27",
         "date": "2026-10-15",
@@ -3714,108 +3626,7 @@
         "link_type": "Direct PDF Document"
       }
     ],
-    "5": [
-      {
-        "id": 6,
-        "title": "Semester 5 Operating Systems Mini-Project Synopsis Due Date",
-        "date": "2026-11-02",
-        "type": "Academic",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "CSE",
-        "sem": 5,
-        "link": "https://www.ecajmer.ac.in/uploads/circulars/1792051462442-Document%20275_compressed.pdf",
-        "link_type": "Direct PDF Document"
-      },
-      {
-        "id": 107,
-        "title": "Time Table B.TECH V Sem Session 2026-27",
-        "date": "2026-07-13",
-        "type": "Official",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "EE",
-        "sem": 5,
-        "link": "https://www.ecajmer.ac.in/uploads/circulars/1783939771821-v sem tt.pdf",
-        "link_type": "Direct PDF Document"
-      },
-      {
-        "id": 270,
-        "title": "Time Table Back Mercy Mid Term B.Tech 5th Sem CS,IT &Cyber Exam 2025-26 (New Scheme )",
-        "date": "2025-11-20",
-        "type": "Official",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "IT",
-        "sem": 5,
-        "link": "https://www.ecajmer.ac.in/uploads/circulars/1763628407762-Document.pdf",
-        "link_type": "Direct PDF Document"
-      },
-      {
-        "id": 297,
-        "title": "Practical Time Table For B.Tech 5th Sem CS,IT&Cyber(Main)",
-        "date": "2025-10-30",
-        "type": "Official",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "IT",
-        "sem": 5,
-        "link": "https://www.ecajmer.ac.in/uploads/circulars/1761810279089-Document 94.pdf",
-        "link_type": "Direct PDF Document"
-      },
-      {
-        "id": 294,
-        "title": "B.Tech V Sem M-B Practical & Sessional Exam 2025-26",
-        "date": "2025-10-30",
-        "type": "Official",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "EE",
-        "sem": 5,
-        "link": "https://www.ecajmer.ac.in/uploads/circulars/1761799334569-B.Tech V Sem M-B Practical & Sessional Exam 2025-26.pdf",
-        "link_type": "Direct PDF Document"
-      },
-      {
-        "id": 780,
-        "title": "WRE MTE-2  V SEM SOLUTION 2019-20",
-        "date": "2019-12-28",
-        "type": "Academic",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "All",
-        "sem": 5,
-        "link": "https://www.ecajmer.ac.in/uploads/announcements/WRE%20MTE-2%20%20V%20SEM%20SOLUTION%202019-20.pdf",
-        "link_type": "Direct PDF Document"
-      },
-      {
-        "id": 779,
-        "title": "WRE MTE-1  V SEM SOLUTION 2019-20",
-        "date": "2019-12-28",
-        "type": "Academic",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "All",
-        "sem": 5,
-        "link": "https://www.ecajmer.ac.in/uploads/announcements/WRE%20MTE-1%20%20V%20SEM%20SOLUTION%202019-20.pdf",
-        "link_type": "Direct PDF Document"
-      },
-      {
-        "id": 787,
-        "title": "Assignment Submission for B.Tech. V Sem EE students for EMD (Last Date 11-12-2019)",
-        "date": "2019-12-06",
-        "type": "Academic",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "EE",
-        "sem": 5,
-        "link": "https://forms.gle/Cmzfa7k5dHv3im1D7",
-        "link_type": "Direct PDF Document"
-      }
-    ],
     "3": [
-      {
-        "id": 5,
-        "title": "Semester 3 Data Structures Lab Assessment & Viva Schedule",
-        "date": "2026-11-02",
-        "type": "Academic",
-        "scope": "SEMESTER_SPECIFIC",
-        "dept": "CSE",
-        "sem": 3,
-        "link": "https://www.ecajmer.ac.in/uploads/circulars/1793247267504-BTU%20-%20Circular%20for%20B.Tech.%20III%20Sem%20(Main%20and%20Back%20Exam)%20Session%202026-27%20(Last%20date%2001.11.2026%20with%20single%20fee).pdf",
-        "link_type": "Direct PDF Document"
-      },
       {
         "id": 13,
         "title": "Exam Form Filling for B Tech III Semester Main and Back Exam New and Old Scheme Session 2026 27 Last date with single fee 1 November 2026",
@@ -4102,6 +3913,85 @@
         "dept": "CE",
         "sem": 1,
         "link": "https://www.ecajmer.ac.in/uploads/announcements/BASIC%20CIVIL%20ENGINEERING%20I%20SEM%20MTE-I%20SOLUTIONS%202018-19.pdf",
+        "link_type": "Direct PDF Document"
+      }
+    ],
+    "5": [
+      {
+        "id": 107,
+        "title": "Time Table B.TECH V Sem Session 2026-27",
+        "date": "2026-07-13",
+        "type": "Official",
+        "scope": "SEMESTER_SPECIFIC",
+        "dept": "EE",
+        "sem": 5,
+        "link": "https://www.ecajmer.ac.in/uploads/circulars/1783939771821-v sem tt.pdf",
+        "link_type": "Direct PDF Document"
+      },
+      {
+        "id": 270,
+        "title": "Time Table Back Mercy Mid Term B.Tech 5th Sem CS,IT &Cyber Exam 2025-26 (New Scheme )",
+        "date": "2025-11-20",
+        "type": "Official",
+        "scope": "SEMESTER_SPECIFIC",
+        "dept": "IT",
+        "sem": 5,
+        "link": "https://www.ecajmer.ac.in/uploads/circulars/1763628407762-Document.pdf",
+        "link_type": "Direct PDF Document"
+      },
+      {
+        "id": 297,
+        "title": "Practical Time Table For B.Tech 5th Sem CS,IT&Cyber(Main)",
+        "date": "2025-10-30",
+        "type": "Official",
+        "scope": "SEMESTER_SPECIFIC",
+        "dept": "IT",
+        "sem": 5,
+        "link": "https://www.ecajmer.ac.in/uploads/circulars/1761810279089-Document 94.pdf",
+        "link_type": "Direct PDF Document"
+      },
+      {
+        "id": 294,
+        "title": "B.Tech V Sem M-B Practical & Sessional Exam 2025-26",
+        "date": "2025-10-30",
+        "type": "Official",
+        "scope": "SEMESTER_SPECIFIC",
+        "dept": "EE",
+        "sem": 5,
+        "link": "https://www.ecajmer.ac.in/uploads/circulars/1761799334569-B.Tech V Sem M-B Practical & Sessional Exam 2025-26.pdf",
+        "link_type": "Direct PDF Document"
+      },
+      {
+        "id": 780,
+        "title": "WRE MTE-2  V SEM SOLUTION 2019-20",
+        "date": "2019-12-28",
+        "type": "Academic",
+        "scope": "SEMESTER_SPECIFIC",
+        "dept": "All",
+        "sem": 5,
+        "link": "https://www.ecajmer.ac.in/uploads/announcements/WRE%20MTE-2%20%20V%20SEM%20SOLUTION%202019-20.pdf",
+        "link_type": "Direct PDF Document"
+      },
+      {
+        "id": 779,
+        "title": "WRE MTE-1  V SEM SOLUTION 2019-20",
+        "date": "2019-12-28",
+        "type": "Academic",
+        "scope": "SEMESTER_SPECIFIC",
+        "dept": "All",
+        "sem": 5,
+        "link": "https://www.ecajmer.ac.in/uploads/announcements/WRE%20MTE-1%20%20V%20SEM%20SOLUTION%202019-20.pdf",
+        "link_type": "Direct PDF Document"
+      },
+      {
+        "id": 787,
+        "title": "Assignment Submission for B.Tech. V Sem EE students for EMD (Last Date 11-12-2019)",
+        "date": "2019-12-06",
+        "type": "Academic",
+        "scope": "SEMESTER_SPECIFIC",
+        "dept": "EE",
+        "sem": 5,
+        "link": "https://forms.gle/Cmzfa7k5dHv3im1D7",
         "link_type": "Direct PDF Document"
       }
     ],
@@ -5012,7 +4902,7 @@
         "dept": "All",
         "sem": 8,
         "link": "https://docs.google.com/forms/d/e/1FAIpQLSdcIkbDQn3avjcrP_FngT5ruoKZM6gixslhZ69gopK8DxyYBQ/viewform?usp=sf_link",
-        "link_type": "Direct PDF Document"
+        "link_type": "Official Notice Webpage"
       },
       {
         "id": 886,
@@ -5049,17 +4939,6 @@
       "sem": "All",
       "link": "https://www.ecajmer.ac.in/uploads/circulars/1786086101797-Water%20Cooler&%20Purifier%20Tender%201_compressed.pdf",
       "link_type": "Direct PDF Document"
-    },
-    {
-      "id": 10,
-      "title": "Confidential Academic Fee Exemption Audit",
-      "date": "2026-11-02",
-      "type": "Official",
-      "scope": "INDIVIDUAL",
-      "dept": "All",
-      "sem": "All",
-      "link": "https://www.ecajmer.ac.in/latestfromeca",
-      "link_type": "Official Notice Webpage"
     },
     {
       "id": 13,
@@ -5311,8 +5190,8 @@
       "scope": "UNCLASSIFIED",
       "dept": "All",
       "sem": "All",
-      "link": "https://www.ecajmer.ac.in/latestfromeca",
-      "link_type": "Official Notice Webpage"
+      "link": "https://www.ecajmer.ac.in/ui/cells/cas/circulars",
+      "link_type": "Direct PDF Document"
     },
     {
       "id": 215,
@@ -8755,7 +8634,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://nptel.ac.in/courses/112104289/",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 648,
@@ -9536,7 +9415,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://nptel.ac.in/courses/110/106/110106081/",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 721,
@@ -10636,7 +10515,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLScmEIIQNvEHdDiuGbtJlLvh4FDN26gsPAO4G_-JKNhVdsAfEA/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 961,
@@ -10768,7 +10647,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLSfdU2a75ET8kFEjH_4kcYKOO7paZ7vWtsVx3hr04OfF4D6RsA/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 844,
@@ -10790,7 +10669,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLSfsDXLSMuffnwnczKRTkjEA8tm3u80zxa5ETaEzGhpavl5paA/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 849,
@@ -10801,7 +10680,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLSe6OKpQpwqXpkX0lxP_Mh9iw2u7PA0CSunnNmlDBdp8xq3-7A/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 847,
@@ -10878,7 +10757,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://university.mastercam.com/",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 965,
@@ -10889,7 +10768,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLSfHwGk8lC556-ihZ_PCxoTvFz19Ci2fksZi6Jgu8Vf9J8IHkQ/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 851,
@@ -10922,7 +10801,7 @@
       "dept": "All",
       "sem": 8,
       "link": "https://docs.google.com/forms/d/e/1FAIpQLSdcIkbDQn3avjcrP_FngT5ruoKZM6gixslhZ69gopK8DxyYBQ/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 863,
@@ -11186,7 +11065,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLSdNnAOfspHFE2aTW18wtKL74VRtTtRPSp8xYudKJ_grZSVVRg/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 885,
@@ -11329,7 +11208,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLSfKfRTFvR-T015oUPCnjGxBvRy058qVGA4ttxeZ7QFlxqgJcg/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 904,
@@ -11340,7 +11219,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLSeea0UmRhej1wooYUwHioO5K5fRnw-UtLm_k2eYc1eyIxSk5g/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 903,
@@ -11362,7 +11241,7 @@
       "dept": "All",
       "sem": "All",
       "link": "https://docs.google.com/forms/d/e/1FAIpQLScyCdJAQQlE3w0M1FPqwvppOgXRk4EAN_cmOIheM1xH-_BV1A/viewform?usp=sf_link",
-      "link_type": "Direct PDF Document"
+      "link_type": "Official Notice Webpage"
     },
     {
       "id": 907,
