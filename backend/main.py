@@ -107,12 +107,41 @@ from backend.services.scheduler import CampusSyncScraperScheduler
 from backend.services.vector_service import ensure_chroma_initialized
 from backend.db.session import SessionLocal
 
+def ensure_notices_synced(db):
+    """Ensures all notices have direct working official PDF URLs from the verified catalog map."""
+    try:
+        from backend.models.academic import Notice
+        import json
+        from pathlib import Path
+        candidates = [
+            Path(__file__).resolve().parent.parent / "src" / "services" / "noticePdfMap.json",
+            Path(__file__).resolve().parent / "src" / "services" / "noticePdfMap.json",
+            Path("/app/src/services/noticePdfMap.json")
+        ]
+        map_path = next((p for p in candidates if p.exists()), None)
+        if map_path:
+            with open(map_path, "r", encoding="utf-8") as f:
+                pdf_map = json.load(f)
+            missing = db.query(Notice).filter((Notice.document_url == None) | (Notice.document_url == "")).all()
+            updated = 0
+            for n in missing:
+                nid = str(n.id)
+                if nid in pdf_map:
+                    n.document_url = pdf_map[nid]
+                    updated += 1
+            if updated > 0:
+                db.commit()
+                print(f"[CampusSync Startup] Auto-synced {updated} notices with direct official PDF links.")
+    except Exception as e:
+        print(f"[CampusSync Startup] Notice sync check: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     """Initializes vector store and starts the automated 3-hour website scraping scheduler."""
     # 1. Safe ChromaDB startup verification (idempotent, skips if already populated)
     db = SessionLocal()
     try:
+        ensure_notices_synced(db)
         ensure_chroma_initialized(db)
     finally:
         db.close()

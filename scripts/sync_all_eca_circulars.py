@@ -19,7 +19,7 @@ for item in latest:
 
 print(f"Loaded {len(latest)} official circulars from ECA ({len(latest_dict)} unique normalized titles).")
 
-for db_path in ['campussync.db', 'backend/campussync.db']:
+for db_path in ['campussync.db', 'backend/campussync.db', '/data/campussync.db']:
     if not os.path.exists(db_path):
         print(f"Skipping {db_path} (not found)")
         continue

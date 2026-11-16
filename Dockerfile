@@ -17,8 +17,11 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 # Create volume mount point for persistent storage
 RUN mkdir -p /data && chmod 777 /data
 
-# Copy backend application and seed database
+# Copy backend application, scripts, and seed database
 COPY backend/ ./backend/
+COPY scripts/ ./scripts/
+COPY eca_latest_circulars.json ./eca_latest_circulars.json
+COPY src/services/noticePdfMap.json ./src/services/noticePdfMap.json
 COPY campussync.db ./campussync.db
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh

@@ -5,12 +5,13 @@ set -e
 if [ -d "/data" ]; then
     echo "[CampusSync Docker] Detected persistent volume at /data"
     
-    # Seed database into persistent volume if none exists yet
+    # Seed database into persistent volume if none exists yet, or update with release circulars
     if [ ! -f "/data/campussync.db" ] && [ -f "/app/campussync.db" ]; then
         echo "[CampusSync Docker] Initializing persistent database at /data/campussync.db from release seed..."
         cp /app/campussync.db /data/campussync.db
     else
-        echo "[CampusSync Docker] Preserving existing database at /data/campussync.db"
+        echo "[CampusSync Docker] Syncing persistent database at /data/campussync.db with release circulars..."
+        python scripts/sync_all_eca_circulars.py || true
     fi
 
     # Seed ChromaDB into persistent volume if none exists yet

@@ -4,6 +4,8 @@
  * environment configuration, and structured error handling.
  */
 
+import noticePdfMap from './noticePdfMap.json';
+
 export class ApiError extends Error {
   constructor(message, { status = null, code = null, detail = null, url = null } = {}) {
     super(message);
@@ -478,6 +480,56 @@ export const apiService = {
       }),
     });
   },
+};
+
+/**
+ * Resolves the exact direct PDF URL for any given notice object.
+ * Checks direct document_url, action_url, or looks up by ID / title in the verified catalog map.
+ */
+export const resolveNoticePdf = (notice) => {
+  if (!notice) return null;
+
+  // 1. If direct document_url points to a circular PDF or image upload
+  if (
+    notice.document_url &&
+    typeof notice.document_url === 'string' &&
+    (notice.document_url.includes('/uploads/circulars/') ||
+      notice.document_url.toLowerCase().includes('.pdf') ||
+      notice.document_url.toLowerCase().includes('/content/'))
+  ) {
+    return notice.document_url;
+  }
+
+  // 2. If action_url points to a circular PDF or image upload
+  if (
+    notice.action_url &&
+    typeof notice.action_url === 'string' &&
+    (notice.action_url.includes('/uploads/circulars/') ||
+      notice.action_url.toLowerCase().includes('.pdf') ||
+      notice.action_url.toLowerCase().includes('/content/'))
+  ) {
+    return notice.action_url;
+  }
+
+  // 3. Match by notice ID in verified catalog
+  if (notice.id && noticePdfMap[String(notice.id)]) {
+    return noticePdfMap[String(notice.id)];
+  }
+
+  // 4. Match by normalized title in verified catalog
+  if (notice.title && typeof notice.title === 'string') {
+    const norm = notice.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (noticePdfMap[norm]) {
+      return noticePdfMap[norm];
+    }
+  }
+
+  // 5. Fallback to download_url or document_url if present
+  if (notice.download_url && notice.download_url.startsWith('/api/v1/')) {
+    return notice.download_url;
+  }
+
+  return notice.document_url || notice.action_url || null;
 };
 
 /**

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { apiService, openOfficialLink } from '../../services/apiService';
+import { apiService, openOfficialLink, resolveNoticePdf } from '../../services/apiService';
 import EditProfileModal from './EditProfileModal';
 import CampusAiWorkspace from '../chat/CampusAiWorkspace';
 import CampusSyncLogo from '../ui/CampusSyncLogo';
@@ -718,7 +718,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {paginatedNotices.map((n) => (
+                        {paginatedNotices.map((n) => {
+                          const directPdfUrl = resolveNoticePdf(n);
+                          const isPdf = Boolean(directPdfUrl && (directPdfUrl.includes('/uploads/circulars/') || directPdfUrl.toLowerCase().includes('.pdf') || directPdfUrl.toLowerCase().includes('/content/')));
+                          return (
                           <div
                             key={n.id}
                             className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:border-emerald-300 hover:bg-white transition-all flex items-start justify-between gap-3 group shadow-xs"
@@ -751,26 +754,25 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               <button
                                 onClick={() =>
                                   openOfficialLink(
-                                    (n.document_url && (n.document_url.toLowerCase().includes('.pdf') || n.document_url.toLowerCase().includes('/uploads/circulars/') || n.document_url.toLowerCase().includes('/content/')) ? n.document_url : null) ||
-                                    (n.action_url && (n.action_url.toLowerCase().includes('.pdf') || n.action_url.toLowerCase().includes('/uploads/circulars/') || n.action_url.toLowerCase().includes('/content/')) ? n.action_url : null) ||
+                                    directPdfUrl ||
                                     n.document_url ||
                                     n.action_url ||
                                     n.target_url ||
                                     n.download_url ||
                                     'https://www.ecajmer.ac.in/latestfromeca',
                                     onActionNotification,
-                                    'Official notice link is currently unavailable.'
+                                    isPdf ? 'Opening verified official PDF document...' : 'Opening verified official notice...'
                                   )
                                 }
                                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                                  n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT'
+                                  isPdf
                                     ? 'text-emerald-600 hover:bg-emerald-50'
                                     : n.destination_type === 'OFFICIAL_PAGE'
                                       ? 'text-blue-600 hover:bg-blue-50'
                                       : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                                 }`}
                                 title={
-                                  n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT'
+                                  isPdf
                                     ? 'Download Verified Notice PDF'
                                     : n.destination_type === 'OFFICIAL_PAGE'
                                       ? 'Open Official Notice Webpage'
@@ -778,7 +780,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                                 }
                               >
                                 <span className="material-symbols-outlined text-base">
-                                  {n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT'
+                                  {isPdf
                                     ? 'download'
                                     : n.destination_type === 'OFFICIAL_PAGE'
                                       ? 'open_in_new'
@@ -787,7 +789,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               </button>
                             </div>
                           </div>
-                        ))}
+                        );})}
                       </div>
                     )}
 
@@ -1088,7 +1090,10 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {paginatedNotices.map((n) => (
+                  {paginatedNotices.map((n) => {
+                    const directPdfUrl = resolveNoticePdf(n);
+                    const isPdf = Boolean(directPdfUrl && (directPdfUrl.includes('/uploads/circulars/') || directPdfUrl.toLowerCase().includes('.pdf') || directPdfUrl.toLowerCase().includes('/content/')));
+                    return (
                     <div
                       key={n.id}
                       className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:border-emerald-300 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs group"
@@ -1121,33 +1126,26 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                         <button
                           onClick={() =>
                             openOfficialLink(
-                              (n.document_url && (n.document_url.toLowerCase().includes('.pdf') || n.document_url.toLowerCase().includes('/uploads/circulars/') || n.document_url.toLowerCase().includes('/content/')) ? n.document_url : null) ||
-                              (n.action_url && (n.action_url.toLowerCase().includes('.pdf') || n.action_url.toLowerCase().includes('/uploads/circulars/') || n.action_url.toLowerCase().includes('/content/')) ? n.action_url : null) ||
+                              directPdfUrl ||
                               n.document_url ||
                               n.action_url ||
                               n.target_url ||
                               n.download_url ||
                               'https://www.ecajmer.ac.in/latestfromeca',
                               onActionNotification,
-                              'Official notice link is currently unavailable.'
+                              isPdf ? 'Opening verified official PDF document...' : 'Opening verified official notice...'
                             )
                           }
                           className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-500 text-emerald-700 hover:text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.99]"
                         >
-                          <span>
-                            {n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT' || (n.document_url && (n.document_url.toLowerCase().includes('.pdf') || n.document_url.toLowerCase().includes('/uploads/circulars/')))
-                              ? 'Download PDF'
-                              : 'View Circular'}
-                          </span>
+                          <span>{isPdf ? 'Download PDF' : 'View Circular'}</span>
                           <span className="material-symbols-outlined text-sm">
-                            {n.has_pdf || n.destination_type === 'HOSTED_DOWNLOAD' || n.destination_type === 'OFFICIAL_DOCUMENT' || (n.document_url && (n.document_url.toLowerCase().includes('.pdf') || n.document_url.toLowerCase().includes('/uploads/circulars/')))
-                              ? 'download'
-                              : 'open_in_new'}
+                            {isPdf ? 'download' : 'open_in_new'}
                           </span>
                         </button>
                       </div>
                     </div>
-                  ))}
+                  );})}
                 </div>
               )}
 
