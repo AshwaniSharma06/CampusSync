@@ -751,7 +751,13 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                               <button
                                 onClick={() =>
                                   openOfficialLink(
-                                    n.action_url || n.target_url || n.download_url || n.document_url || n.source_url || 'https://www.ecajmer.ac.in',
+                                    (n.document_url && n.document_url.includes('.pdf') ? n.document_url : null) ||
+                                    (n.action_url && n.action_url.includes('.pdf') ? n.action_url : null) ||
+                                    n.action_url ||
+                                    n.target_url ||
+                                    n.download_url ||
+                                    n.document_url ||
+                                    'https://www.ecajmer.ac.in/circulars',
                                     onActionNotification,
                                     'Official notice link is currently unavailable.'
                                   )
@@ -1121,7 +1127,13 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                         <button
                           onClick={() =>
                             openOfficialLink(
-                              n.action_url || n.target_url || n.download_url || n.document_url || n.source_url || 'https://www.ecajmer.ac.in',
+                              (n.document_url && n.document_url.includes('.pdf') ? n.document_url : null) ||
+                              (n.action_url && n.action_url.includes('.pdf') ? n.action_url : null) ||
+                              n.action_url ||
+                              n.target_url ||
+                              n.download_url ||
+                              n.document_url ||
+                              'https://www.ecajmer.ac.in/circulars',
                               onActionNotification,
                               'Official notice link is currently unavailable.'
                             )

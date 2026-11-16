@@ -490,13 +490,14 @@ export const apiService = {
 export const openOfficialLink = (
   targetUrl,
   onActionNotification,
-  unavailableFallback = 'Opening Govt. Engineering College Ajmer official portal...'
+  unavailableFallback = 'Opening Govt. Engineering College Ajmer official circulars...'
 ) => {
-  // If targetUrl is missing, redirect to ECA official portal
+  const SAFE_CIRCULARS_URL = 'https://www.ecajmer.ac.in/circulars';
+
+  // If targetUrl is missing or invalid, redirect to verified circulars directory (never bare homepage)
   if (!targetUrl || targetUrl === '#' || targetUrl === 'javascript:void(0)') {
-    const fallbackUrl = 'https://www.ecajmer.ac.in';
-    window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
-    if (onActionNotification) onActionNotification('Opening Govt. Engineering College Ajmer official portal...');
+    window.open(SAFE_CIRCULARS_URL, '_blank', 'noopener,noreferrer');
+    if (onActionNotification) onActionNotification('Opening ECA official circulars directory...');
     return true;
   }
 
@@ -521,16 +522,53 @@ export const openOfficialLink = (
       cleanUrl = `https://${cleanUrl}`;
     }
 
+    const lower = cleanUrl.toLowerCase().replace(/\/+$/, '');
+
+    // Prevent redirecting to bare homepage (which causes confusion instead of showing the notice)
+    if (
+      lower === 'https://www.ecajmer.ac.in' ||
+      lower === 'http://www.ecajmer.ac.in' ||
+      lower === 'https://ecajmer.ac.in' ||
+      lower === 'http://ecajmer.ac.in'
+    ) {
+      cleanUrl = SAFE_CIRCULARS_URL;
+    }
+
+    // Intercept and prevent 404 routes (/departments/cse, /facilities/library, etc.)
+    const brokenRoutes = [
+      '/departments/cse',
+      '/departments/',
+      '/facilities/library',
+      '/facilities/',
+      '/academics/examinations',
+      '/academics/sem',
+      '/academics/cse',
+      '/events/technotsav',
+      '/notices/unclassified'
+    ];
+    if (brokenRoutes.some(route => lower.includes(route))) {
+      cleanUrl = SAFE_CIRCULARS_URL;
+    }
+
+    // Normalize legacy Content paths
+    cleanUrl = cleanUrl
+      .replace(/ecajmer\.ac\.in\/\.\.\/content\//i, 'ecajmer.ac.in/Content/')
+      .replace(/ecajmer\.ac\.in\/\.\/content\//i, 'ecajmer.ac.in/Content/');
+
     const urlObj = new URL(cleanUrl);
     if (onActionNotification) {
-      onActionNotification(`Opening official circular (${urlObj.hostname})...`);
+      if (cleanUrl.toLowerCase().includes('.pdf')) {
+        onActionNotification(`Opening verified PDF document (${urlObj.hostname})...`);
+      } else {
+        onActionNotification(`Opening official circular (${urlObj.hostname})...`);
+      }
     }
     window.open(cleanUrl, '_blank', 'noopener,noreferrer');
     return true;
   } catch (err) {
     console.warn('URL parsing fallback:', err);
-    window.open('https://www.ecajmer.ac.in', '_blank', 'noopener,noreferrer');
-    if (onActionNotification) onActionNotification('Opening ECA Official Portal...');
+    window.open(SAFE_CIRCULARS_URL, '_blank', 'noopener,noreferrer');
+    if (onActionNotification) onActionNotification('Opening ECA Official Circulars...');
     return true;
   }
 };

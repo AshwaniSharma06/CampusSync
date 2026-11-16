@@ -29,26 +29,26 @@ const AUTHENTIC_FALLBACK_NOTICES = [
     summary: 'BTU circular regarding exam form schedule and registration guidelines for B.Tech 3rd semester students.'
   },
   {
-    id: 3,
-    title: 'BTU B.Tech Semester Examination Form Guidelines & Fee Schedule',
+    id: 25,
+    title: '7th Semester CE, IT and Cyber Mid Term (Mercy/Back Improvement) 2026-27',
     notice_type: 'Examination',
-    formatted_date: '02 Nov 2026',
-    is_important: false,
+    formatted_date: '15 Oct 2026',
+    is_important: true,
     has_pdf: true,
-    action_url: 'https://www.ecajmer.ac.in/academics/examinations',
-    action_label: 'Open Official Examination Circular',
-    summary: 'Guidelines for semester examination forms, verification portal links, and BTU fee schedules.'
+    action_url: 'https://www.ecajmer.ac.in/uploads/circulars/1792058637831-Document%20(7).pdf',
+    action_label: 'Open Verified Official Document',
+    summary: 'Department mid-term examination timetable for Semester 7 students across Computer Engineering, IT, and Cyber Security.'
   },
   {
-    id: 2,
-    title: 'Central Library Extended Night Reading Hours for Mid-Terms',
+    id: 19,
+    title: 'Programming and Competitive Coding (PCC) Club Induction Notice',
     notice_type: 'Official',
-    formatted_date: '02 Nov 2026',
+    formatted_date: '23 Oct 2026',
     is_important: false,
-    has_pdf: false,
-    action_url: 'https://www.ecajmer.ac.in/facilities/library',
-    action_label: 'Open Official College Notice Page',
-    summary: 'Central Library reading hall access extended up to 11:00 PM on working days during examination period.'
+    has_pdf: true,
+    action_url: 'https://www.ecajmer.ac.in/uploads/circulars/1792744602711-Document%206.pdf',
+    action_label: 'Open Verified Official Document',
+    summary: 'Official notification regarding coding club induction, competitive programming tracks, and orientation sessions.'
   }
 ];
 

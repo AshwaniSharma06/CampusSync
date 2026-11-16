@@ -12,3 +12,4 @@ const child = spawn(py, ['-m', 'uvicorn', 'backend.main:app', '--reload', '--por
 });
 
 child.on('exit', (code) => process.exit(code || 0));
+
