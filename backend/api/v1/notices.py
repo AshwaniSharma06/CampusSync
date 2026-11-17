@@ -10,6 +10,7 @@ import glob
 from backend.api.deps import get_db, get_current_student_context, StudentContext
 from backend.models.academic import Notice, Course, ClassificationScope, VerificationStatus
 from backend.services.url_validator import resolve_notice_destination, is_trusted_url, DestinationType
+from backend.services.syllabus_service import get_student_syllabus, build_pinned_syllabus_notice
 
 router = APIRouter()
 
@@ -279,10 +280,44 @@ def get_notices(
     if category and isinstance(category, str) and category.lower() != "all":
         query = query.filter(Notice.notice_type.ilike(category.strip()))
         
-    notices = query.order_by(Notice.published_date.desc()).all()
-    
+    raw_notices = query.order_by(Notice.published_date.desc()).all()
+
+    # 1. Filter out legacy/other-branch syllabus notices to prevent duplicates and cross-branch leakage
+    filtered_notices = []
+    for n in raw_notices:
+        title_lower = (n.title or "").lower()
+        if n.notice_type == "Syllabus" or "syllabus" in title_lower or "scheme & syllabus" in title_lower:
+            # Pinned syllabus from BTU will be dynamically injected at index 0
+            continue
+        filtered_notices.append(n)
+
+    # 2. Prioritize notices: Semester & Department cohort notices first, then departmental, then global
+    def get_notice_priority(n):
+        is_sem = (
+            n.target_semester == semester or
+            any(tok.lower() in (n.title or "").lower() for tok in sem_tokens)
+        )
+        is_dept = (
+            n.department_code == dept_code or
+            (is_computing and (n.department_code in COMPUTING_DEPTS or any(k in (n.title or "") for k in ["CS", "CSE", "IT", "Cyber", "CE, IT", "CS, IT"])))
+        )
+        if is_sem and is_dept:
+            return 0  # Highest priority: Student's own semester exam, practical, and academic notices
+        if is_dept or n.scope == ClassificationScope.DEPARTMENT_SPECIFIC.value:
+            return 1  # Medium priority: Department announcements
+        return 2      # Standard priority: Global notices, tenders, general club activities
+
+    sorted_notices = sorted(
+        filtered_notices,
+        key=lambda n: (
+            get_notice_priority(n),
+            -(n.published_date.timestamp() if n.published_date else 0),
+            -n.id
+        )
+    )
+
     results = []
-    for n in notices:
+    for n in sorted_notices:
         dest_type, dest_url, dest_label = resolve_notice_destination(
             download_url=getattr(n, "download_url", None),
             document_url=getattr(n, "document_url", None),
@@ -308,8 +343,30 @@ def get_notices(
             "destination_type": dest_type.value,
             "action_url": dest_url,
             "action_label": dest_label,
-            "is_actionable": dest_type != DestinationType.UNAVAILABLE
+            "is_actionable": dest_type != DestinationType.UNAVAILABLE,
+            "is_pinned": False
         })
+
+    # 3. Pinned Syllabus Integration: Prepend authenticated student's matching BTU syllabus at index 0
+    try:
+        syllabus_doc = get_student_syllabus(student_ctx, db)
+        if syllabus_doc:
+            pinned_notice = build_pinned_syllabus_notice(syllabus_doc, student_ctx)
+            include_pinned = True
+            if category and isinstance(category, str) and category.lower() not in ["all", "syllabus", "academic", "official"]:
+                include_pinned = False
+            elif q and isinstance(q, str) and q.strip():
+                q_lower = q.strip().lower()
+                include_pinned = (
+                    q_lower in pinned_notice["title"].lower() or
+                    q_lower in pinned_notice["content"].lower() or
+                    "syllabus" in q_lower or
+                    "scheme" in q_lower
+                )
+            if include_pinned:
+                results.insert(0, pinned_notice)
+    except Exception as e:
+        print(f"[CampusSync Notices] Pinned syllabus resolution error: {e}")
 
     return results
 

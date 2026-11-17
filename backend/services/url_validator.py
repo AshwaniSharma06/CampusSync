@@ -24,7 +24,10 @@ TRUSTED_DOMAINS = [
     "dce.rajasthan.gov.in",
     "hte.rajasthan.gov.in",
     "digitaloceanspaces.com",
-    "blr1.digitaloceanspaces.com"
+    "blr1.digitaloceanspaces.com",
+    "btu.blr1.digitaloceanspaces.com",
+    "squarespace.com",
+    "static1.squarespace.com"
 ]
 
 DOCUMENT_EXTENSIONS = (

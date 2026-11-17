@@ -168,3 +168,24 @@ class AcademicResource(Base):
     verification_status = Column(String(30), default="VERIFIED")
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=True)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
+
+class SyllabusDocument(Base):
+    __tablename__ = "syllabus_documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(250), nullable=False)
+    programme = Column(String(50), nullable=False, default="B.Tech") # B.Tech, M.Tech, MCA, MBA
+    branch_code = Column(String(20), nullable=False)                 # CSE, IT, ECE, EE, ME, CE, EIC, CYBER, MCA, MBA, COMMON
+    branch_name = Column(String(100), nullable=False)
+    semester_start = Column(Integer, nullable=False, default=1)
+    semester_end = Column(Integer, nullable=False, default=8)
+    is_common = Column(Boolean, default=False)                       # True for B.Tech Common Sem 1 & 2
+    admission_session = Column(String(50), default="2021-22 and onwards")
+    scheme_version = Column(String(50), default="2021-22")
+    original_url = Column(String(500), nullable=False)
+    local_filename = Column(String(250), nullable=True)
+    source_institution = Column(String(100), default="Bikaner Technical University (BTU)")
+    verification_status = Column(String(30), default="VERIFIED")
+    total_pages = Column(Integer, default=0)
+    file_size = Column(String(50), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)

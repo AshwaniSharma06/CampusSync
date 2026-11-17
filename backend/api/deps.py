@@ -66,6 +66,10 @@ def normalize_department_code(dept: Optional[str]) -> Optional[str]:
     if not dept:
         return None
     d = dept.strip().upper()
+    if "CYBER" in d:
+        return "CYBER"
+    if any(k in d for k in ["EIC", "INSTRUMENTATION"]):
+        return "EIC"
     if any(k in d for k in ["CSE", "COMPUTER"]):
         return "CSE"
     if any(k in d for k in ["IT", "INFORMATION"]):
@@ -82,6 +86,8 @@ def normalize_department_code(dept: Optional[str]) -> Optional[str]:
         return "MCA"
     if "MBA" in d:
         return "MBA"
+    if "MTECH" in d or "M.TECH" in d:
+        return "MTECH"
     return d
 
 class StudentContext:
