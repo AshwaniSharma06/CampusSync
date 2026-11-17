@@ -77,7 +77,9 @@ export default function CommunityPostComposer({ currentUser, onPostCreated, onRe
 
   const handleRemoveAttachment = async (id) => {
     try {
-      await apiService.apiClient(`/community/attachments/${id}`, { method: 'DELETE' });
+      if (apiService.deleteCommunityAttachment) {
+        await apiService.deleteCommunityAttachment(id);
+      }
     } catch (_) {
       // Best effort deletion
     }
@@ -142,6 +144,7 @@ export default function CommunityPostComposer({ currentUser, onPostCreated, onRe
         content: content.trim(),
         tags: selectedTags,
         attachment_ids: uploadedAttachments.map((a) => a.id),
+        attachments: uploadedAttachments,
         poll: pollPayload,
       };
 

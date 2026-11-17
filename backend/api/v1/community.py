@@ -285,6 +285,7 @@ def create_community_post(
 
 
 @router.post("/upload", response_model=AttachmentResponse)
+@router.post("/upload/", response_model=AttachmentResponse, include_in_schema=False)
 async def upload_attachment(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
@@ -498,6 +499,7 @@ def vote_poll(
 
 
 @router.get("/{post_id}/comments", response_model=List[CommentResponse])
+@router.get("/{post_id}/comments/", response_model=List[CommentResponse], include_in_schema=False)
 def get_post_comments(
     post_id: int,
     current_user: Optional[User] = Depends(get_optional_current_user),
@@ -549,6 +551,7 @@ def get_post_comments(
 
 
 @router.post("/{post_id}/comments", response_model=CommentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{post_id}/comments/", response_model=CommentResponse, status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def create_post_comment(
     post_id: int,
     comment_in: CommentCreate,
@@ -602,6 +605,7 @@ def create_post_comment(
 
 
 @router.delete("/comments/{comment_id}")
+@router.delete("/comments/{comment_id}/", include_in_schema=False)
 def delete_post_comment(
     comment_id: int,
     current_user: User = Depends(get_current_user),
@@ -623,6 +627,7 @@ def delete_post_comment(
 
 
 @router.delete("/{post_id}")
+@router.delete("/{post_id}/", include_in_schema=False)
 def delete_community_post(
     post_id: int,
     current_user: User = Depends(get_current_user),
