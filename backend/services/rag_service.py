@@ -254,6 +254,25 @@ OBJECTIVES:
         msg = str(api_err)
         print(f"[Gemini APIError] Code {code}: {msg}")
 
+        # If Gemini is temporarily unavailable (503/429/timeout), gracefully synthesize from verified chunks
+        if retrieved_chunks:
+            top_c = retrieved_chunks[0]
+            doc_title = top_c.get("title", "Official Notice")
+            body_snippet = top_c.get("text", "").strip()
+            # Clean up snippet
+            lines = [l.strip() for l in body_snippet.splitlines() if l.strip()]
+            preview = "\n\n".join(lines[:6])
+            fallback_text = (
+                f"Based on the official BTU/ECA documentation (**{doc_title}**):\n\n"
+                f"{preview}\n\n"
+                f"*(For complete details, please refer to the attached official source document).* "
+            )
+            return {
+                "answer": fallback_text,
+                "sources": sources,
+                "rewritten_query": rewritten_query
+            }
+
         if code == 429 or "RESOURCE_EXHAUSTED" in msg or "quota" in msg.lower():
             return {
                 "answer": "⚠️ **CampusSync AI Notice**: Gemini API quota limit reached. Please wait a moment before sending another message.",
@@ -261,7 +280,7 @@ OBJECTIVES:
                 "rewritten_query": rewritten_query
             }
         return {
-            "answer": f"⚠️ **CampusSync AI Notice**: Gemini service error ({code or 'API'}). Please retry shortly.",
+            "answer": f"⚠️ **CampusSync AI Notice**: Gemini service temporarily experiencing high traffic ({code or '503'}). Please retry shortly.",
             "sources": sources,
             "rewritten_query": rewritten_query
         }

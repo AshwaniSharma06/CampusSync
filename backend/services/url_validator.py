@@ -22,7 +22,9 @@ TRUSTED_DOMAINS = [
     "youtube.com",
     "youtu.be",
     "dce.rajasthan.gov.in",
-    "hte.rajasthan.gov.in"
+    "hte.rajasthan.gov.in",
+    "digitaloceanspaces.com",
+    "blr1.digitaloceanspaces.com"
 ]
 
 DOCUMENT_EXTENSIONS = (

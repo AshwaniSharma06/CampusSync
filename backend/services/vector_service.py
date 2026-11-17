@@ -323,13 +323,23 @@ def sync_hosted_documents_to_chroma() -> int:
     indexed_count = 0
     hosted_specs = [
         {
+            "filename": "BTU_CSE_Sem3_to_8_Syllabus.pdf",
+            "title": "BTU B.Tech CSE (3rd to 8th Sem) Scheme & Syllabus",
+            "document_type": "SYLLABUS",
+            "scope": "DEPARTMENT_SPECIFIC",
+            "department_code": "CSE",
+            "target_semester": 0,
+            "document_url": "https://blr1.digitaloceanspaces.com/btu/btu/documents/1788498815350793100_15102025022312-media.pdf",
+            "data_origin": "VERIFIED_OFFICIAL"
+        },
+        {
             "filename": "Resource_1_BTU_CSE_Sem7_Syllabus.pdf",
             "title": "BTU B.Tech CSE 7th Sem Complete Scheme & Syllabus",
             "document_type": "SYLLABUS",
             "scope": "SEMESTER_SPECIFIC",
             "department_code": "CSE",
             "target_semester": 7,
-            "document_url": "https://www.ecajmer.ac.in/uploads/resources/Resource_1_BTU_CSE_Sem7_Syllabus.pdf",
+            "document_url": "https://blr1.digitaloceanspaces.com/btu/btu/documents/1788498815350793100_15102025022312-media.pdf",
             "data_origin": "VERIFIED_OFFICIAL"
         },
         {
@@ -403,12 +413,13 @@ def sync_courses_and_exams_to_chroma(db: Session) -> int:
     courses = db.query(Course).all()
     for c in courses:
         text = f"Course Code: {c.code}. Title: {c.title}. Department: {c.department}. Semester: {c.semester}. Credits: {c.credits}. Syllabus Details: {c.syllabus_summary or 'Standard BTU Curriculum'}."
+        doc_url = "https://blr1.digitaloceanspaces.com/btu/btu/documents/1788498815350793100_15102025022312-media.pdf" if c.department == "CSE" else "https://btu.ac.in/home/Syllabus-Scheme"
         index_document(
             doc_id=f"course_{c.id}_{c.code}",
             title=f"Course Syllabus: {c.code} - {c.title}",
             text=text,
-            source_url="https://www.ecajmer.ac.in/academics/syllabus",
-            document_url="https://www.ecajmer.ac.in/uploads/resources/Resource_1_BTU_CSE_Sem7_Syllabus.pdf",
+            source_url="https://btu.ac.in/home/Syllabus-Scheme",
+            document_url=doc_url,
             scope="SEMESTER_SPECIFIC",
             department_code=c.department,
             target_semester=c.semester,
