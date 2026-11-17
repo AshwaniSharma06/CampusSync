@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { apiService, openOfficialLink, resolveNoticePdf } from '../../services/apiService';
+import { apiService, openOfficialLink, resolveNoticePdf, getStudentSyllabus } from '../../services/apiService';
 import EditProfileModal from './EditProfileModal';
 import CampusAiWorkspace from '../chat/CampusAiWorkspace';
 import CampusSyncLogo from '../ui/CampusSyncLogo';
@@ -81,7 +81,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       ] = await Promise.allSettled([
         apiService.getDashboardSummary(),
         apiService.getEnrolledCourses(),
-        apiService.getNotices(),
+        apiService.getNotices('All', '', studentDepartment, studentSemester),
         apiService.getExaminations(),
         apiService.getAssignments(),
         apiService.getNotifications(),
@@ -104,7 +104,7 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
             const [s2, c2, n2, e2] = await Promise.allSettled([
               apiService.getDashboardSummary(),
               apiService.getEnrolledCourses(),
-              apiService.getNotices(),
+              apiService.getNotices('All', '', studentDepartment, studentSemester),
               apiService.getExaminations(),
             ]);
             summaryRes = s2;
@@ -232,18 +232,22 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
     }
   };
 
+  // Authenticated student's verified BTU curriculum syllabus (guaranteed pinned at index 0)
+  const effectivePinnedSyllabus = useMemo(() => {
+    const fromNotices = (notices || []).find(n => n.is_pinned || n.is_syllabus || (typeof n.id === 'string' && n.id.startsWith('syllabus-')));
+    if (fromNotices) return fromNotices;
+    return getStudentSyllabus(studentDepartment, studentSemester);
+  }, [notices, studentDepartment, studentSemester]);
+
   // Filtered notices based on active category pill and search (strictly authentic official notices only)
   const filteredNotices = useMemo(() => {
     let result = (notices || []).filter(n => {
-      if (n.is_pinned || n.is_syllabus) return true;
-      if (typeof n.id === 'string' && n.id.startsWith('syllabus-')) return true;
+      if (n.is_pinned || n.is_syllabus) return false;
+      if (typeof n.id === 'string' && n.id.startsWith('syllabus-')) return false;
       return (Number(n.id) > 12) && n.data_origin !== 'DEMO_SEED';
     });
 
-    const pinnedNotice = result.find(n => n.is_pinned || n.is_syllabus);
-    const nonPinned = result.filter(n => !(n.is_pinned || n.is_syllabus));
-
-    let activeList = nonPinned;
+    let activeList = result;
     if (noticeFilter === 'Official') {
       activeList = activeList.filter(n => n.data_origin === 'VERIFIED_OFFICIAL' || n.notice_type === 'Official' || n.notice_type === 'Examination');
     } else if (noticeFilter === 'Department') {
@@ -280,20 +284,20 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
       );
     }
 
-    if (pinnedNotice) {
+    if (effectivePinnedSyllabus) {
       const q = searchQuery.trim().toLowerCase();
       const matchesSearch = !q ||
-        (pinnedNotice.title && pinnedNotice.title.toLowerCase().includes(q)) ||
-        (pinnedNotice.content && pinnedNotice.content.toLowerCase().includes(q)) ||
+        (effectivePinnedSyllabus.title && effectivePinnedSyllabus.title.toLowerCase().includes(q)) ||
+        (effectivePinnedSyllabus.content && effectivePinnedSyllabus.content.toLowerCase().includes(q)) ||
         q.includes('syllabus') ||
         q.includes('scheme');
       if (matchesSearch) {
-        return [pinnedNotice, ...activeList];
+        return [effectivePinnedSyllabus, ...activeList];
       }
     }
 
     return activeList;
-  }, [notices, noticeFilter, searchQuery, studentDepartment, studentSemester]);
+  }, [notices, effectivePinnedSyllabus, noticeFilter, searchQuery, studentDepartment, studentSemester]);
 
   // Cohort-specific examination, mid-term and practical notices for the Examinations tab
   const cohortExamNotices = useMemo(() => {
@@ -690,6 +694,52 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                       </div>
                     </div>
 
+                    {/* Pinned Syllabus Card: Guaranteed at Top of Notices */}
+                    {effectivePinnedSyllabus && (
+                      <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50/40 to-white border-2 border-emerald-400 hover:border-emerald-500 transition-all shadow-xs group">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-xs">
+                                <span className="material-symbols-outlined text-[12px]">push_pin</span>
+                                <span>{effectivePinnedSyllabus.pinned_badge || 'Your Semester Syllabus'}</span>
+                              </span>
+                              <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                <span className="material-symbols-outlined text-[12px]">verified</span>
+                                <span>Official BTU Scheme</span>
+                              </span>
+                              <span className="text-[11px] text-emerald-700 font-semibold font-mono">
+                                Sem {studentSemester} Curriculum
+                              </span>
+                            </div>
+                            <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                              {effectivePinnedSyllabus.title}
+                            </h4>
+                            {effectivePinnedSyllabus.content && (
+                              <p className="text-xs text-slate-600 font-medium mt-1 line-clamp-2">
+                                {effectivePinnedSyllabus.content}
+                              </p>
+                            )}
+                          </div>
+                          <div className="shrink-0 flex items-center">
+                            <button
+                              onClick={() =>
+                                openOfficialLink(
+                                  effectivePinnedSyllabus.action_url || effectivePinnedSyllabus.document_url || 'https://btu.ac.in/syllabusAndScheme',
+                                  onActionNotification,
+                                  'Opening verified official BTU syllabus PDF...'
+                                )
+                              }
+                              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all cursor-pointer active:scale-[0.98]"
+                            >
+                              <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
+                              <span>Open Official Syllabus PDF</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {paginatedNotices.length === 0 ? (
                       <div className="text-center py-10 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
                         <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">notifications_off</span>
@@ -703,58 +753,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                         {paginatedNotices.map((n) => {
                           const directPdfUrl = resolveNoticePdf(n);
                           const isPdf = Boolean(directPdfUrl && (directPdfUrl.includes('/uploads/circulars/') || directPdfUrl.toLowerCase().includes('.pdf') || directPdfUrl.toLowerCase().includes('/content/')));
-                          const isPinnedSyllabus = Boolean(n.is_pinned || n.is_syllabus || (typeof n.id === 'string' && n.id.startsWith('syllabus-')));
-
-                          if (isPinnedSyllabus) {
-                            return (
-                              <div
-                                key={n.id}
-                                className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50/40 to-white border-2 border-emerald-400 hover:border-emerald-500 transition-all shadow-xs group"
-                              >
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                                      <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-xs">
-                                        <span className="material-symbols-outlined text-[12px]">push_pin</span>
-                                        <span>{n.pinned_badge || 'Your Semester Syllabus'}</span>
-                                      </span>
-                                      <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                        <span className="material-symbols-outlined text-[12px]">verified</span>
-                                        <span>Official BTU Scheme</span>
-                                      </span>
-                                      <span className="text-[11px] text-emerald-700 font-semibold font-mono">
-                                        Sem {studentSemester} Curriculum
-                                      </span>
-                                    </div>
-                                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug">
-                                      {n.title}
-                                    </h4>
-                                    {n.content && (
-                                      <p className="text-xs text-slate-600 font-medium mt-1 line-clamp-2">
-                                        {n.content}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <div className="shrink-0 flex items-center">
-                                    <button
-                                      onClick={() =>
-                                        openOfficialLink(
-                                          directPdfUrl || n.document_url || n.action_url || 'https://btu.ac.in/syllabusAndScheme',
-                                          onActionNotification,
-                                          'Opening verified official BTU syllabus PDF...'
-                                        )
-                                      }
-                                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all cursor-pointer active:scale-[0.98]"
-                                    >
-                                      <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
-                                      <span>Open Official Syllabus PDF</span>
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          }
-
                           return (
                           <div
                             key={n.id}
@@ -1041,6 +1039,52 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                 </div>
               </div>
 
+              {/* Pinned Syllabus Card: Guaranteed at Top of Notices Tab */}
+              {effectivePinnedSyllabus && (
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/40 to-white border-2 border-emerald-400 hover:border-emerald-500 transition-all shadow-xs group">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-black px-3 py-1 rounded-full bg-emerald-600 text-white shadow-xs">
+                          <span className="material-symbols-outlined text-[13px]">push_pin</span>
+                          <span>{effectivePinnedSyllabus.pinned_badge || 'Your Semester Syllabus'}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          <span className="material-symbols-outlined text-[12px]">verified</span>
+                          <span>Official BTU Scheme</span>
+                        </span>
+                        <span className="text-xs text-emerald-700 font-semibold font-mono">
+                          Semester {studentSemester} Curriculum
+                        </span>
+                      </div>
+                      <h4 className="text-base font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                        {effectivePinnedSyllabus.title}
+                      </h4>
+                      {effectivePinnedSyllabus.content && (
+                        <p className="text-xs text-slate-600 font-medium mt-1.5 leading-relaxed">
+                          {effectivePinnedSyllabus.content}
+                        </p>
+                      )}
+                    </div>
+                    <div className="shrink-0 self-start sm:self-auto">
+                      <button
+                        onClick={() =>
+                          openOfficialLink(
+                            effectivePinnedSyllabus.action_url || effectivePinnedSyllabus.document_url || 'https://btu.ac.in/syllabusAndScheme',
+                            onActionNotification,
+                            'Opening verified official BTU syllabus PDF...'
+                          )
+                        }
+                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-[0.98]"
+                      >
+                        <span className="material-symbols-outlined text-base">picture_as_pdf</span>
+                        <span>Open Official Syllabus PDF</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Notices List */}
               {paginatedNotices.length === 0 ? (
                 <div className="text-center py-12 px-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50">
@@ -1055,58 +1099,6 @@ export default function StudentDashboard({ user, onSignOut, onActionNotification
                   {paginatedNotices.map((n) => {
                     const directPdfUrl = resolveNoticePdf(n);
                     const isPdf = Boolean(directPdfUrl && (directPdfUrl.includes('/uploads/circulars/') || directPdfUrl.toLowerCase().includes('.pdf') || directPdfUrl.toLowerCase().includes('/content/')));
-                    const isPinnedSyllabus = Boolean(n.is_pinned || n.is_syllabus || (typeof n.id === 'string' && n.id.startsWith('syllabus-')));
-
-                    if (isPinnedSyllabus) {
-                      return (
-                        <div
-                          key={n.id}
-                          className="p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/40 to-white border-2 border-emerald-400 hover:border-emerald-500 transition-all shadow-xs group"
-                        >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <span className="inline-flex items-center gap-1 text-[11px] font-black px-3 py-1 rounded-full bg-emerald-600 text-white shadow-xs">
-                                  <span className="material-symbols-outlined text-[13px]">push_pin</span>
-                                  <span>{n.pinned_badge || 'Your Semester Syllabus'}</span>
-                                </span>
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                  <span className="material-symbols-outlined text-[12px]">verified</span>
-                                  <span>Official BTU Scheme</span>
-                                </span>
-                                <span className="text-xs text-emerald-700 font-semibold font-mono">
-                                  Semester {studentSemester} Curriculum
-                                </span>
-                              </div>
-                              <h4 className="text-base font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug">
-                                {n.title}
-                              </h4>
-                              {n.content && (
-                                <p className="text-xs text-slate-600 font-medium mt-1.5 leading-relaxed">
-                                  {n.content}
-                                </p>
-                              )}
-                            </div>
-                            <div className="shrink-0 self-start sm:self-auto">
-                              <button
-                                onClick={() =>
-                                  openOfficialLink(
-                                    directPdfUrl || n.document_url || n.action_url || 'https://btu.ac.in/syllabusAndScheme',
-                                    onActionNotification,
-                                    'Opening verified official BTU syllabus PDF...'
-                                  )
-                                }
-                                className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-[0.98]"
-                              >
-                                <span className="material-symbols-outlined text-base">picture_as_pdf</span>
-                                <span>Open Official Syllabus PDF</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
                     return (
                     <div
                       key={n.id}

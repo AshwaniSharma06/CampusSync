@@ -83,10 +83,8 @@ def build_pinned_syllabus_notice(
     # Clear human title
     if syllabus.is_common:
         display_title = f"BTU B.Tech 1st Year (Semester {sem}) Common Scheme & Syllabus"
-    elif syllabus.programme == "B.Tech":
-        display_title = f"BTU B.Tech {syllabus.branch_name} (Semester {sem}) Scheme & Syllabus"
     else:
-        display_title = f"BTU {syllabus.programme} (Semester {sem}) Scheme & Syllabus"
+        display_title = f"BTU B.Tech {syllabus.branch_name} (Semester {sem}) Scheme & Syllabus"
 
     return {
         "id": f"syllabus-{syllabus.id}",
@@ -117,3 +115,4 @@ def build_pinned_syllabus_notice(
         "is_syllabus": True,
         "file_size": syllabus.file_size or "Document"
     }
+
