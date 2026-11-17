@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
 import { apiService } from '../../services/apiService';
+import { accountStore } from '../../services/accountStore';
 import CommunityMediaViewer from './CommunityMediaViewer';
+
+// Strict author matching helper: ensures only the original author can modify/delete content
+const isMatchingAuthor = (currentName, currentId, authorName, authorId) => {
+  const cName = (currentName || '').trim().toLowerCase();
+  const aName = (authorName || '').trim().toLowerCase();
+  if (!cName || !aName) return false;
+  if (cName === aName) return true;
+  if (currentId && authorId && String(currentId) === String(authorId)) return true;
+  if (cName.length >= 3 && aName.length >= 3) {
+    if (cName.startsWith(aName) || aName.startsWith(cName)) return true;
+  }
+  return false;
+};
 
 export default function CommunityPostCard({
   post,
@@ -13,6 +27,33 @@ export default function CommunityPostCard({
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [likesCount, setLikesCount] = useState(post.likes || 0);
   const [isLiking, setIsLiking] = useState(false);
+
+  // Author access check: strictly ensure only the creator of this post can see the delete button and delete it
+  const activeUser = currentUser || accountStore.getActiveSession();
+  const currentUserName = (
+    activeUser?.name ||
+    activeUser?.displayName ||
+    activeUser?.full_name ||
+    ''
+  ).trim();
+  const currentUserId = activeUser?.id || activeUser?.uid;
+
+  const postAuthorName = (
+    post?.author_name ||
+    post?.author?.name ||
+    ''
+  ).trim();
+  const postAuthorId = post?.author_id || post?.author?.id;
+
+  const canDeletePost = Boolean(
+    activeUser &&
+    isMatchingAuthor(currentUserName, currentUserId, postAuthorName, postAuthorId)
+  );
+
+  const canDeleteComment = (c) => Boolean(
+    activeUser &&
+    isMatchingAuthor(currentUserName, currentUserId, c?.author_name || c?.author?.name, c?.author_id || c?.author?.id)
+  );
 
   // Poll state
   const [poll, setPoll] = useState(post.poll);
@@ -163,8 +204,14 @@ export default function CommunityPostCard({
     }
   };
 
-  // Delete Comment
+  // Delete Comment (strictly author only)
   const handleDeleteComment = async (commentId) => {
+    const target = comments.find((c) => c.id === commentId);
+    if (target && !canDeleteComment(target)) {
+      onActionNotification?.('You can only delete your own comments.');
+      return;
+    }
+    if (!window.confirm('Are you sure you want to delete this comment?')) return;
     try {
       await apiService.deleteCommunityComment(commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
@@ -175,8 +222,12 @@ export default function CommunityPostCard({
     }
   };
 
-  // Delete Post
+  // Delete Post (strictly author only)
   const handleDeletePost = async () => {
+    if (!canDeletePost) {
+      onActionNotification?.('You can only delete your own discussions.');
+      return;
+    }
     if (!window.confirm('Are you sure you want to delete this discussion post?')) return;
     setIsDeleting(true);
     try {
@@ -236,8 +287,8 @@ export default function CommunityPostCard({
           </div>
         </div>
 
-        {/* Delete Post action if user owns it or is admin */}
-        {post.can_delete && (
+        {/* Delete Post action strictly for original author only */}
+        {canDeletePost && (
           <button
             onClick={handleDeletePost}
             disabled={isDeleting}
@@ -610,7 +661,7 @@ export default function CommunityPostCard({
                       >
                         Reply
                       </button>
-                      {c.can_delete && (
+                      {canDeleteComment(c) && (
                         <button
                           type="button"
                           onClick={() => handleDeleteComment(c.id)}

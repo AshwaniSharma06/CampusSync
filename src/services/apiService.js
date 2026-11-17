@@ -313,6 +313,47 @@ const removeStoredLocalPost = (postId) => {
   } catch (_) {}
 };
 
+const DELETED_POSTS_KEY = 'campussync_deleted_posts';
+const DELETED_COMMENTS_KEY = 'campussync_deleted_comments';
+
+const getDeletedPostIds = () => {
+  if (typeof window === 'undefined' || !window.localStorage) return new Set();
+  try {
+    const list = JSON.parse(localStorage.getItem(DELETED_POSTS_KEY) || '[]');
+    return new Set(list.map(Number));
+  } catch (_) {
+    return new Set();
+  }
+};
+
+const markPostAsDeleted = (postId) => {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    const set = getDeletedPostIds();
+    set.add(Number(postId));
+    localStorage.setItem(DELETED_POSTS_KEY, JSON.stringify(Array.from(set)));
+  } catch (_) {}
+};
+
+const getDeletedCommentIds = () => {
+  if (typeof window === 'undefined' || !window.localStorage) return new Set();
+  try {
+    const list = JSON.parse(localStorage.getItem(DELETED_COMMENTS_KEY) || '[]');
+    return new Set(list.map(Number));
+  } catch (_) {
+    return new Set();
+  }
+};
+
+const markCommentAsDeleted = (commentId) => {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    const set = getDeletedCommentIds();
+    set.add(Number(commentId));
+    localStorage.setItem(DELETED_COMMENTS_KEY, JSON.stringify(Array.from(set)));
+  } catch (_) {}
+};
+
 const readFileAsBase64 = (file) => {
   return new Promise((resolve) => {
     if (typeof FileReader === 'undefined') {
@@ -745,18 +786,44 @@ export const apiService = {
       console.warn('Failed to fetch community posts from server, falling back to local posts:', err);
     }
 
-    // 1. Separate regular discussion posts from cross-profile synchronized comment records
+    // 1. Separate regular discussion posts from cross-profile synchronized comment records and tombstones
     const syncedCommentsByParent = new Map();
     const regularPosts = [];
+    const deletedPostIds = getDeletedPostIds();
+    const deletedCommentIds = getDeletedCommentIds();
 
     posts.forEach((p) => {
       const postTags = p.tags || [];
+
+      // Collect cloud tombstones so all devices and profiles immediately drop deleted posts/comments
+      if (postTags.includes('__deleted__')) {
+        const delPostTag = postTags.find((t) => t.startsWith('del_post_'));
+        if (delPostTag) {
+          const dId = Number(delPostTag.replace('del_post_', ''));
+          if (dId) {
+            deletedPostIds.add(dId);
+            markPostAsDeleted(dId);
+          }
+        }
+        const delCommTag = postTags.find((t) => t.startsWith('del_comment_'));
+        if (delCommTag) {
+          const dId = Number(delCommTag.replace('del_comment_', ''));
+          if (dId) {
+            deletedCommentIds.add(dId);
+            markCommentAsDeleted(dId);
+          }
+        }
+        return;
+      }
+
       if (postTags.includes('__comment__')) {
+        if (deletedCommentIds.has(Number(p.id))) return;
         // Parse parent post identifier
         const parentTag = postTags.find((t) => t.startsWith('parent_'));
         if (parentTag) {
           const parentPostId = Number(parentTag.replace('parent_', ''));
           if (parentPostId) {
+            if (deletedPostIds.has(parentPostId)) return;
             const authorTag = postTags.find((t) => t.startsWith('author_'));
             const deptTag = postTags.find((t) => t.startsWith('dept_'));
             const semTag = postTags.find((t) => t.startsWith('sem_'));
@@ -814,15 +881,18 @@ export const apiService = {
           }
         }
       } else if (!postTags.includes('__test__') && !postTags.includes('img_https_example_com_demo_png')) {
-        regularPosts.push(p);
+        if (!deletedPostIds.has(Number(p.id))) {
+          regularPosts.push(p);
+        }
       }
     });
 
     // 2. Merge regular posts with stored local posts and ensure attachments & comments are preserved
-    const localPosts = getStoredLocalPosts();
+    const localPosts = getStoredLocalPosts().filter((p) => !deletedPostIds.has(Number(p.id)));
     const postMap = new Map();
     localPosts.forEach((p) => postMap.set(p.id, p));
     regularPosts.forEach((p) => {
+      if (deletedPostIds.has(Number(p.id))) return;
       const local = postMap.get(p.id);
       if (local && local.attachments && local.attachments.length > 0 && (!p.attachments || p.attachments.length === 0)) {
         p.attachments = local.attachments;
@@ -830,7 +900,7 @@ export const apiService = {
       postMap.set(p.id, p);
     });
 
-    let merged = Array.from(postMap.values());
+    let merged = Array.from(postMap.values()).filter((p) => !deletedPostIds.has(Number(p.id)));
 
     // 3. Process every post: extract embedded attachments, guarantee Post #7 screenshot, and compute dynamic comment counts
     merged = merged.map((p) => {
@@ -1190,9 +1260,10 @@ export const apiService = {
       }
     } catch (_) {}
 
-    return Array.from(commentMap.values()).sort(
-      (a, b) => new Date(a.created_at) - new Date(b.created_at)
-    );
+    const deletedCommentIds = getDeletedCommentIds();
+    return Array.from(commentMap.values())
+      .filter((c) => !deletedCommentIds.has(Number(c.id)))
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   },
 
   createCommunityComment: async (postId, content, parentId = null) => {
@@ -1262,7 +1333,18 @@ export const apiService = {
   },
 
   deleteCommunityComment: async (commentId) => {
+    markCommentAsDeleted(commentId);
     removeStoredLocalCommentById(commentId);
+    try {
+      apiClient('/community/', {
+        method: 'POST',
+        body: JSON.stringify({
+          content: `[DELETED COMMENT ${commentId}]`,
+          tags: ['__deleted__', `del_comment_${commentId}`],
+        }),
+      }).catch(() => {});
+    } catch (_) {}
+
     try {
       return await apiClient(`/community/comments/${commentId}`, {
         method: 'DELETE',
@@ -1273,7 +1355,18 @@ export const apiService = {
   },
 
   deleteCommunityPost: async (postId) => {
+    markPostAsDeleted(postId);
     removeStoredLocalPost(postId);
+    try {
+      apiClient('/community/', {
+        method: 'POST',
+        body: JSON.stringify({
+          content: `[DELETED POST ${postId}]`,
+          tags: ['__deleted__', `del_post_${postId}`],
+        }),
+      }).catch(() => {});
+    } catch (_) {}
+
     try {
       return await apiClient(`/community/${postId}`, {
         method: 'DELETE',
