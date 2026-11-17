@@ -7,6 +7,11 @@ export default defineConfig({
     port: 3000,
     open: false,
     proxy: {
+      '/community-upload': {
+        target: 'https://freeimage.host',
+        changeOrigin: true,
+        rewrite: () => '/api/1/upload',
+      },
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,

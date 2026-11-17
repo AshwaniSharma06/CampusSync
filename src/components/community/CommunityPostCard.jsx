@@ -280,6 +280,11 @@ export default function CommunityPostCard({
               <img
                 src={images[0].file_url}
                 alt={images[0].file_name}
+                onError={(e) => {
+                  if (images[0].local_url && e.target.src !== images[0].local_url) {
+                    e.target.src = images[0].local_url;
+                  }
+                }}
                 className="w-full max-h-[440px] object-cover group-hover:scale-[1.01] transition-transform duration-300"
               />
             </div>
@@ -294,6 +299,11 @@ export default function CommunityPostCard({
                   <img
                     src={img.file_url}
                     alt={img.file_name}
+                    onError={(e) => {
+                      if (img.local_url && e.target.src !== img.local_url) {
+                        e.target.src = img.local_url;
+                      }
+                    }}
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                   />
                 </div>
