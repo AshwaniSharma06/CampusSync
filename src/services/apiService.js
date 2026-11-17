@@ -325,8 +325,8 @@ export const getStudentSyllabus = (deptInput = 'CSE', semInput = 7) => {
   if (branchCode === 'MCA') {
     const isSem12 = sem <= 2;
     const url = isSem12
-      ? 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788585430217334500_mca1andii.pdf'
-      : 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788585501869818800_mcasemiiiandiv.pdf';
+      ? '/syllabi/btu_mca_sem1_2.pdf'
+      : '/syllabi/btu_mca_sem3_4.pdf';
     return {
       id: `syllabus-mca-${isSem12 ? '1-2' : '3-4'}`,
       title: `BTU MCA (Semester ${sem}) Scheme & Syllabus`,
@@ -352,8 +352,8 @@ export const getStudentSyllabus = (deptInput = 'CSE', semInput = 7) => {
   if (branchCode === 'MBA') {
     const isSem12 = sem <= 2;
     const url = isSem12
-      ? 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788532720976150200_10102025031034-media.pdf'
-      : 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788532807456552500_10102025031103-media.pdf';
+      ? '/syllabi/btu_mba_sem1_2.pdf'
+      : '/syllabi/btu_mba_sem3_4.pdf';
     return {
       id: `syllabus-mba-${isSem12 ? '1-2' : '3-4'}`,
       title: `BTU MBA (Semester ${sem}) Scheme & Syllabus`,
@@ -377,7 +377,7 @@ export const getStudentSyllabus = (deptInput = 'CSE', semInput = 7) => {
   }
 
   if (branchCode === 'MTECH') {
-    const url = 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788528630261406900_11102025112518-media.pdf';
+    const url = '/syllabi/btu_mtech_cse.pdf';
     return {
       id: 'syllabus-mtech-cse',
       title: `BTU M.Tech Computer Engineering (Semester ${sem}) Scheme & Syllabus`,
@@ -403,7 +403,7 @@ export const getStudentSyllabus = (deptInput = 'CSE', semInput = 7) => {
   // 2. Undergraduate B.Tech Programmes
   // Rule: Semesters 1 and 2 use the common syllabus applicable to all B.Tech branches
   if (sem === 1 || sem === 2) {
-    const commonUrl = 'https://static1.squarespace.com/static/5fce63270356d927d7eecdbd/t/5ff2e58810ee9f5922b6d0f5/1614415426849/btu-1st-to-4th-syllabus-and-scheme.pdf';
+    const commonUrl = '/syllabi/btu_btech_common_sem1_2.pdf';
     return {
       id: `syllabus-btech-common-sem${sem}`,
       title: `BTU B.Tech 1st Year (Semester ${sem}) Common Scheme & Syllabus`,
@@ -428,14 +428,14 @@ export const getStudentSyllabus = (deptInput = 'CSE', semInput = 7) => {
 
   // Rule: Semesters 3 to 8 use respective branch-specific syllabus
   const branchPdfs = {
-    CSE: 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788498815350793100_15102025022312-media.pdf',
-    IT: 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788498863614828300_15102025022037-media.pdf',
-    ECE: 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788500251783854300_15102025021232-media.pdf',
-    EE: 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788500445778848500_15102025021008-media.pdf',
-    ME: 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788500714347403100_15102025015854-media.pdf',
-    CE: 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788498686014827800_15102025020730-media.pdf',
-    EIC: 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788500609353974500_15102025020108-media.pdf',
-    CYBER: 'https://blr1.digitaloceanspaces.com/btu/btu/documents/1788498960109968400_15102025021650-media.pdf',
+    CSE: '/syllabi/btu_btech_cse_sem3_8.pdf',
+    IT: '/syllabi/btu_btech_it_sem3_8.pdf',
+    ECE: '/syllabi/btu_btech_ece_sem3_8.pdf',
+    EE: '/syllabi/btu_btech_ee_sem3_8.pdf',
+    ME: '/syllabi/btu_btech_me_sem3_8.pdf',
+    CE: '/syllabi/btu_btech_ce_sem3_8.pdf',
+    EIC: '/syllabi/btu_btech_eic_sem3_8.pdf',
+    CYBER: '/syllabi/btu_btech_cyber_sem3_8.pdf',
   };
 
   const pdfUrl = branchPdfs[branchCode] || branchPdfs.CSE;
@@ -1086,9 +1086,46 @@ export const openOfficialLink = (
     return true;
   }
 
+  // 1. Intercept DigitalOcean / Squarespace syllabus links that suffer from AccessDenied and redirect to hosted copy
+  const SYLLABI_RESCUE_MAP = {
+    '1788498815350793100_15102025022312-media.pdf': '/syllabi/btu_btech_cse_sem3_8.pdf',
+    '1788498960109968400_15102025021650-media.pdf': '/syllabi/btu_btech_cyber_sem3_8.pdf',
+    '1788498863614828300_15102025022037-media.pdf': '/syllabi/btu_btech_it_sem3_8.pdf',
+    '1788500251783854300_15102025021232-media.pdf': '/syllabi/btu_btech_ece_sem3_8.pdf',
+    '1788500445778848500_15102025021008-media.pdf': '/syllabi/btu_btech_ee_sem3_8.pdf',
+    '1788500714347403100_15102025015854-media.pdf': '/syllabi/btu_btech_me_sem3_8.pdf',
+    '1788498686014827800_15102025020730-media.pdf': '/syllabi/btu_btech_ce_sem3_8.pdf',
+    '1788500609353974500_15102025020108-media.pdf': '/syllabi/btu_btech_eic_sem3_8.pdf',
+    'btu-1st-to-4th-syllabus-and-scheme.pdf': '/syllabi/btu_btech_common_sem1_2.pdf',
+    '1788585430217334500_mca1andii.pdf': '/syllabi/btu_mca_sem1_2.pdf',
+    '1788585501869818800_mcasemiiiandiv.pdf': '/syllabi/btu_mca_sem3_4.pdf',
+    '1788532720976150200_10102025031034-media.pdf': '/syllabi/btu_mba_sem1_2.pdf',
+    '1788532807456552500_10102025031103-media.pdf': '/syllabi/btu_mba_sem3_4.pdf',
+    '1788528630261406900_11102025112518-media.pdf': '/syllabi/btu_mtech_cse.pdf',
+  };
+
+  let effectiveTarget = targetUrl;
+  if (typeof targetUrl === 'string') {
+    for (const [key, hostedPath] of Object.entries(SYLLABI_RESCUE_MAP)) {
+      if (targetUrl.includes(key)) {
+        effectiveTarget = hostedPath;
+        break;
+      }
+    }
+  }
+
+  // 2. Handle locally hosted syllabi or static assets (always same-origin 200 OK)
+  if (typeof effectiveTarget === 'string' && (effectiveTarget.startsWith('/syllabi/') || (effectiveTarget.startsWith('/') && !effectiveTarget.startsWith('/api/v1/')))) {
+    const origin = typeof window !== 'undefined' && window.location ? window.location.origin : '';
+    const fullUrl = `${origin}${effectiveTarget}`;
+    window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    if (onActionNotification) onActionNotification(unavailableFallback || 'Opening verified official BTU syllabus PDF...');
+    return true;
+  }
+
   // Handle local CampusSync hosted file download
-  if (targetUrl.startsWith('/api/v1/')) {
-    const fullDownloadUrl = `${API_BASE_URL.replace(/\/api\/v1\/?$/, '')}${targetUrl}`;
+  if (effectiveTarget.startsWith('/api/v1/')) {
+    const fullDownloadUrl = `${API_BASE_URL.replace(/\/api\/v1\/?$/, '')}${effectiveTarget}`;
     if (onActionNotification) onActionNotification('Opening official document from CampusSync...');
     const link = document.createElement('a');
     link.href = fullDownloadUrl;
@@ -1102,7 +1139,7 @@ export const openOfficialLink = (
 
   // Handle external HTTP/HTTPS official portals and PDFs
   try {
-    let cleanUrl = targetUrl.trim();
+    let cleanUrl = effectiveTarget.trim();
     if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
       cleanUrl = `https://${cleanUrl}`;
     }

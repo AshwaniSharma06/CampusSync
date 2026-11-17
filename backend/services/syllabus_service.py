@@ -86,6 +86,8 @@ def build_pinned_syllabus_notice(
     else:
         display_title = f"BTU B.Tech {syllabus.branch_name} (Semester {sem}) Scheme & Syllabus"
 
+    hosted_pdf_url = f"/syllabi/{syllabus.local_filename}" if syllabus.local_filename else syllabus.original_url
+
     return {
         "id": f"syllabus-{syllabus.id}",
         "title": display_title,
@@ -103,11 +105,11 @@ def build_pinned_syllabus_notice(
         "data_origin": "VERIFIED_OFFICIAL",
         "verification_status": "VERIFIED",
         "destination_type": "OFFICIAL_DOCUMENT",
-        "document_url": syllabus.original_url,
+        "document_url": hosted_pdf_url,
         "source_url": "https://btu.ac.in/syllabusAndScheme",
-        "download_url": None,
+        "download_url": hosted_pdf_url,
         "official_page_url": "https://btu.ac.in/syllabusAndScheme",
-        "action_url": syllabus.original_url,
+        "action_url": hosted_pdf_url,
         "action_label": "Open Official Syllabus PDF",
         "is_actionable": True,
         "is_pinned": True,

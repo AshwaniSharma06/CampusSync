@@ -103,6 +103,18 @@ async def health_check():
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+from fastapi.staticfiles import StaticFiles
+_syllabi_candidates = [
+    _PROJECT_ROOT / "public" / "syllabi",
+    _CURRENT_DIR / "data" / "hosted_documents" / "syllabi",
+    Path("/app/public/syllabi"),
+    Path("/app/backend/data/hosted_documents/syllabi")
+]
+_syllabi_dir = next((p for p in _syllabi_candidates if p.exists()), None)
+if _syllabi_dir:
+    app.mount("/syllabi", StaticFiles(directory=str(_syllabi_dir)), name="syllabi")
+    print(f"[CampusSync Startup] Mounted static syllabus directory from {_syllabi_dir}")
+
 from backend.services.scheduler import CampusSyncScraperScheduler
 from backend.services.vector_service import ensure_chroma_initialized
 from backend.db.session import SessionLocal
