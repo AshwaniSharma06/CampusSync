@@ -53,6 +53,8 @@ export default function CampusAiSection({ currentUser }) {
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const chatContainerRef = useRef(null);
+  const isFirstMountRef = useRef(true);
 
   // Sync messages with sessionStorage
   useEffect(() => {
@@ -76,10 +78,22 @@ export default function CampusAiSection({ currentUser }) {
     }
   }, [activeSessionId]);
 
-  // Auto-scroll chat area when new messages appear or loading starts
+  // Auto-scroll chat area when new messages appear or loading starts - scoped strictly to chat box (prevents page jump/redirect on refresh)
   useEffect(() => {
-    if (messages.length > 0 || isThinking) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      // On initial mount or page refresh, position chat content at bottom inside chat container WITHOUT scrolling the browser window
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+      return;
+    }
+
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
     }
   }, [messages, isThinking]);
 
@@ -280,7 +294,7 @@ export default function CampusAiSection({ currentUser }) {
               </div>
 
               {/* Chat Body: Empty State or Messages */}
-              <div className="flex-1 overflow-y-auto pr-1 space-y-3.5 hide-scrollbar">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto pr-1 space-y-3.5 hide-scrollbar">
                 {messages.length === 0 ? (
                   /* Empty State with Suggested Academic Questions */
                   <div className="flex flex-col items-center justify-center text-center py-4 px-2">

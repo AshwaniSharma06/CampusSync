@@ -15,9 +15,23 @@ export default function CampusAiWorkspace({ studentProfile, onActionNotification
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const chatContainerRef = useRef(null);
+  const isFirstMountRef = useRef(true);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+      return;
+    }
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   };
 
   useEffect(() => {
@@ -347,7 +361,7 @@ export default function CampusAiWorkspace({ studentProfile, onActionNotification
         </div>
 
         {/* Message Thread */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 hide-scrollbar">
+        <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 hide-scrollbar">
           {messages.map((msg, idx) => {
             const isUser = msg.role === 'user' || msg.role === 'student';
 
